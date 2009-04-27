@@ -25,21 +25,36 @@
 	x Set matchlist for OR stringing of Name and Extension conditions... e.g., Extension matches on of png,jpg,gif
 	x Fix saving bug detailed here: http://lifehacker.com/341950/belvedere-automates-your-self+cleaning-pc#c4044294
 
-Added Features not yet in release:
-	- Enable/Disable rules with UI checkboxes
-	- Recurse subdirectories
-	- Option to overwrite or not when moving or copying files
-	- Added tabbed interface for rules and preferences
-	- Added configurable sleeptime
-	- Added rule and folder deletion confirmation
-	- fixed bug in rule description bug across folders
-	- created application installer
+0.4 Release:
+	x Enable/Disable rules with UI checkboxes
+	x Recurse subdirectories
+	x Option to overwrite or not when moving or copying files
+	x Added tabbed interface for rules and preferences
+	x Added configurable sleeptime
+	x Added rule and folder deletion confirmation
+	x fixed bug in rule description bug across folders
+	x created application installer
 	
-Maybe features:
- 	- Multiple Actions (e.g., copy twice, copy and move, etc.) (moved to 0.3)
+slated for 0.5 Release (just the initial list):
 	- Trash management tab a la Hazel (i.e., Keep Recycle Bin size under X GB)
+	- Disable Belvedere with right click on tray
+	- improved upgrade support for older rules.ini
+	- action logging
+
+future releases/Maybe features:
+ 	- Multiple Actions (e.g., copy twice, copy and move, etc.) (moved to 0.3)
+	- RegEx Support/wildcard characters
 	- Import media to iTunes
 	- Multiple Actions/Results
 	- Action, Action1, etc, break loop when IniRead reads ERROR
 	- Update GUI to allow for multiple actions
-	- change rule storage 
+	- change rule storage
+	- Rule prioritization
+	- Copy/Paste rules from other folders
+	- Add datetime stamps to filenames
+	- ability to change permissions of files/folders
+	- shortcut creation in source directory for items moved
+	- skinned GUI
+	- ability to rename files/file extensions
+	- custom actions
+
