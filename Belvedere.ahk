@@ -10,6 +10,7 @@
 
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #SingleInstance force
+#Persistent
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 StringCaseSense, On
@@ -18,14 +19,19 @@ GoSub, SetVars
 GoSub, TRAYMENU
 GoSub, MENUBAR
 Gosub, BuildINI
+SetTimer, emptyRB, Off
 IniRead, Folders, rules.ini, Folders, Folders
 IniRead, FolderNames, rules.ini, Folders, FolderNames
 IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
 IniRead, SleepTime, rules.ini, Preferences, SleepTime
+IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
+IniRead, LogType, rules.ini, Preferences, LogType
 if (AllRuleNames = "ERROR")
 {
 	AllRuleNames=
 }
+
+Log("Starting " . APPNAME . " " . Version, "System")
 
 ;main execution loop
 Loop
@@ -259,9 +265,15 @@ Loop
 					IfMsgBox No
 						break
 				}
+				
+				Log("======================================", "Action")
+				Log("Action taken: " . Action, "Action")
+				Log("File: " . file, "Action")
+				
 				if (Action = "Move file") or (Action = "Rename file")
 				{
 					move(file, Destination, Overwrite)
+					Log("Destination: " . Destination, "Action")
 					if errorCheck
 					{
 						errorCheck := 0
@@ -280,6 +292,7 @@ Loop
 				else if (Action = "Copy file")
 				{
 					copy(file, Destination, Overwrite)
+					Log("Destination: " . Destination, "Action")
 					if errorCheck
 					{
 						errorCheck := 0
@@ -294,6 +307,8 @@ Loop
 				{
 					Msgbox, You've detemerined no action to take.
 				}
+				
+				Log("======================================", "Action")
 			}
 			else
 			{
@@ -302,10 +317,120 @@ Loop
 			StringCaseSense, On
 		}
 	}
-	;msgbox, run
+	
+	;Now that we've done the rules, time to handle to Recycle Bin (if enabled)
+	IniRead, RBEnable, rules.ini, Preferences, RBEnable
+	if (RBEnable = 1)
+	{
+		;Find the SID of the RB for this computer in the registry
+		Loop, HKEY_CURRENT_USER, Software\Microsoft\Protected Storage System Provider, 2
+				SID = %A_LoopRegName%
+		RBPath = C:\RECYCLER\%SID%\
+		
+		;Manage the age of the RB if enabled
+		IniRead, RBManageAge, rules.ini, RecycleBin, RBManageAge
+		if (RBManageAge = 1)
+		{
+			;Loop through the contents of the RB
+			Loop, %RBPath%*.*, , 1
+			{
+				
+			
+			}
+		}
+		
+		;Manage the size of the RB if enabled
+		IniRead, RBManageSize, rules.ini, RecycleBin, RBManageSize
+		if (RBManageSize = 1)
+		{
+			IniRead, RBSize, rules.ini, RecycleBin, RBSize, %A_Space%
+			IniRead, RBSizeUnits, rules.ini, RecycleBin, RBSizeUnits
+			IniRead, RBDelAppChoice, rules.ini, RecycleBin, RBDelAppChoice
+			
+			Log("Recycle Bin - Managing Size - Deletion Approach: " RBDelAppChoice, "Action")
+
+			RBFolderSize := getRBSize(RBPath, RBSizeUnits)
+
+			while (RBFolderSize > RBSize)
+			{
+				filename :=
+				
+				if (RBDelAppChoice = "Oldest First")
+				{
+					filename := getOldest(RBPath)
+					FileDelete, %filename%
+				}
+				else if (RBDelAppChoice = "Youngest First")
+				{
+					filename := getYoungest(RBPath)
+					FileDelete, %filename%
+				}
+				else if (RBDelAppChoice = "Largest First")
+				{
+					filename := getLargest(RBPath)
+					FileDelete, %filename%
+				}
+				elseif (RBDelAppChoice = "Smallest First")
+				{
+					filename := getSmallest(RBPath)
+					FileDelete, %filename%
+				}
+				
+				Log("Recycle Bin - Managing Size - Deleting " . filename, "Action")
+				
+				;Get new size after deletion
+				RBFolderSize := getRBSize(RBPath, RBSizeUnits)
+			}
+		}
+		
+		;Empty the RB on set intervals if enabled
+		IniRead, RBEmpty, rules.ini, RecycleBin, RBEmpty
+		if (RBEmpty = 1)
+		{
+			IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue
+			IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength
+			period :=
+			
+			if (RBEmptyTimeLength = "minutes")
+			{
+				period := RBEmptyTimeValue * 60000
+			}
+			else if (RBEmptyTimeLength = "hours")
+			{
+				period := RBEmptyTimeValue * 3600000
+			}
+			else if (RBEmptyTimeLength = "days")
+			{
+				period := RBEmptyTimeValue * 86400000
+			}
+			else if (RBEmptyTimeLength = "weeks")
+			{
+				period := RBEmptyTimeValue * 604800000
+			}
+			
+			;Only update the timer if there is a new value
+			;This keeps it from getting reset
+			if (oldperiod != period)
+			{
+				SetTimer, emptyRB, %period%
+				Log("Recycle Bin - Sleeptime changed from ". oldperiod . " to " . period, "System")
+				oldperiod := period
+			}
+		}
+		else
+		{
+			SetTimer, emptyRB, Off
+			Log("Recycle Bin - empty interval has been disabled", "System")
+		}
+	}
+
 	Sleep, %SleepTime%
 }
 
+emptyRB:
+	FileRecycleEmpty
+	Log("Recycle Bin - Interval Empty", "Action")
+return
 
 SetVars:
 	APPNAME = Belvedere
@@ -326,6 +451,7 @@ SetVars:
 	NoDefaultDateUnits = minutes|hours|days|weeks|
 	MatchList = ALL|ANY|
 	DeleteApproach = Oldest First|Youngest First|Largest First|Smallest First
+	LogTypes = System|Actions|Both
 	IfNotExist,resources
 	{
 		FileCreateDir,resources
@@ -335,6 +461,7 @@ SetVars:
 	FileInstall, resources\both.png, resources\both.png
 	Menu, TRAY, Icon, resources\belvedere.ico
 	BelvederePNG = resources\both.png
+	LogFile = %A_ScriptDir%\event.log
 return
 
 BuildINI:
@@ -344,6 +471,8 @@ BuildINI:
 		IniWrite,%A_Space%,rules.ini, Rules, AllRuleNames
 		IniWrite,300000,rules.ini, Preferences, Sleeptime
 		IniWrite,0,rules.ini, Preferences, RBEnable
+		IniWrite,0,rules.ini, Preferences, EnableLogging
+		IniWrite,%A_Space%,rules.ini, Preferences, LogType
 	}
 return
 
@@ -355,6 +484,7 @@ TRAYMENU:
 	;Menu,TRAY,Add,&Preferences,PREFS
 	;Menu,TRAY,Add,&Help,HELP
 	Menu,TRAY,Add
+	Menu, TRAY, Add, &Pause, PAUSE
 	Menu,TRAY,Add,&About...,ABOUT
 	Menu,TRAY,Add,E&xit,EXIT
 	Menu,Tray,Tip,%APPNAME% %Version%
@@ -362,6 +492,7 @@ TRAYMENU:
 Return
 
 MENUBAR:
+	Menu, FileMenu, Add,&Pause, PAUSE
 	Menu, FileMenu, Add,E&xit,EXIT
 	Menu, HelpMenu, Add,&About %APPNAME%,ABOUT
 	Menu, MenuBar, Add, &File, :FileMenu
@@ -370,6 +501,11 @@ Return
 
 PREFS:
 	msgbox, tk
+return
+
+PAUSE:
+	Log("Paused State Changed", "System")
+	Pause, Toggle
 return
 
 HELP:
@@ -404,6 +540,12 @@ Return
 #Include includes\subjects.ahk
 #Include includes\actions.ahk
 #Include includes\Main_GUI.ahk
+#Include includes\log.ahk
 
 EXIT:
+	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
+	IfMsgBox No
+		return
+	
+	Log(APPNAME . " is closing. Good-bye!", "System")
 	ExitApp

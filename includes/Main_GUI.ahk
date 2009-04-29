@@ -54,6 +54,7 @@ MANAGE:
 	Gui, 1: Add, DropDownList, x325 y130 w60 vRBSizeUnits, %thisSizeUnits% 
 	Gui, 1: Add, Text, x150 y160 vRBDelAppText, Deletion Approach: 
 	Gui, 1: Add, DropDownList, x255 y160 w130 vRBDelAppChoice, %thisDelAppChoice%
+	Gui, 1: Add, Text, x390 y160 vRBDelAppChoiceText, (using last access date)
 	Gui, 1: Add, Checkbox, x100 y190 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
 	Gui, 1: Add, Edit, x255 y190 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
 	Gui, 1: Add, DropDownList, x325 y190 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
@@ -62,14 +63,20 @@ MANAGE:
 	GoSub, RBEnable ;Need to Enable/Disable the controls based on first checkbox
 	
 	;Items found on Third Tab
-	IniRead, Sleep, rules.ini, Preferences, Sleeptime
+	IniRead, Sleep, rules.ini, Preferences, Sleeptime, 300000
+	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
+	IniRead, LogType, rules.ini, Preferences, LogType
+	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
+	
 	Gui, Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
 	Gui, 1: Add, Edit, x120 y60 w100 h20 Number vSleep, %Sleep%
 	Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
+	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
+	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
 	
-	Gui, 1: Show, h443 w724, %APPNAME% Rules
+	Gui, 1: Show, h443 w724, %APPNAME% %Version%
 Return
 
 GuiClose:
@@ -173,6 +180,9 @@ AddFolder:
 		SplitPath, A_LoopField, FileName
 		LV_Add(0, FileName, A_LoopField)
 	}
+	
+	Log("Folder Added: " NewFolder, "System")
+	
 	Gosub, RefreshVars
 return
 
@@ -211,6 +221,9 @@ RemoveFolder:
 		SplitPath, A_LoopField, FileName
 		LV_Add(0, FileName, A_LoopField)
 	}
+	
+	Log("Folder Removed: " CurrentlySelected, "System")
+	
 	Gosub, ListRules
 return
 
@@ -563,6 +576,9 @@ RemoveRule:
 	StringReplace, AllRuleNames, AllRuleNames, %ActiveRule%|,,
 	Iniwrite, %AllRuleNames%, rules.ini, Rules, AllRulenames
 	Inidelete, rules.ini, %ActiveRule%
+	
+	Log("Rule Removed: " ActiveRule, "System")
+	
 	Gosub, RefreshVars
 	Gosub, ListRules
 return
@@ -698,6 +714,9 @@ SaveRule:
 			IniWrite, % GUIUnits%thisLine%, rules.ini, %RuleName%, Units%RuleNum%
 		}
 	}
+	
+	Log("Rule Saved: " RuleName, "System")
+	
 	Gosub, RefreshVars
 	Gosub, ListRules
 return
@@ -995,6 +1014,24 @@ SavePrefs:
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
+	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
+	IniWrite, %LogType%, rules.ini, Preferences, LogType
+	if (EnableLogging = 1)
+	{
+		if(LogType = "")
+		{
+			MsgBox, Please select a logging type
+			return
+		}
+		
+		Log("Logging has been enabled with type: " . LogType, "System")
+	}
+	else if (EnableLogging = 0)
+	{
+		Log("Logging has been disabled", "System")
+	}
+	
+	Log("Preferences have been saved", "System")
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 
@@ -1067,6 +1104,7 @@ RBSavePrefs:
 	IniWrite, %RBEmptyTimeValue%, rules.ini, RecycleBin, RBEmptyTimeValue
 	IniWrite, %RBEmptyTimeLength%, rules.ini, RecycleBin, RBEmptyTimeLength
 
+	Log("Recycle Bin - Preferences have been saved", "System")
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 
@@ -1083,6 +1121,7 @@ RBEnable:
 		GuiControl, 1: Enable, RBSizeUnits
 		GuiControl, 1: Enable, RBDelAppText
 		GuiControl, 1: Enable, RBDelAppChoice
+		GuiControl, 1: Enable, vRBDelAppChoiceText
 		GuiControl, 1: Enable, RBEmpty
 		GuiControl, 1: Enable, RBEmptyTimeValue
 		GuiControl, 1: Enable, RBEmptyTimeLength
@@ -1097,6 +1136,7 @@ RBEnable:
 		GuiControl, 1: Disable, RBSizeUnits
 		GuiControl, 1: Disable, RBDelAppText
 		GuiControl, 1: Disable, RBDelAppChoice
+		GuiControl, 1: Disable, vRBDelAppChoiceText
 		GuiControl, 1: Disable, RBEmpty
 		GuiControl, 1: Disable, RBEmptyTimeValue
 		GuiControl, 1: Disable, RBEmptyTimeLength
