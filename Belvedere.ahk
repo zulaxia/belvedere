@@ -541,6 +541,7 @@ Return
 #Include includes\actions.ahk
 #Include includes\Main_GUI.ahk
 #Include includes\log.ahk
+#Include includes\test.ahk
 
 EXIT:
 	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
