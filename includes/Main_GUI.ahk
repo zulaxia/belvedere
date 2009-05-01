@@ -1,10 +1,10 @@
 MANAGE:
 	Gui, 1: Destroy
-	Gui, Add, Tab2, w700 h425 vTabs , Folders|Recycle Bin|Preferences
+	Gui, 1: Add, Tab2, w700 h425 vTabs , Folders|Recycle Bin|Preferences
 	Gui, 1: Menu, MenuBar
 	
 	;Items found of First Tab
-	Gui, Tab, 1
+	Gui, 1: Tab, 1
 	Gui, 1: Add, ListView, NoSortHdr x62 y52 w175 h310 vFolders gListRules,Folders|Path
 	ListFolders := SubStr(Folders, 1, -1)
 	if (ListFolders != "ERROR")
@@ -44,7 +44,7 @@ MANAGE:
 	IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength
 	StringReplace, thisEmptyTimeLength, NoDefaultDateUnits, %RBEmptyTimeLength%, %RBEmptyTimeLength%|
 	
-	Gui, Tab, 2
+	Gui, 1: Tab, 2
 	Gui, 1: Add, Checkbox, x62 y52 w585 vRBEnable gRBEnable Checked%RBEnable%, Allow %APPNAME% to manage my Recycle Bin
 	Gui, 1: Add, Checkbox, x100 y100 vRBManageAge Checked%RBManageAge%, Remove files in my Recycle Bin older than
 	Gui, 1: Add, Edit, x325 y100 w70 h20 vRBTimeValue Number, %RBTimeValue%
@@ -68,7 +68,7 @@ MANAGE:
 	IniRead, LogType, rules.ini, Preferences, LogType
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
 	
-	Gui, Tab, 3
+	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
 	Gui, 1: Add, Edit, x120 y60 w100 h20 Number vSleep, %Sleep%
 	Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
@@ -606,13 +606,7 @@ SaveRule:
  			return
 		}
 	}
-	if Edit
-	{
-		IniDelete, rules.ini, %OldName%
-		StringReplace, AllRuleNames, AllRuleNames, %OldName%|,,
-		StringReplace, RuleNames, RuleNames, %OldName%|,,
-		;msgbox, allrulenames: %allrulenames% - rulenames: %rulenames%
-	}
+
 	if (LineNum = "")
 	{
 		LineNum := 1
@@ -662,6 +656,15 @@ SaveRule:
 			}
 		}
 	}
+	
+	if Edit
+	{
+		IniDelete, rules.ini, %OldName%
+		StringReplace, AllRuleNames, AllRuleNames, %OldName%|,,
+		StringReplace, RuleNames, RuleNames, %OldName%|,,
+		;msgbox, allrulenames: %allrulenames% - rulenames: %rulenames%
+	}
+	
 	Gui, 2: Destroy
 	;MsgBox, %LineNum%
 	IniWrite, %RuleNames%%RuleName%|, rules.ini, %ActiveFolder%, RuleNames

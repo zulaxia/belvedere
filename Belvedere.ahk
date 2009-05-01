@@ -263,7 +263,7 @@ Loop
 				{
 					MsgBox, 4, Action Confirmation, Are you sure you want to %Action% %fileName% because of rule %thisRule%?
 					IfMsgBox No
-						break
+						continue
 				}
 				
 				Log("======================================", "Action")
@@ -459,7 +459,7 @@ SetVars:
 	FileInstall, resources\belvedere.ico, resources\belvedere.ico
 	FileInstall, resources\belvederename.png, resources\belvederename.png
 	FileInstall, resources\both.png, resources\both.png
-	Menu, TRAY, Icon, resources\belvedere.ico
+	Menu, TRAY, Icon, resources\belvedere.ico,,1
 	BelvederePNG = resources\both.png
 	LogFile = %A_ScriptDir%\event.log
 return
@@ -481,7 +481,7 @@ TRAYMENU:
 	Menu,TRAY,DeleteAll 
 	Menu, TRAY, Add, &Manage, MANAGE
 	Menu, TRAY, Default, &Manage
-	;Menu,TRAY,Add,&Preferences,PREFS
+	Menu,TRAY,Add,&Preferences,PREFS
 	;Menu,TRAY,Add,&Help,HELP
 	Menu,TRAY,Add
 	Menu, TRAY, Add, &Pause, PAUSE
@@ -500,11 +500,24 @@ MENUBAR:
 Return
 
 PREFS:
-	msgbox, tk
+	GoSub MANAGE
+	GuiControl, 1: Choose, Tabs, 3
 return
 
 PAUSE:
-	Log("Paused State Changed", "System")
+	if (A_IsPaused = 1)
+	{
+		Log(APPNAME . " has resumed from being paused", "System")
+		Menu, TRAY, Icon, resources\belvedere.ico
+	}
+	else
+	{
+		Log(APPNAME . " has been paused", "System")
+		Menu, TRAY, Icon, resources\belvedere-paused.ico
+	}
+	
+	Menu, TRAY, ToggleCheck, &Pause
+	Menu, FileMenu, ToggleCheck, &Pause
 	Pause, Toggle
 return
 
