@@ -5,7 +5,41 @@
 <Title>Preferences Tab</Title>
 </HEAD>
 <BODY>
-
-
+<h1>Preferences Tab</h1>
+<p>With the preferences tab, users can configure the various aspects of Belvedere to their liking</p>
+<a href="#sleep">Sleeptime</a><br />
+<a href="#log">System Logging</a><br />
+<hr />
+<a name="sleep"><h2>Sleeptime</h2></a>
+<p>The sleeptime setting is used to configure how often Belvedere will rotate through the folder and rules.  After each process time, Belevedere will go to sleep for the specified period of time.  Once this time period as passed, Belvedere will 'wake-up' and work through all the active rules for each folder.  All times inserted are in milliseconds.</p>
+<h3>Examples:</h3>
+<ul>
+<li>3000000 - 3 hours</li>
+<li>300000 - 3 minutes</li>
+<li>30000 - 30 seconds</li>
+<li>3000 - 3 seconds</li>
+</ul>
+<hr />
+<a name="log"><h2>System Logging</h2></a>
+<p>Belvedere is capable of logging all the actions within the system in 3 different forms:</p>
+<ol>
+<li>System Events (System) - This option allows the user to log all activity within Belvedere with respect to option changes, rule creation/deletion/activation.</li>
+<li>System Actions (Actions) - this opiton allows the user to log all actions that Belvedere takes based upon the rules that are setup and active within the system.</li>
+<li>All System Occurances (Both) - This option is a combination of both of the options listed above.</li>
+</ol>
+<h3>Examples:</h3>
+<ul>
+<style="monospace">
+<dl>
+<dt>System Events</dt><br />
+<dd style="font-family: monospace">2009-04-28 10:38:00 Logging has been enabled with type: Both</dd><br />
+<dd style="font-family: monospace">2009-05-01 03:28:06 SYSTEM Belvedere has been paused</dd><br />
+<dt>System Actions</dt><br />
+<dd style="font-family: monospace">2009-04-28 10:38:14 ======================================</dd>
+<dd style="font-family: monospace">2009-04-28 10:38:14 Action taken: Move file</dd>
+<dd style="font-family: monospace">2009-04-28 10:38:14 File: C:\Documents and Settings\test\test.pdf</dd>
+<dd style="font-family: monospace">2009-04-28 10:38:14 Destination: C:\Documents and Settings\test\Desktop\pdf</dd>
+<dd style="font-family: monospace">2009-04-28 10:38:14 ======================================</dd>
+</style>
 </BODY>
 </HTML>

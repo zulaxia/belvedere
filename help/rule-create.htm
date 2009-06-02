@@ -5,7 +5,49 @@
 <Title>Creating a Rule</Title>
 </HEAD>
 <BODY>
+<h1>Create Rule</h1>
+<p>The 'Create a rule...' dialog is displayed by pressing the '+' below the rule list box on the main program screen.  The user is then presented with the below dialog box.</p>
+<img src="images/rule-create.JPG"><br /><br />
+<p>The screen is divided into 4 sections:</p>
+<a href="#settings">Rule Settings Area</a><br />
+<a href="#subjects">Rule Subjects Area</a><br />
+<a href="#verbs">Rule Verbs Area</a><br />
+<a href="#buttons">Rule Buttons</a><br />
+<hr />
+<a name="settings"><h2>Rule Settings</h2></a>
+<p>The top most part of the dialog box is where the user sets the overall rule settings.  Here the user is presented with the folder to which the rule is assigned, and allowed to create a description, or rule title.  Here the user can also apply the following rule options:</p>
+<img src="images/rule-create-1.JPG"><br />
+<ul>
+<li>Enabled - If checked, the specific rule will be applied, and potentially act upon, the files within the folder to which this rule is assigned.  This option is also displayed on the main screen in the left most column of the right side rule box.  A rule may be enabled/disabled from either location within the application.</li>
+<li>Confirm Action - If checked, a dialog box with be displayed, confirming the action(s) of the rule prior to executing these actions.  If a confirmation is activley being displayed, the program will essentially be 'paused' until user input is provided.  A user may either confirm or deny the actions of the particular rule in question.</li>
+<li>Recursive - If checked, the program will step through all the subdirectories of the folder to which the rule is assigned.  If left unchecked, the rule in question will only operate on files within the immediate folder, and will not step into folders deeper within the tree structure.</li>
+</ul>
+<hr />
+<a name="subjects"><h2>Rule Subjects</h2></a>
+<p>The Rule Subjects area is where the user lists the conditions or files on which the rule will act.</p>
+<img src="images/rule-create-2.JPG"><br />
 
-
+<hr />
+<a name="verbs"><h2>Rule Verbs</h2></a>
+<p>The Rule Verbs area is wher the actions of the rule are defined when ANY or ALL of the conditions set within the Rule Subjects area are met.</p>
+<img src="images/rule-create-3.JPG"><br />
+<p>The following options are available to be executed on files that meet ANY or ALL of the conditions set above:</p>
+<ul>
+<li>Move File - This action will relocate the file from the current location to the location set in the box to the immediate right.  This location is chosen by clicking the '...' button and selecting a valid location.  The user may choose whether or not to Overwrite a file of a similar name in the location directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
+<li>Rename File - This action will rename the file in the current location as identified by the conditions set above.</li>
+<li>Send file to Recycle Bin - This action will move the file from the current location to the Windows Recycle Bin.</li>
+<li>Delete file - This action will irreversibly delte the file from the current location.</li>
+<li>Copy File - This action will make a copy of the file in question in the location chosen by clicking the '...' button and selecting a valid location.  The user may choose whether or not to Overwrite a file of a similar name in the lcation directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
+<li>Open File - This action will open the file in question as handled by file extension associations within your operating system.  For example, if .txt files are associated with Notepad by default, the file in question will be opened by said program.</li>
+</ul>
+<hr />
+<a name="buttons"><h2>Rule Buttons</h2></a>
+<p>The final section of the Rule Creation dialog are the dialog buttons.  Here the user may Test, Save (OK) or Close without saving (Cancel) the rule creation dialog.</p>
+<img src="images/rule-create-4.JPG"><br />
+<ul>
+<li>TEST - The test button will validate the input of your rule, and display the files which match the criteria set by the conditions above.  No actions will be executed, nor will the rule be saved with a press of this button.</li>
+<li>OK - The OK button will save your current rule settings and close the 'Create a rule...' dialog box.</li>
+<li>Cancel - The Cancel button will close the 'Create a rule...' dialog box without saving the settings of the current rule, irregardless of changes.</li>
+</ul>
 </BODY>
 </HTML>
