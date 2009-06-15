@@ -1,0 +1,27 @@
+[OPTIONS]
+Compatibility=1.1 or later
+Compiled file=Belvedere Help.chm
+Contents file=Table of Contents.hhc
+Default topic=index.htm
+Display compile progress=No
+Index file=Index.hhk
+Language=0x409 English (United States)
+Title=Belvedere Help
+
+
+[FILES]
+tab-recycle_bin.htm
+index-menu.htm
+index-rule.htm
+index-tab.htm
+menu-file.htm
+menu-help.htm
+menu-tray.htm
+rule-create.htm
+rule-edit.htm
+tab-folders.htm
+tab-preferences.htm
+index.htm
+
+[INFOTYPES]
+
