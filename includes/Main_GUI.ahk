@@ -28,36 +28,17 @@ MANAGE:
 	; Generated using SmartGUI Creator 4.0
 	
 	;Items found on Second Tab
-	IniRead, RBEnable, rules.ini, Preferences, RBEnable
-	IniRead, RBManageAge, rules.ini, RecycleBin, RBManageAge
-	IniRead, RBTimeValue, rules.ini, RecycleBin, RBTimeValue, %A_Space%
-	IniRead, RBTimeLength, rules.ini, RecycleBin, RBTimeLength
-	StringReplace, thisTimeLength, NoDefaultDateUnits, %RBTimeLength%, %RBTimeLength%|
-	IniRead, RBManageSize, rules.ini, RecycleBin, RBManageSize
-	IniRead, RBSize, rules.ini, RecycleBin, RBSize, %A_Space%
-	IniRead, RBSizeUnits, rules.ini, RecycleBin, RBSizeUnits
-	StringReplace, thisSizeUnits, NoDefaultSizeUnits, %RBSizeUnits%, %RBSizeUnits%|
-	IniRead, RBDelAppChoice, rules.ini, RecycleBin, RBDelAppChoice
-	StringReplace, thisDelAppChoice, DeleteApproach, %RBDelAppChoice%, %RBDelAppChoice%|
-	IniRead, RBEmpty, rules.ini, RecycleBin, RBEmpty
+	IniRead, RBEnable, rules.ini, Preferences, RBEnable, 0
+	IniRead, RBEmpty, rules.ini, RecycleBin, RBEmpty, 0
 	IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue, %A_Space%
-	IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength
+	IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength, %A_Space%
 	StringReplace, thisEmptyTimeLength, NoDefaultDateUnits, %RBEmptyTimeLength%, %RBEmptyTimeLength%|
 	
 	Gui, 1: Tab, 2
 	Gui, 1: Add, Checkbox, x62 y52 w585 vRBEnable gRBEnable Checked%RBEnable%, Allow %APPNAME% to manage my Recycle Bin
-	Gui, 1: Add, Checkbox, x100 y100 vRBManageAge Checked%RBManageAge%, Remove files in my Recycle Bin older than
-	Gui, 1: Add, Edit, x325 y100 w70 h20 vRBTimeValue Number, %RBTimeValue%
-	Gui, 1: Add, DropDownList, x395 y100 w60 vRBTimeLength, %thisTimeLength%
-	Gui, 1: Add, Checkbox, x100 y130 vRBManageSize Checked%RBManageSize%, Keep my Recycle Bin under
-	Gui, 1: Add, Edit, x255 y130 w70 h20 vRBSize Number, %RBSize%
-	Gui, 1: Add, DropDownList, x325 y130 w60 vRBSizeUnits, %thisSizeUnits% 
-	Gui, 1: Add, Text, x150 y160 vRBDelAppText, Deletion Approach: 
-	Gui, 1: Add, DropDownList, x255 y160 w130 vRBDelAppChoice, %thisDelAppChoice%
-	Gui, 1: Add, Text, x390 y160 vRBDelAppChoiceText, (using last access date)
-	Gui, 1: Add, Checkbox, x100 y190 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
-	Gui, 1: Add, Edit, x255 y190 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
-	Gui, 1: Add, DropDownList, x325 y190 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
+	Gui, 1: Add, Checkbox, x100 y100 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
+	Gui, 1: Add, Edit, x255 y100 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
+	Gui, 1: Add, DropDownList, x325 y100 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
 	Gui, 1: Add, Button, x62 y382 h30 vRBSavePrefs gRBSavePrefs, Save Preferences
 	
 	GoSub, RBEnable ;Need to Enable/Disable the controls based on first checkbox
@@ -65,7 +46,7 @@ MANAGE:
 	;Items found on Third Tab
 	IniRead, Sleep, rules.ini, Preferences, Sleeptime, 300000
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
-	IniRead, LogType, rules.ini, Preferences, LogType
+	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
 	
 	Gui, 1: Tab, 3
@@ -75,6 +56,7 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
+	Gui, 1: Add, Button, x580 y382 h30 vVerifyConfig gVerifyConfig, Verify Configuration
 	
 	Gui, 1: Show, h443 w724, %APPNAME%
 Return
@@ -96,14 +78,8 @@ ListRules:
 		LV_GetText(ActiveFolder, A_EventInfo, 2)
 		CurrentlySelected = %A_eventinfo%
 	}
-	;msgbox, % text
-	;msgbox, %activefolder%
-	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
-	;msgbox, %rulenames%
-	if (RuleNames = "ERROR")
-	{
-		RuleNames =
-	}
+
+	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames, %A_Space%
 
 	Gui, 1: ListView, Rules
 	LV_Delete()
@@ -111,7 +87,7 @@ ListRules:
 	;msgbox, %listrules%
 	Loop, Parse, ListRules, |
 	{
-		IniRead, Enabled, rules.ini, %A_LoopField%, Enabled
+		IniRead, Enabled, rules.ini, %A_LoopField%, Enabled, 0
 
 		if (Enabled = 1)
 			LV_Add(0,"Yes", A_LoopField)
@@ -134,7 +110,7 @@ SetActive:
 	}
 	
 	;Change the button based on the selected rule's enable status
-	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled
+	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	If (Enabled = 1)
 	{
 		GuiControl, 1:, EnableButton, Disable
@@ -153,7 +129,7 @@ EnableButton:
 		return
 	}
 
-	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled
+	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	If (Enabled = 1)
 	{
 		IniWrite, 0, rules.ini, %ActiveRule%, Enabled
@@ -305,14 +281,14 @@ EditRule:
 	
 	;TK Start HERE to complete the editing rule features	
 	;msgbox, %thisRule% has %Numofrules% rules
-	IniRead, Folder, rules.ini, %ActiveRule%, Folder
-	IniRead, Action, rules.ini, %ActiveRule%, Action
-	IniRead, Destination, rules.ini, %ActiveRule%, Destination, 0
-	IniRead, Overwrite, rules.ini, %ActiveRule%, Overwrite
-	IniRead, Matches, rules.ini, %ActiveRule%, Matches
-	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled
-	IniRead, ConfirmAction, rules.ini, %ActiveRule%, ConfirmAction
-	IniRead, Recursive, rules.ini, %ActiveRule%, Recursive
+	IniRead, Folder, rules.ini, %ActiveRule%, Folder, %A_Space%
+	IniRead, Action, rules.ini, %ActiveRule%, Action, %A_Space%
+	IniRead, Destination, rules.ini, %ActiveRule%, Destination, %A_Space%
+	IniRead, Overwrite, rules.ini, %ActiveRule%, Overwrite, 0
+	IniRead, Matches, rules.ini, %ActiveRule%, Matches, %A_Space%
+	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
+	IniRead, ConfirmAction, rules.ini, %ActiveRule%, ConfirmAction, 0
+	IniRead, Recursive, rules.ini, %ActiveRule%, Recursive, 0
 	Gui, 2: Destroy
 	Gui, 2: +owner1
 	Gui, 2: +toolwindow
@@ -390,11 +366,13 @@ EditRule:
 		{
 			NoDefaultUnits = %NoDefaultSizeUnits%
 			GuiControl, 2: Move , GUIObject%RuleNum% , w70
+			GuiControl, 2: +Number, GUIObject%RuleNum%
 		}
 		else if (defaultSubject = "Date last modified|") or (defaultSubject = "Date last opened|") or (defaultSubject = "Date created|")
 		{
 			NoDefaultUnits = %NoDefaultDateUnits%
 			GuiControl, 2: Move , GUIObject%RuleNum% , w70
+			GuiControl, 2: +Number, GUIObject%RuleNum%
 		}
 		;msgbox, %defaultunit%
 		StringReplace, RuleUnits, NoDefaultUnits, %defaultUnit%, %defaultUnit%|
@@ -460,11 +438,13 @@ SetVerbList:
 		GuiControl, 2: ,GUIVerb%GUILineNum%,|%NameVerbs%
 		GuiControl, 2: Hide, GUIUnits%GUILineNum%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w140
+		GuiControl, 2: -Number, GUIObject%RuleNum%
 	}
 	else if (GUISubject%GUILineNum% = "Size")
 	{
 		GuiControl, 2: ,GUIVerb%GUILineNum%,|%NumVerbs%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
+		GuiControl, 2: +Number, GUIObject%RuleNum%
 		;ControlMove, GUIObject,,,70,,
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%SizeUnits%
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
@@ -473,6 +453,7 @@ SetVerbList:
 	{
 		GuiControl,,GUIVerb%GUILineNum%,|%DateVerbs%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
+		GuiControl, 2: +Number, GUIObject%RuleNum%
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%DateUnits%
 		;GuiControl, 2: +r4, GUIUnits
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
@@ -675,8 +656,15 @@ SaveRule:
 	IniWrite, %Recursive%, rules.ini, %RuleName%, Recursive
 	IniWrite, %Matches%, rules.ini, %RuleName%, Matches
 	IniWrite, %GUIAction%, rules.ini, %RuleName%, Action
-	IniWrite, %GUIDestination%, rules.ini, %RuleName%, Destination
-	IniWrite, %Overwrite%, rules.ini, %RuleName%, Overwrite
+	
+	;only need to write these tags if they need a destination
+	if  (GUIAction != "Send file to Recycle Bin") and (GUIAction != "Delete file")
+	{
+		IniWrite, %GUIDestination%, rules.ini, %RuleName%, Destination
+		IniWrite, %Overwrite%, rules.ini, %RuleName%, Overwrite
+	}
+	
+	;save the rest of the subject combos
 	Loop
 	{
 		if (A_Index = 1)
@@ -760,42 +748,7 @@ RBSavePrefs:
 
 	;Check to see if all boxes are filled properly
 	if( RBEnable = 1 )
-	{
-		;Check time values are chosen if this section is enabled
-		if (RBManageAge = 1)
-		{
-			if( RBTimeValue = "")
-			{
-				MsgBox,,Missing Time Value, Please insert time value
-				return
-			}
-			else if (RBTimeLength = "")
-			{
-				MsgBox,,Missing Time Length, Please select a time length
-				return
-			}
-		}
-		
-		;Check size values are chosen if this section is enabled
-		if (RBManageSize = 1)
-		{
-			if (RBSize = "")
-			{
-				MsgBox,,Missing File Size, Please insert a file size
-				return
-			}
-			else if (RBSizeUnits = "")
-			{
-				MsgBox,,Missing File Size Type, Please select a file size unit type
-				return
-			}
-			else if (RBDelAppChoice = "")
-			{
-				MsgBox,,Missing Deletion Approach, Please select a deletion approach
-				return
-			}
-		}
-		
+	{	
 		;Check Recycle Bin Empty values are chosen if section is enabled
 		if (RBEmpty = 1)
 		{
@@ -811,14 +764,7 @@ RBSavePrefs:
 			}
 		}
 	}
-	
-	IniWrite, %RBManageAge%, rules.ini, RecycleBin, RBManageAge
-	IniWrite, %RBTimeValue%, rules.ini, RecycleBin, RBTimeValue
-	IniWrite, %RBTimeLength%, rules.ini, RecycleBin, RBTimeLength
-	IniWrite, %RBManageSize%, rules.ini, RecycleBin, RBManageSize
-	IniWrite, %RBSize%, rules.ini, RecycleBin, RBSize
-	IniWrite, %RBSizeUnits%, rules.ini, RecycleBin, RBSizeUnits
-	IniWrite, %RBDelAppChoice%, rules.ini, RecycleBin, RBDelAppChoice
+
 	IniWrite, %RBEmpty%, rules.ini, RecycleBin, RBEmpty
 	IniWrite, %RBEmptyTimeValue%, rules.ini, RecycleBin, RBEmptyTimeValue
 	IniWrite, %RBEmptyTimeLength%, rules.ini, RecycleBin, RBEmptyTimeLength
@@ -832,30 +778,12 @@ RBEnable:
 	
 	if (RBEnable = 1)
 	{
-		GuiControl, 1: Enable, RBManageAge
-		GuiControl, 1: Enable, RBTimeValue
-		GuiControl, 1: Enable, RBTimeLength
-		GuiControl, 1: Enable, RBManageSize
-		GuiControl, 1: Enable, RBSize
-		GuiControl, 1: Enable, RBSizeUnits
-		GuiControl, 1: Enable, RBDelAppText
-		GuiControl, 1: Enable, RBDelAppChoice
-		GuiControl, 1: Enable, vRBDelAppChoiceText
 		GuiControl, 1: Enable, RBEmpty
 		GuiControl, 1: Enable, RBEmptyTimeValue
 		GuiControl, 1: Enable, RBEmptyTimeLength
 	}
 	else
 	{
-		GuiControl, 1: Disable, RBManageAge
-		GuiControl, 1: Disable, RBTimeValue
-		GuiControl, 1: Disable, RBTimeLength
-		GuiControl, 1: Disable, RBManageSize
-		GuiControl, 1: Disable, RBSize
-		GuiControl, 1: Disable, RBSizeUnits
-		GuiControl, 1: Disable, RBDelAppText
-		GuiControl, 1: Disable, RBDelAppChoice
-		GuiControl, 1: Disable, vRBDelAppChoiceText
 		GuiControl, 1: Disable, RBEmpty
 		GuiControl, 1: Disable, RBEmptyTimeValue
 		GuiControl, 1: Disable, RBEmptyTimeLength
@@ -872,14 +800,9 @@ return
 		Sleep, 10
 		Click 2
 	}
-	else
-	{
-		;Click
-	}
 return
 
 RefreshVars:
 	IniRead, Folders, rules.ini, Folders, Folders
-	IniRead, FolderNames, rules.ini, Folders, FolderNames
 	IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
 return

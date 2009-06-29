@@ -5,6 +5,7 @@
 <Title>Creating a Rule</Title>
 </HEAD>
 <BODY>
+<a name="top"></a>
 <h1>Create Rule</h1>
 <p>The 'Create a rule...' dialog is displayed by pressing the '+' below the rule list box on the main program screen.  The user is then presented with the below dialog box.</p>
 <img src="images/rule-create.JPG"><br /><br />
@@ -22,11 +23,65 @@
 <li>Confirm Action - If checked, a dialog box with be displayed, confirming the action(s) of the rule prior to executing these actions.  If a confirmation is activley being displayed, the program will essentially be 'paused' until user input is provided.  A user may either confirm or deny the actions of the particular rule in question.</li>
 <li>Recursive - If checked, the program will step through all the subdirectories of the folder to which the rule is assigned.  If left unchecked, the rule in question will only operate on files within the immediate folder, and will not step into folders deeper within the tree structure.</li>
 </ul>
+<a href="#top">Top</a><br />
 <hr />
 <a name="subjects"><h2>Rule Subjects</h2></a>
 <p>The Rule Subjects area is where the user lists the conditions or files on which the rule will act.</p>
 <img src="images/rule-create-2.JPG"><br />
+<p>The following rule subjects, and their corresponding options are available to be queried against all files within the defined folder:</p>
+<ul>
+<li>Name - This subject acts upon the filename of the file in question, excluding the file extension.</li>
+	<ul>
+	  <li>is - acts upon a file if the filename matches exactly.</li>
+	  <li>is not - acts upon all files that do not the filename exactly .</li>
+	  <li>matches one of - .</li>
+	  <li>does not match one of - .</li>
+	  <li>contains - acts upon a file if the filename contains the specified text exactly.</li>
+	  <li>does not contain - acts upon a file if it does not contain the specified text exactly.</li>
+	</ul>
+<li>extension - This subject acts upon the file extension of the file in question, excluding the filename and '.'.</li>
+	<ul>
+	  <li>is - acts upon a file if the file extension matches exactly.</li>
+	  <li>is not - acts upon all files that do not match the file extension exactly.</li>
+	  <li>matches one of - .</li>
+	  <li>does not match one of - .</li>
+	  <li>contains - acts upon a file if the file extension contains the specified text exactly.</li>
+	  <li>does not contain - acts upon a file if the file extension does not contained the specified text exactly.</li>
+	</ul>
+</ul>
 
+<img src="images/rule-create-5.JPG"><br />
+<ul>
+<li>Size - This subject acts upon the file size of the file in question.</li>
+	<ul>
+	  <li>is - acts upon a file if the file size matches the file size specified.</li>
+	  <li>is not - acts upon all files that do not match the file size specified .</li>
+	  <li>is greater than - acts upon a file if the file size is greater than the file size specified.</li>
+	  <li>is less than - acts upon a file if the file size is less than the file size specified.</li>
+	</ul>
+</ul>
+<p>Sizes are currently in untis of Megabytes (MB) and Kilobytes (KB).</p>
+
+<img src="images/rule-create-6.JPG"><br />
+<ul>
+<li>Date Last Modified - This subject acts upon the modification date of the file in question.</li>
+	<ul>
+	  <li>is in the last - acts upon a file if the date last modified is within the specified time period.</li>
+	  <li>is not in the last - acts upon a file if the date last modified is not within the specified time period.</li>
+	</ul>
+<li>Date Last Opened - This subject acts upon the access date of the file in question.</li>
+	<ul>
+	  <li>is in the last - acts upon a file if the date last opened is within the specified time period.</li>
+	  <li>is not in the last - acts upon a file if the date last opened is not within the specified time period.</li>
+	</ul>
+<li>Date Created - This subject acts upon the creation date of the file in question.</li>
+	<ul>
+	  <li>is in the last - acts upon a file if the date created is within the specified time period.</li>
+	  <li>is not in the last - acts upon a file if the date created is not within the specified time period.</li>
+	</ul>
+</ul>
+<p>Time periods are from the current system provided time and are specified in units of minutes, hours, days, and weeks.</p>
+<a href="#top">Top</a><br />
 <hr />
 <a name="verbs"><h2>Rule Verbs</h2></a>
 <p>The Rule Verbs area is wher the actions of the rule are defined when ANY or ALL of the conditions set within the Rule Subjects area are met.</p>
@@ -40,6 +95,7 @@
 <li>Copy File - This action will make a copy of the file in question in the location chosen by clicking the '...' button and selecting a valid location.  The user may choose whether or not to Overwrite a file of a similar name in the lcation directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
 <li>Open File - This action will open the file in question as handled by file extension associations within your operating system.  For example, if .txt files are associated with Notepad by default, the file in question will be opened by said program.</li>
 </ul>
+<a href="#top">Top</a><br />
 <hr />
 <a name="buttons"><h2>Rule Buttons</h2></a>
 <p>The final section of the Rule Creation dialog are the dialog buttons.  Here the user may Test, Save (OK) or Close without saving (Cancel) the rule creation dialog.</p>
@@ -49,5 +105,6 @@
 <li>OK - The OK button will save your current rule settings and close the 'Create a rule...' dialog box.</li>
 <li>Cancel - The Cancel button will close the 'Create a rule...' dialog box without saving the settings of the current rule, irregardless of changes.</li>
 </ul>
+<a href="#top">Top</a><br />
 </BODY>
 </HTML>

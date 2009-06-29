@@ -20,16 +20,11 @@ GoSub, TRAYMENU
 GoSub, MENUBAR
 Gosub, BuildINI
 SetTimer, emptyRB, Off
-IniRead, Folders, rules.ini, Folders, Folders
-IniRead, FolderNames, rules.ini, Folders, FolderNames
-IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
-IniRead, SleepTime, rules.ini, Preferences, SleepTime
-IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
-IniRead, LogType, rules.ini, Preferences, LogType
-if (AllRuleNames = "ERROR")
-{
-	AllRuleNames=
-}
+IniRead, Folders, rules.ini, Folders, Folders, %A_Space%
+IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
+IniRead, SleepTime, rules.ini, Preferences, SleepTime, 300000
+IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
+IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 
 Log("Starting " . APPNAME . " " . Version, "System")
 
@@ -61,13 +56,13 @@ Loop
 			continue
 		}
 		;msgbox, %thisRule% has %Numofrules% rules
-		IniRead, Folder, rules.ini, %thisRule%, Folder
-		IniRead, Enabled, rules.ini, %thisRule%, Enabled
+		IniRead, Folder, rules.ini, %thisRule%, Folder, %A_Space%
+		IniRead, Enabled, rules.ini, %thisRule%, Enabled, 0
 		IniRead, ConfirmAction, rules.ini, %thisRule%, ConfirmAction, 0
 		IniRead, Recursive, rules.ini, %thisRule%, Recursive, 0
-		IniRead, Action, rules.ini, %thisRule%, Action
-		IniRead, Destination, rules.ini, %thisRule%, Destination, 0
-		IniRead, Matches, rules.ini, %thisRule%, Matches
+		IniRead, Action, rules.ini, %thisRule%, Action, %A_Space%
+		IniRead, Destination, rules.ini, %thisRule%, Destination, %A_Space%
+		IniRead, Matches, rules.ini, %thisRule%, Matches, %A_Space%
 		
 		;If rule is not enabled, just skip over it
 		if (Enabled = 0)
@@ -95,9 +90,9 @@ Loop
 			IniRead, Object%RuleNum%, rules.ini, %thisRule%, Object%RuleNum%
 		}
 		;msgbox, %subject%, %subject1%, %subject2%
-		if (Destination != "0")
+		if (Destination != "")
 		{
-			IniRead, Overwrite, rules.ini, %thisRule%, Overwrite
+			IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
 		}
 		
 		;Msgbox, %Subject% %Verb% %Object% %Action% %ConfirmAction% %Recursive%
@@ -319,76 +314,15 @@ Loop
 	}
 	
 	;Now that we've done the rules, time to handle to Recycle Bin (if enabled)
-	IniRead, RBEnable, rules.ini, Preferences, RBEnable
+	IniRead, RBEnable, rules.ini, Preferences, RBEnable, 0
 	if (RBEnable = 1)
-	{
-		;Find the SID of the RB for this computer in the registry
-		Loop, HKEY_CURRENT_USER, Software\Microsoft\Protected Storage System Provider, 2
-				SID = %A_LoopRegName%
-		RBPath = C:\RECYCLER\%SID%\
-		
-		;Manage the age of the RB if enabled
-		IniRead, RBManageAge, rules.ini, RecycleBin, RBManageAge
-		if (RBManageAge = 1)
-		{
-			;Loop through the contents of the RB
-			Loop, %RBPath%*.*, , 1
-			{
-				
-			
-			}
-		}
-		
-		;Manage the size of the RB if enabled
-		IniRead, RBManageSize, rules.ini, RecycleBin, RBManageSize
-		if (RBManageSize = 1)
-		{
-			IniRead, RBSize, rules.ini, RecycleBin, RBSize, %A_Space%
-			IniRead, RBSizeUnits, rules.ini, RecycleBin, RBSizeUnits
-			IniRead, RBDelAppChoice, rules.ini, RecycleBin, RBDelAppChoice
-			
-			Log("Recycle Bin - Managing Size - Deletion Approach: " RBDelAppChoice, "Action")
-
-			RBFolderSize := getRBSize(RBPath, RBSizeUnits)
-
-			while (RBFolderSize > RBSize)
-			{
-				filename :=
-				
-				if (RBDelAppChoice = "Oldest First")
-				{
-					filename := getOldest(RBPath)
-					FileDelete, %filename%
-				}
-				else if (RBDelAppChoice = "Youngest First")
-				{
-					filename := getYoungest(RBPath)
-					FileDelete, %filename%
-				}
-				else if (RBDelAppChoice = "Largest First")
-				{
-					filename := getLargest(RBPath)
-					FileDelete, %filename%
-				}
-				elseif (RBDelAppChoice = "Smallest First")
-				{
-					filename := getSmallest(RBPath)
-					FileDelete, %filename%
-				}
-				
-				Log("Recycle Bin - Managing Size - Deleting " . filename, "Action")
-				
-				;Get new size after deletion
-				RBFolderSize := getRBSize(RBPath, RBSizeUnits)
-			}
-		}
-		
+	{	
 		;Empty the RB on set intervals if enabled
-		IniRead, RBEmpty, rules.ini, RecycleBin, RBEmpty
+		IniRead, RBEmpty, rules.ini, RecycleBin, RBEmpty, 0
 		if (RBEmpty = 1)
 		{
-			IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue
-			IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength
+			IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue, %A_Space%
+			IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength,  %A_Space%
 			period :=
 			
 			if (RBEmptyTimeLength = "minutes")
@@ -482,18 +416,23 @@ TRAYMENU:
 	Menu, TRAY, Add, &Manage, MANAGE
 	Menu, TRAY, Default, &Manage
 	Menu,TRAY,Add,&Preferences,PREFS
-	;Menu,TRAY,Add,&Help,HELP
 	Menu,TRAY,Add
 	Menu, TRAY, Add, &Pause, PAUSE
 	Menu,TRAY,Add,&About...,ABOUT
 	Menu,TRAY,Add,E&xit,EXIT
 	Menu,Tray,Tip,%APPNAME% %Version%
-	;Menu,TRAY,Icon,resources\tk.ico
 Return
 
 MENUBAR:
 	Menu, FileMenu, Add,&Pause, PAUSE
+	Menu, FileMenu, Add
+	Menu, FileMenu, Add, Backup Settings..., BACKUP
+	Menu, FileMenu, Add, Import Settings..., IMPORT
+	Menu, FileMenu, Add
+	Menu, FileMenu, Add, Veiw Log..., VIEWLOG
+	Menu, FileMenu, Add
 	Menu, FileMenu, Add,E&xit,EXIT
+	Menu, HelpMenu, Add, &Help, HELP
 	Menu, HelpMenu, Add,&About %APPNAME%,ABOUT
 	Menu, MenuBar, Add, &File, :FileMenu
 	Menu, MenuBar, Add, &Help, :HelpMenu
@@ -521,8 +460,107 @@ PAUSE:
 	Pause, Toggle
 return
 
+BACKUP:
+	FileSelectFile, BackupFile, S, ,Backup %APPNAME% Settings, 
+	if (BackupFile = "")
+	{	
+		return
+	}
+	
+	IfExist %BackupFile%
+	{
+		MsgBox, 4, Overwrite, A file with the same name already exists.`nWould you like to overwrite the existing file?
+		IfMsgBox No
+		{
+			MsgBox,,Backup, Your settings were not backed up
+			return
+		}
+	}
+	
+	FileCopy, %A_ScriptDir%\rules.ini, %BackupFile%, 1
+	if ErrorLevel
+		MsgBox,,Backup Error, Backup was not completed!
+	else
+		MsgBox,,Backup Success, Backup has completed successfully!
+Return
+
+IMPORT:
+	FileSelectFile, ImportFile, , , Import %APPNAME% Settings,
+	if (ImportFile = "")
+	{
+		return
+	}
+	
+	IniRead, Folders, %ImportFile%, Folders, Folders, %A_Space%
+	IniRead, AllRuleNames, %ImportFile%, Rules, AllRuleNames, %A_Space%
+	if (Folders = "" or AllRuleNames = "")
+	{
+		MsgBox,,Import Error, The file you are attempting to import is not a %APPNAME% rules file!
+		return
+	}
+
+	MsgBox, 4, WARNING, This will overwrite your current rule set!`nAre you sure you would like to proceed?
+	IfMsgBox No
+		return
+	
+	FileCopy, %ImportFile%, %A_ScriptDir%\rules.ini, 1
+	if ErrorLevel
+		MsgBox,,Import Error, Rules import was not completed!
+	else
+		MsgBox,,Import Success, Rules import was completed successfully!
+	
+	GoSub, VerifyConfig
+Return
+
+VIEWLOG:
+	Gui, 5: Destroy
+	Gui, 5: Add, Edit, h425 w600 vLogView ReadOnly
+	Gui, 5: Add, Button, x10 y440 h30 vRefreshLog gRefreshLog, Refresh
+	Gui, 5: Add, Button, x280 y440 h30 vClearLog gClearLog, Clear Log
+	Gui, 5: Add, Button, x545 y440 h30 vSaveLog gSaveLog, Save Log...
+	GoSub, RefreshLog
+	Gui, 5: Show, auto, %APPNAME% Log
+Return
+
+RefreshLog:
+	FileRead, FileContents, %A_ScriptDir%\event.log
+	GuiControl, 5: , LogView, %FileContents%
+Return
+
+ClearLog:
+	MsgBox, 4, Clear Log?, Are you sure you would like to clear the application log?
+	IfMsgBox No
+		return
+	FileDelete, %A_ScriptDir%\event.log
+	GoSub, RefreshLog
+Return
+
+SaveLog:
+	FileSelectFile, BackupFile, S, ,Save %APPNAME% Log, 
+	if (BackupFile = "")
+	{	
+		return
+	}
+	
+	IfExist %BackupFile%
+	{
+		MsgBox, 4, Overwrite, A file with the same name already exists.`nWould you like to overwrite the existing file?
+		IfMsgBox No
+		{
+			MsgBox,,Backup, Your log was not saved
+			return
+		}
+	}
+	
+	FileCopy, %A_ScriptDir%\rules.ini, %BackupFile%, 1
+	if ErrorLevel
+		MsgBox,,Save Error, Log Save was not completed!
+	else
+		MsgBox,,Save Success, Log Save has completed successfully!
+Return
+
 HELP:
-	msgbox, tk
+	Run, "resources\Belvedere Help.chm"
 return
 
 HOMEPAGE:
@@ -540,12 +578,15 @@ ABOUT:
 	Gui,4: font, s8, Courier New
 	Gui,4: Add, Text,x275 y235,%Version%
 	Gui,4: font, s9, Arial 
-	Gui,4: Add,Text,x10 y250 Center,Belvedere is an automated file managment application`nthat performs actions on files based on user-defined criteria.`nFor example, if a file in your downloads folder`nhasn't been opened in 4 weeks and it's larger than 10MB,`nyou can tell Belvedere to automatically send it to the Recycle Bin.`n`nBelvedere is written by Adam Pash and distributed`nby Lifehacker under the GNU Public License.`nFor details on how to use Belvedere, check out the
+	Gui,4: Add,Text,x10 y250 Center,Belvedere is an automated file managment application`nthat performs actions on files based on user-defined criteria.`n`nBelvedere is written by Adam Pash and distributed`nby Lifehacker under the GNU Public License.`nFor details on how to use Belvedere, check out the
 	Gui,4:Font,underline bold
-	Gui,4:Add,Text,cBlue gHomepage Center x115 y385,Belvedere homepage
+	Gui,4:Add,Text,cBlue gHELP Center x115 y350, %APPNAME% Help Text
+	Gui,4: font, norm
+	Gui,4:Add,Text, Center x165 y367, or
+	Gui,4:Font,underline bold
+	Gui,4:Add,Text,cBlue gHomepage Center x115 y385,%APPNAME% homepage
 	Gui,4:Add,Text,cBlue gWCHomepage Center x105 y400,Icon design by What Cheer
 	Gui,4: Color,F8FAF0
-	;Gui 2:+Disabled
 	Gui,4: Show,auto,About Belvedere
 Return
 
@@ -555,6 +596,7 @@ Return
 #Include includes\Main_GUI.ahk
 #Include includes\log.ahk
 #Include includes\test.ahk
+#Include includes\maint.ahk
 
 EXIT:
 	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
