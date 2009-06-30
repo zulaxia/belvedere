@@ -448,11 +448,13 @@ PAUSE:
 	{
 		Log(APPNAME . " has resumed from being paused", "System")
 		Menu, TRAY, Icon, resources\belvedere.ico
+		SB_SetText("", 2)
 	}
 	else
 	{
 		Log(APPNAME . " has been paused", "System")
 		Menu, TRAY, Icon, resources\belvedere-paused.ico
+		SB_SetText("PAUSED", 2)
 	}
 	
 	Menu, TRAY, ToggleCheck, &Pause

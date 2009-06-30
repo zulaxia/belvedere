@@ -58,7 +58,12 @@ MANAGE:
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
 	Gui, 1: Add, Button, x580 y382 h30 vVerifyConfig gVerifyConfig, Verify Configuration
 	
-	Gui, 1: Show, h443 w724, %APPNAME%
+	;Status Bar with the various sections
+	Gui, 1: Add, StatusBar
+	SB_SetParts(650, 74)
+	
+	Gui, 1: Show, h463 w724, %APPNAME%
+	GoSub, RefreshVars
 Return
 
 GuiClose:
@@ -147,19 +152,8 @@ AddFolder:
 	{
 		return
 	}
-	Folders = %Folders%%NewFolder%|
-	IniWrite, %Folders%, rules.ini, Folders, Folders
-	Gui, ListView, Folders
-	LV_Delete()
-	Loop, Parse, Folders, |
-	{
-		SplitPath, A_LoopField, FileName
-		LV_Add(0, FileName, A_LoopField)
-	}
-	
-	Log("Folder Added: " NewFolder, "System")
-	
-	Gosub, RefreshVars
+
+	SaveFolders(NewFolder, Folders)
 return
 
 RemoveFolder:
@@ -805,4 +799,56 @@ return
 RefreshVars:
 	IniRead, Folders, rules.ini, Folders, Folders
 	IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
+		
+	ListFolders := SubStr(Folders, 1, -1)
+	FolderCount :=
+	Loop, Parse, ListFolders, |
+	{
+		FolderCount++
+	}
+	
+	ListRules := SubStr(AllRuleNames, 1, -1)
+	RuleCount :=
+	Loop, Parse, ListRules, |
+	{
+		RuleCount++
+	}
+	SB_SetText(APPNAME . " is currently managing " . FolderCount . " folders with " . RuleCount .  " total rules" , 1)
 return
+
+GuiDropFiles:
+	;Only accept DnD in the folders list box
+	if A_GuiControl = Folders
+	{
+		StringSplit, F, A_GuiEvent, `n
+		SplitPath, F1, , NewFolder
+		MsgBox, 4, Add Folder, Would you like to add the following folder to your folder list?`n %NewFolder%
+		IfMsgBox Yes
+			SaveFolders(NewFolder, Folders)
+	}
+Return
+
+SaveFolders(NewFolder, Folders)
+{
+	StringReplace, FoldersMatchList, Folders, |,`,,ALL
+	if NewFolder in %FoldersMatchList%
+	{
+		Msgbox, ,Duplicate Folder, A folder with this name already exists. Please choose a new folder.
+ 		return
+	}
+	
+	Folders = %Folders%%NewFolder%|
+	IniWrite, %Folders%, rules.ini, Folders, Folders
+	Gui, 1: Default
+	Gui, 1: ListView, Folders
+	LV_Delete()
+	Loop, Parse, Folders, |
+	{
+		SplitPath, A_LoopField, FileName
+		LV_Add(0, FileName, A_LoopField)
+	}
+	
+	Log("Folder Added: " NewFolder, "System")
+	Gosub, RefreshVars
+	return
+}
