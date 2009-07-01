@@ -1,3 +1,19 @@
+;
+; AutoHotkey Version: 1.x
+; Language:       English
+; Platform:       Windows
+; Author:         Adam Pash <adam.pash@gmail.com>
+; Contributor:	  Matthew Shorts <mshorts@gmail.com>
+;
+; Script Name:	  Main_GUI
+;
+; This script is the main gui portion of the application.  It also has all the logic
+;  to create, edit, and delete folders and their assigned rules 
+;
+; Some portions Generated using SmartGUI Creator 4.0 
+
+;This is the main GUI screen with the tabs, menu options, and status bar
+;  This window is always identified by Gui, 1
 MANAGE:
 	Gui, 1: Destroy
 	Gui, 1: Add, Tab2, w700 h425 vTabs , Folders|Recycle Bin|Preferences
@@ -25,7 +41,6 @@ MANAGE:
 	Gui, 1: Add, Button, x282 y382 w30 h30 gRemoveRule, -
 	Gui, 1: Add, Button, x312 y382 h30 vEditRule gEditRule, Edit Rule
 	Gui, 1: Add, Button, x620 y382 h30 vEnableButton gEnableButton, Enable
-	; Generated using SmartGUI Creator 4.0
 	
 	;Items found on Second Tab
 	IniRead, RBEnable, rules.ini, Preferences, RBEnable, 0
@@ -66,11 +81,16 @@ MANAGE:
 	GoSub, RefreshVars
 Return
 
+;Handles the closure of the screens
+; Gui, 1 - Main tabbed interface
+; Gui, 2 - Rule create/edit screen
 GuiClose:
 	Gui, 1: Destroy
 	Gui, 2: Destroy
 return
 
+;Lists the rules on the right side of the screen for the actively 
+; selected folder on the left side of the screen
 ListRules:
 	ActiveRule=
 	Gui, 1:Default
@@ -78,54 +98,50 @@ ListRules:
 	LV_Delete()
 	if (A_EventInfo != 0)
 	{
-		;msgbox, %a_eventinfo%
 		Gui, 1: ListView, Folders
 		LV_GetText(ActiveFolder, A_EventInfo, 2)
 		CurrentlySelected = %A_eventinfo%
 	}
 
+	;Retrieves the rules for the actively selected folder and displays them
+	; in the rule list on the right side, along with their enabled state
 	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames, %A_Space%
-
 	Gui, 1: ListView, Rules
 	LV_Delete()
 	ListRules := SubStr(RuleNames, 1, -1)
-	;msgbox, %listrules%
 	Loop, Parse, ListRules, |
 	{
 		IniRead, Enabled, rules.ini, %A_LoopField%, Enabled, 0
-
 		if (Enabled = 1)
 			LV_Add(0,"Yes", A_LoopField)
 		else
 			LV_Add(0,"No", A_LoopField)
 	}
+	
+	GoSub, RefreshVars
 return
 
+;Determines the actively selected rule on the right side
+; also toggles the enable/disable button dependant on the state
+; of the actively selected rule
 SetActive:
 	Gui, ListView, Rules
 
 	;Blank out ActiveRule if we get the column headings
 	if (A_EventInfo = 0)
-	{
 		ActiveRule =
-	}
 	else 
-	{
 		LV_GetText(ActiveRule, A_EventInfo, 2)
-	}
 	
 	;Change the button based on the selected rule's enable status
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	If (Enabled = 1)
-	{
 		GuiControl, 1:, EnableButton, Disable
-	}
 	else
-	{
 		GuiControl, 1:, EnableButton, Enable
-	}
 return
 
+;Toggles the active state of the selected rule and saves it to the ini
 EnableButton:
 	; make sure a rule is selected
 	if (ActiveRule = "")
@@ -134,44 +150,53 @@ EnableButton:
 		return
 	}
 
+	;Toggle the enabled setting in the ini file
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	If (Enabled = 1)
-	{
 		IniWrite, 0, rules.ini, %ActiveRule%, Enabled
-	}
 	else
-	{
 		IniWrite, 1, rules.ini, %ActiveRule%, Enabled
-	}
+
 	Gosub, ListRules
 return
 
+;Run when the '+' button is clicked under the folder list
+; responsible for showing a selection dialog and saving the folder
 AddFolder:
 	FileSelectFolder, NewFolder,
 	if (NewFolder = "")
-	{
 		return
-	}
 
 	SaveFolders(NewFolder, Folders)
 return
 
+;Run when the '-' button is clicked under the folder list
+; responsible for deleting the selected folder and all rules
+; associated with that folder
 RemoveFolder:
 	if (CurrentlySelected = "")
 	{
 		Msgbox, Select the folder you'd like to delete.
 		return
 	}
+	
+	;Confirm the delete, if no then we jump out of here
 	MsgBox, 4, Delete Folder, Are you sure you would like to delete the folder "%ActiveFolder%" ?
 	IfMsgBox No
 		return
+	
+	;Get the currently selected folder and delete from the screen
 	Gui, 1: Default
 	Gui, ListView, Folders
 	LV_GetText(RemoveFolder, CurrentlySelected, 2)
 	LV_GetText(RemoveFolderName, CurrentlySelected, 3)
 	success := LV_Delete()
+	
+	;Delete the selected folder from above from the ini file list
 	StringReplace, Folders, Folders, %RemoveFolder%|,,
 	IniWrite, %Folders%, rules.ini, Folders, Folders
+	
+	;Delete all the rules associated with the selected folder from above
 	IniRead, RuleNames, rules.ini, %RemoveFolder%, RuleNames
 	Loop, Parse, RuleNames, |
 	{
@@ -181,11 +206,13 @@ RemoveFolder:
 			IniDelete, rules.ini, %A_LoopField%
 		}
 	}
+	
+	;Rewrite the rule names now that we have delete all of the 
+	; ones associated with this folder
 	IniWrite, %AllRuleNames%, rules.ini, Rules, AllRuleNames
 	IniDelete, rules.ini, %RemoveFolder%
 	Gosub, RefreshVars
 
-	;msgbox, %success%
 	Loop, Parse, Folders, |
 	{
 		SplitPath, A_LoopField, FileName
@@ -197,11 +224,16 @@ RemoveFolder:
 	Gosub, ListRules
 return
 
+;Run when the '+' button is clicked under the rule list
+; only the GUI creation of the rule process, saving is handled in
+; SaveRule procedure below
 AddRule:
 	Skip=
 	Edit := 0 ; this is a new rule, not a rule being edited
 	LineNum=
 	NumOfRules := 1
+	
+	;Get the currently selected folder, if any
 	if (CurrentlySelected = "")
 	{
 		MsgBox, You must select a folder to create a rule
@@ -210,6 +242,8 @@ AddRule:
 	Gui, ListView, Folders
 	LV_GetText(RemoveFolderName, CurrentlySelected, 3)
 	LV_GetText(FolderName, CurrentlySelected, 3)
+	
+	;Create a new 'Create a rule...' dialog box with base settings
 	Gui, 2: Destroy
 	Gui, 2: +owner1
 	Gui, 2: +toolwindow
@@ -239,12 +273,15 @@ AddRule:
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
 	Gui, 2: Add, Button, x372 y302 w100 h30 vOKButton gSaveRule, OK
 	Gui, 2: Add, Button, x482 y302 w100 h30 vCancelButton gGui2Close, Cancel
-	; Generated using SmartGUI Creator 4.0
+
 	Gui, 2: Show, h348 w598, Create a rule...
 	Gosub, RefreshVars
 	Gosub, ListRules
 Return
 
+;Run when the 'Edit' button is clicked under the rule list
+; only the GUI creation of the rule process and population with the 
+; current rule settings, saving is handled in SaveRule procedure below
 EditRule:
 	Skip = 
 	Edit := 1
@@ -263,18 +300,12 @@ EditRule:
 	{
 		IniRead, MultiRule, rules.ini, %ActiveRule%, Subject%A_Index%
 		if (MultiRule != "ERROR")
-		{
 			NumOfRules++ 
-		}
 		else
-		{
 			break
-		}
 	}
-	;msgbox, %numofrules%
-	
-	;TK Start HERE to complete the editing rule features	
-	;msgbox, %thisRule% has %Numofrules% rules
+
+	;Retrieve the current main settings for the rule selected for editing
 	IniRead, Folder, rules.ini, %ActiveRule%, Folder, %A_Space%
 	IniRead, Action, rules.ini, %ActiveRule%, Action, %A_Space%
 	IniRead, Destination, rules.ini, %ActiveRule%, Destination, %A_Space%
@@ -283,6 +314,8 @@ EditRule:
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	IniRead, ConfirmAction, rules.ini, %ActiveRule%, ConfirmAction, 0
 	IniRead, Recursive, rules.ini, %ActiveRule%, Recursive, 0
+	
+	;Create the GUI and insert the current main settings for the rules selected
 	Gui, 2: Destroy
 	Gui, 2: +owner1
 	Gui, 2: +toolwindow
@@ -305,17 +338,13 @@ EditRule:
 	Loop
 	{
 		if ((A_Index-1) = NumOfRules)
-		{
 			break
-		}
+
 		if (A_Index = 1)
-		{
 			RuleNum =
-		}
 		else
-		{
 			RuleNum := A_Index - 1
-		}
+
 		IniRead, Subject%RuleNum%, rules.ini, %ActiveRule%, Subject%RuleNum%
 		IniRead, Verb%RuleNum%, rules.ini, %ActiveRule%, Verb%RuleNum%
 		IniRead, Object%RuleNum%, rules.ini, %ActiveRule%, Object%RuleNum%
@@ -329,33 +358,28 @@ EditRule:
 		{
 			height := (RuleNum * 30) + 152
 		}
+		
 		; Set each control with the value of each rule
 		defaultSubject = % Subject%RuleNum% "|"
 		defaultVerb = % Verb%RuleNum% "|"
-		;defaultObject = % Object%RuleNum% "|"
 		defaultUnit = % Units%RuleNum% "|"
 		StringReplace, RuleSubject, NoDefaultSubject, %defaultSubject%, %defaultSubject%|
 		
 		; verbs need to be set by subject b/c verbs change by subject
-		;msgbox, %defaultSubject%
 		if (defaultSubject = "Name|") or (defaultSubject = "Extension|")
-		{
 			NoDefaultVerbs = %NoDefaultNameVerbs%
-		}
 		else if (defaultSubject = "Size|")
-		{
 			NoDefaultVerbs = %NoDefaultNumVerbs%
-		}
 		else if (defaultSubject = "Date last modified|") or (defaultSubject = "Date last opened|") or (defaultSubject = "Date created|")
-		{
 			NoDefaultVerbs = %NoDefaultDateVerbs%
-		}
+
 		StringReplace, RuleVerb, NoDefaultVerbs, %defaultVerb%, %defaultVerb%|
 
-		;msgbox, % subject%rulenum% " translates to " rulesubject
 		Gui, 2: Add, DropDownList, x32 y%height% w160 h20 r6 vGUISubject%RuleNum% gSetVerbList , %RuleSubject%
 		Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r6 vGUIVerb%RuleNum% , %RuleVerb%
 		Gui, 2: Add, Edit, x372 y%height% w140 h20 vGUIObject%RuleNum% , % Object%RuleNum%
+		
+		;Change the GUI objects based on the subject of each line
 		if (defaultSubject = "Size|")
 		{
 			NoDefaultUnits = %NoDefaultSizeUnits%
@@ -368,25 +392,25 @@ EditRule:
 			GuiControl, 2: Move , GUIObject%RuleNum% , w70
 			GuiControl, 2: +Number, GUIObject%RuleNum%
 		}
-		;msgbox, %defaultunit%
+
 		StringReplace, RuleUnits, NoDefaultUnits, %defaultUnit%, %defaultUnit%|
-		;msgbox, %ruleunits%
+
+		;Change the GUI objects based on the subject of each line
 		Gui, 2: Add, DropDownList, x445 y%height% vGUIUnits%RuleNum% w60 , %RuleUnits%
 		if (defaultSubject = "Name|") or (defaultSubject = "Extension|")
-		{
 			GuiControl, 2: Hide, GUIUnits%RuleNum%
-		}
+
 		Gui, 2: Add, Button, vGUINewLine%RuleNum% x515 y%height% w20 h20 gNewLine , +
 		if (RuleNum != "")
-		{
 			Gui, 2: Add, Button, vGUIRemLine%RuleNum% x535 y%height% w20 h20 gRemLine , -
-		}
+
 		LineNum++
-	}	
+	}
+	
 	ActionHeight :=
 	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
 	StringReplace, RuleAction, AllActionsNoDefault, %Action%, %Action%|
-	;msgbox, %RuleAction%
+
 	Gui, 2: Add, DropDownList, x32 y242 w160 h20 vGUIAction gSetDestination r6 , %RuleAction%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 vGUIDestination , %Destination%
@@ -398,7 +422,7 @@ EditRule:
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
 	Gui, 2: Add, Button, x372 y302 w100 h30 vOKButton gSaveRule, OK
 	Gui, 2: Add, Button, x482 y302 w100 h30 vCancelButton gGui2Close, Cancel
-	; Generated using SmartGUI Creator 4.0
+
 	GuiControl, 2: Move, Consequence , % "y" (NumOfRules-1) * 30 + 212
 	GuiControl, 2: Move, GUIAction, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, ActionTo, % "y" (NumOfRules-1) * 30 + 242
@@ -408,24 +432,24 @@ EditRule:
 	GuiControl, 2: Move, TestButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, OKButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, CancelButton, % "y" (NumOfRules-1) * 30 + 302
-	Gui, 2: Show, h348 w598, Create a rule...
+	Gui, 2: Show, h348 w598, Edit Rule
 	Gui, 2: Show, % "h" (NumOfRules-1) * 30 + 348
 	Gosub, RefreshVars
 	Gosub, ListRules
 return
 
+;Destroys the create/edit rule dialog when closed
 Gui2Close:
 	Gui, 2: Destroy
 return
 
+;Changes the options based upon what Subject is selected
 SetVerbList:
 	LaunchedBy = %A_GuiControl%
 	StringRight, GUILineNum, LaunchedBy, 1
 	if (GUILineNum = "t")
-	{
 		GUILineNum =
-	}
-	;Msgbox, %GUILineNum%
+
 	GuiControlGet, GUISubject%GUILineNum%, , GUISubject%GUILineNum%
 	if (GUISubject%GUILineNum% = "Name") or (GUISubject%GUILineNum% = "Extension")
 	{
@@ -439,7 +463,6 @@ SetVerbList:
 		GuiControl, 2: ,GUIVerb%GUILineNum%,|%NumVerbs%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
 		GuiControl, 2: +Number, GUIObject%RuleNum%
-		;ControlMove, GUIObject,,,70,,
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%SizeUnits%
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
 	}
@@ -449,17 +472,17 @@ SetVerbList:
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
 		GuiControl, 2: +Number, GUIObject%RuleNum%
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%DateUnits%
-		;GuiControl, 2: +r4, GUIUnits
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
 	}
 return
 
+;Run when the '+' button is clicked to the right of the subject
+; this 'pushes' the bottom section down and adds a new subject entry
+; to the screen
 NewLine:
-	;msgbox add a new line?!
 	if (LineNum = "")
-	{
 		LineNum := 1
-	}
+
 	height := (LineNum * 30) + 152
 	Gui, 2: Add, DropDownList, x32 y%height% w160 h20 r6 vGUISubject%LineNum% gSetVerbList , %AllSubjects%
 	Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r6 vGUIVerb%LineNum% , %NameVerbs%
@@ -485,31 +508,32 @@ NewLine:
 	NumOfRules++
 return
 
+;Run when the '-' button is clicked to the right of the subject
+; this 'hides' the row selected, but it still exists in the code itself
+; currently there is no function in AHK to 'destroy' gui elements, so we
+; just hide them
 RemLine:
 	NumOfRules--
 	LaunchedBy = %A_GuiControl%
 	StringRight, GUILineNum, LaunchedBy, 1
 	if (GUILineNum = "e")
-	{
 		GUILineNum =
-	}
+
 	Skip = %Skip%,%GUILineNum%
-	;msgbox, %guilinenum% 
 	GuiControl, 2: Hide, GUISubject%GUILineNum%
 	GuiControl, 2: Hide, GUIVerb%GUILineNum%
 	GuiControl, 2: Hide, GUIObject%GUILineNum%
 	GuiControl, 2: Hide, GUIUnits%GUILineNum%
 	GuiControl, 2: Hide, GUINewLine%GUILineNum%
 	GuiControl, 2: Hide, GUIRemLine%GUILineNum%
-	;GuiControl, 2: Hide, GUIUnits%GUILineNum%
 	GuiControl, 2:, GUISubject%GUILineNum%, |
 return
 
+;Changes the options based upon what action is selected
 SetDestination:
 	if !FirstEdit
-	{
 		GuiControlGet, GUIAction, , GUIAction
-	}
+
 	FirstEdit := 0
 	if (GUIAction = "Move file") or (GUIAction = "Copy file")
 	{
@@ -536,13 +560,17 @@ SetDestination:
 	}
 return
 
+;Run when the '-' button is clicked under the rule list
+; this is responsible for confirming and completing the actual
+; delete from the ini file
 RemoveRule:
-	;msgbox, %ActiveRule%
 	if (ActiveRule = "")
 	{
 		MsgBox, Please select a rule to delete.
 		return
 	}
+	
+	;Confirm the delete, and if yes, remove from the screen and ini file
 	MsgBox, 4, Delete Rule, Are you sure you would like to delete the rule "%ActiveRule%" ?
 	IfMsgBox No
 		return
@@ -558,9 +586,11 @@ RemoveRule:
 	Gosub, ListRules
 return
 
+;Run when the 'OK' button is pressed in either a new rule creation
+; or a current rule is edited.  This is responsible for checking that the
+; rule has proper form and then writes it to the ini file
 SaveRule:
 	Gui, 2: Submit, NoHide
-	;MsgBox, LineNum: %LineNum%
 	if (RuleName = "")
 	{
 		Msgbox, You need to write a description for your rule.
@@ -571,8 +601,8 @@ SaveRule:
 		Msgbox, Your description cannot contain the | (pipe) character
 		return
 	}
+
 	StringReplace, RuleMatchList, AllRuleNames, |,`,,ALL
-	;msgbox, Edit: %Edit%
 	if RuleName in %RuleMatchList%
 	{
 		if !Edit
@@ -583,24 +613,19 @@ SaveRule:
 	}
 
 	if (LineNum = "")
-	{
 		LineNum := 1
-	}
+
+	;Check the structure of the rule to make sure all the important stuff is populated
 	Loop
 	{
 		if (A_Index > LineNum)
-		{
-			;msgbox, bigger
 			break
-		}
 		else
-		{
 			CheckLine := A_Index - 1
-		}
+
 		if (CheckLine = 0)
-		{
 			CheckLine=
-		}
+
 		if (GUIObject%CheckLine% = "")
 		{
 			if Checkline in %Skip%
@@ -619,7 +644,6 @@ SaveRule:
 			{
 				Msgbox, % "You need to enter a destination folder for the " GUIAction " action."
 				return
-				; %
 			}
 		}
 		else
@@ -632,16 +656,15 @@ SaveRule:
 		}
 	}
 	
+	;If in edit mode, we delete everything in the ini and then recreate it
 	if Edit
 	{
 		IniDelete, rules.ini, %OldName%
 		StringReplace, AllRuleNames, AllRuleNames, %OldName%|,,
 		StringReplace, RuleNames, RuleNames, %OldName%|,,
-		;msgbox, allrulenames: %allrulenames% - rulenames: %rulenames%
 	}
 	
 	Gui, 2: Destroy
-	;MsgBox, %LineNum%
 	IniWrite, %RuleNames%%RuleName%|, rules.ini, %ActiveFolder%, RuleNames
 	IniWrite, %AllRuleNames%%RuleName%|, rules.ini, Rules, AllRuleNames
 	IniWrite, %ActiveFolder%\*, rules.ini, %RuleName%, Folder
@@ -662,37 +685,22 @@ SaveRule:
 	Loop
 	{
 		if (A_Index = 1)
-		{
 			thisLine =
-		}
 		else
-		{
 			thisLine := A_Index - 1
-		}
-		;msgbox, %thisline%
+
 		if (A_Index > LineNum)
-		{
-			;msgbox, break
 			break
-		}
-		;msgbox, % guisubject%thisline%
+
 		if (GUISubject%thisLine% != "")
 		{
 			if (thisLine = "")
-			{
 				RuleNum =
-				;msgbox, RuleNum = %rulenum%
-			}
 			else if (RuleNum = "")
-			{
 				RuleNum := 1
-				;msgbox, RuleNum = %rulenum%
-			}
 			else
-			{
 				RuleNum++
-				;msgbox, RuleNum = %rulenum%
-			}
+
 			IniWrite, % GUISubject%thisLine%, rules.ini, %RuleName%, Subject%RuleNum%
 			IniWrite, % GUIVerb%thisLine%, rules.ini, %RuleName%, Verb%RuleNum%
 			IniWrite, % GUIObject%thisLine%, rules.ini, %RuleName%, Object%RuleNum%
@@ -706,11 +714,16 @@ SaveRule:
 	Gosub, ListRules
 return
 
+;Run when the '...' button is clicked under to the right of the action section
+; this is responsible displaying a selection box and posting it to the rule
+; creation screen
 ChooseFolder:
 	FileSelectFolder, GUIDestination
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return
 
+;Run when the 'Save Preferences' button is clicked on the Preferences tab
+; writes the information to the ini file
 SavePrefs:
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
@@ -736,6 +749,8 @@ SavePrefs:
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 
+;Run when the 'Save Preferences' button is clicked on the Recycle Bin tab
+; writes the information to the ini file
 RBSavePrefs:
 	Gui, 1: Submit, NoHide
 	IniWrite, %RBEnable%, rules.ini, Preferences, RBEnable
@@ -767,6 +782,8 @@ RBSavePrefs:
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 
+;Run when the first check box is clicked on the Recycle Bin tab
+; enables all the other GUI options on the page; was added as a precautionary function
 RBEnable:
 	Gui, 1: Submit, NoHide
 	
@@ -784,18 +801,20 @@ RBEnable:
 	}
 return
 
+;Essentially this issues a double-click behind the scenes whenever a folder (SysListView321)
+; or rule (SysListView322) is single clicked by the user.  This allows us to have it selected
+; rather than just clicked upon
 #IfWinActive, Belvedere
 ~LButton::
 	MouseGetPos,,,,ClickedControl
-	;msgbox, %ClickedControl%
 	if (ClickedControl = "SysListView321") or (ClickedControl = "SysListView322")
 	{
-		;msgbox, this one
 		Sleep, 10
 		Click 2
 	}
 return
 
+;A quick routine to update teh master Folder list and rule names as well as the status bar
 RefreshVars:
 	IniRead, Folders, rules.ini, Folders, Folders
 	IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
@@ -816,6 +835,9 @@ RefreshVars:
 	SB_SetText(APPNAME . " is currently managing " . FolderCount . " folders with " . RuleCount .  " total rules" , 1)
 return
 
+;Responsible for handling a folder that is drag-and-dropped over the folders list
+; you can drag both a file or a folder and it will confirm the addition of the folder
+; only works on the folder list for the time being
 GuiDropFiles:
 	;Only accept DnD in the folders list box
 	if A_GuiControl = Folders
@@ -828,6 +850,7 @@ GuiDropFiles:
 	}
 Return
 
+;Responsible for checking for duplicate folders and saving the newly added folder to the ini file
 SaveFolders(NewFolder, Folders)
 {
 	StringReplace, FoldersMatchList, Folders, |,`,,ALL

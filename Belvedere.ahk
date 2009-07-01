@@ -18,7 +18,7 @@ SetFormat, float, 0.2
 GoSub, SetVars
 GoSub, TRAYMENU
 GoSub, MENUBAR
-Gosub, BuildINI
+GoSub, BuildINI
 SetTimer, emptyRB, Off
 IniRead, Folders, rules.ini, Folders, Folders, %A_Space%
 IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
