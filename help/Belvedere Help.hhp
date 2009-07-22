@@ -4,7 +4,7 @@ Compiled file=Belvedere Help.chm
 Contents file=Table of Contents.hhc
 Default topic=index.htm
 Display compile progress=No
-Index file=Index.hhk
+Full-text search=Yes
 Language=0x409 English (United States)
 Title=Belvedere Help
 

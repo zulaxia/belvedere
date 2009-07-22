@@ -3,6 +3,7 @@
 ; Language:       English
 ; Platform:       Windows
 ; Author:         Adam Pash <adam.pash@gmail.com>
+; Contributor:	  Matthew Shorts <mshorts@gmail.com>
 ;
 ; Script Function:
 ;	Automated file manager
@@ -13,7 +14,6 @@
 #Persistent
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-StringCaseSense, On
 SetFormat, float, 0.2
 GoSub, SetVars
 GoSub, TRAYMENU
@@ -25,37 +25,39 @@ IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
 IniRead, SleepTime, rules.ini, Preferences, SleepTime, 300000
 IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
+IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, 1
+
+;Will be set based on global settings in ini file
+; will default to On just to be safe
+if CaseSensitivity = 0
+	StringCaseSense, Off
+else
+	StringCaseSense, On
 
 Log("Starting " . APPNAME . " " . Version, "System")
 
 ;main execution loop
 Loop
 {
-	;msgbox, running
 	;Loops through all the rule names for execution
 	Loop, Parse, AllRuleNames, |
 	{
 		thisRule = %A_LoopField%
-		;msgbox, %thisrule%
 		NumOfRules := 1
+
 		;Loops to determine number of subjects within a rule
 		Loop
 		{
 			IniRead, MultiRule, rules.ini, %thisRule%, Subject%A_Index%
 			if (MultiRule != "ERROR")
-			{
 				NumOfRules++ 
-			}
 			else
-			{
 				break
-			}
 		}
+		
 		if (thisRule = "ERROR") or (thisRule = "")
-		{
 			continue
-		}
-		;msgbox, %thisRule% has %Numofrules% rules
+
 		IniRead, Folder, rules.ini, %thisRule%, Folder, %A_Space%
 		IniRead, Enabled, rules.ini, %thisRule%, Enabled, 0
 		IniRead, ConfirmAction, rules.ini, %thisRule%, ConfirmAction, 0
@@ -66,36 +68,27 @@ Loop
 		
 		;If rule is not enabled, just skip over it
 		if (Enabled = 0)
-		{
 			continue
-		}
-		;MsgBox, %thisRule% is currently running
+
 		;Loop to read the subjects, verbs and objects for the list defined
 		Loop
 		{
 			if ((A_Index-1) = NumOfRules)
-			{
 				break
-			}
+
 			if (A_Index = 1)
-			{
 				RuleNum =
-			}
 			else
-			{
 				RuleNum := A_Index - 1
-			}
+
 			IniRead, Subject%RuleNum%, rules.ini, %thisRule%, Subject%RuleNum%
 			IniRead, Verb%RuleNum%, rules.ini, %thisRule%, Verb%RuleNum%
 			IniRead, Object%RuleNum%, rules.ini, %thisRule%, Object%RuleNum%
 		}
-		;msgbox, %subject%, %subject1%, %subject2%
+
+		;if we're moving something, need to find out if I can overwrite it
 		if (Destination != "")
-		{
 			IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
-		}
-		
-		;Msgbox, %Subject% %Verb% %Object% %Action% %ConfirmAction% %Recursive%
 
 		;Loop through all of the folder contents
 		Loop %Folder%, 0, %Recursive%
@@ -103,126 +96,66 @@ Loop
 			Loop
 			{
 				if ((A_Index - 1) = NumOfRules)
-				{
 					break
-				}
+
 				if (A_Index = 1)
-				{
 					RuleNum =
-				}
 				else
-				{
 					RuleNum := A_Index - 1
-				}
-				;msgbox, % subject subject1 subject2
+
 				file = %A_LoopFileLongPath%
-				;MsgBox, %file%
 				fileName = %A_LoopFileName%
-				;Subject1 = Fart
-				;msgbox, % subject%rulenum%
+
 				; Below determines the subject of the comparison
 				if (Subject%RuleNum% = "Name")
-				{
 					thisSubject := getName(file)
-					;msgbox, %thisSubject%
-				}
 				else if (Subject%RuleNum% = "Extension")
-				{
 					thisSubject := getExtension(file)
-					;Msgbox, extension: %thissubject%
-				}
 				else if (Subject%RuleNum% = "Size")
-				{
 					thisSubject := getSize(file)
-					;msgbox, size %thissubject%
-				}
 				else if (Subject%RuleNum% = "Date last modified")
-				{
 					thisSubject := getDateLastModified(file)
-				}
 				else if (Subject%RuleNum% = "Date last opened")
-				{
 					thisSubject := getDateLastOpened(file)
-				}
 				else if (Subject%RuleNum% = "Date created")
-				{
 					thisSubject := getDateCreated(file)
-				}
 				else
-				{
 					MsgBox, Subject does not have a match
-					;msgbox, % subject %rulenum%
-				}
 				
 				; Below determines the comparison verb
 				if (Verb%RuleNum% = "contains")
-				{
 					result%RuleNum% := contains(thisSubject, Object%RuleNum%)
-				}
 				else if (Verb%RuleNum% = "does not contain")
-				{
 					result%RuleNum% := !(contains(thisSubject, Object%RuleNum%))
-				}
 				else if (Verb%RuleNum% = "is")
-				{
 					result%RuleNum% := isEqual(thisSubject, Object%RuleNum%)
-					;msgbox, % result%rulenum% . "is rule" . rulenum
-					;if result%RuleNum%
-					{
-						;msgbox, true for %thissubject% and %object%
-					}
-				}
 				else if (Verb%RuleNum% = "matches one of")
-				{
 					result%RuleNum% := isOneOf(thisSubject, Object%RuleNum%)
-					;msgbox, % result%rulenum% . "is rule" . rulenum
-				}
 				else if (Verb%RuleNum% = "does not match one of")
-				{
 					result%RuleNum% := !(isOneOf(thisSubject, Object%RuleNum%))
-					;msgbox, % result%rulenum% . "is rule" . rulenum
-				}
 				else if (Verb%RuleNum% = "is less than")
-				{
 					result%RuleNum% := isLessThan(thisSubject, Object%RuleNum%)
-					;msgbox, % result%rulenum%
-				}
 				else if (Verb%RuleNum% = "is greater than")
-				{
 					result%RuleNum% := isGreaterThan(thisSubject, Object%RuleNum%)
-				}
 				else if (Verb%RuleNum% = "is not")
-				{
 					result%RuleNum% := !(isEqual(thisSubject, Object%RuleNum%))
-				}
 				else if (Verb%RuleNum% = "is in the last")
-				{
 					result%RuleNum% := isInTheLast(thisSubject, Object%RuleNum%)
-				}
 				else if (Verb%RuleNum% = "is not in the last")
-				{
 					result%RuleNum% := !isInTheLast(thisSubject, Object%RuleNum%)
-					;msgbox, % result%RuleNum%
-				}
 			}
+			
 			; Below evaluates result and takes action
 			Loop
 			{
-				;msgbox, %a_index%
 				if (NumOfRules < A_Index)
-				{
-					;msgbox, over
 					break
-				}
+
 				if (A_Index = 1)
-				{
 					RuleNum=
-				}
 				else
-				{
 					RuleNum := A_Index - 1
-				}
-				;msgbox, % result%rulenum% . "is rule " . rulenum
+
 				if (Matches = "ALL")
 				{
 					if (result%RuleNum% = 0)
@@ -241,7 +174,6 @@ Loop
 					if (result%RuleNum% = 1)
 					{
 						result := 1
-						;msgbox, 1
 						break
 					}
 					else
@@ -251,9 +183,11 @@ Loop
 					}
 				}
 			}
-			;Msgbox, result is %result%
+
+			;if we have mathces, then we act upon them below
 			if result
 			{
+				;User can ask to confirm the actions, and if so, we ask them if they woudl liek to procede
 				if (ConfirmAction = 1)
 				{
 					MsgBox, 4, Action Confirmation, Are you sure you want to %Action% %fileName% because of rule %thisRule%?
@@ -265,6 +199,7 @@ Loop
 				Log("Action taken: " . Action, "Action")
 				Log("File: " . file, "Action")
 				
+				;Here is where we cat upon the files that matched
 				if (Action = "Move file") or (Action = "Rename file")
 				{
 					move(file, Destination, Overwrite)
@@ -281,7 +216,6 @@ Loop
 				}
 				else if (Action = "Delete file")
 				{
-					;msgbox, delete it!
 					delete(file)
 				}
 				else if (Action = "Copy file")
@@ -305,10 +239,7 @@ Loop
 				
 				Log("======================================", "Action")
 			}
-			else
-			{
-				;msgbox, no match
-			}	
+
 			StringCaseSense, On
 		}
 	}
@@ -326,21 +257,13 @@ Loop
 			period :=
 			
 			if (RBEmptyTimeLength = "minutes")
-			{
 				period := RBEmptyTimeValue * 60000
-			}
 			else if (RBEmptyTimeLength = "hours")
-			{
 				period := RBEmptyTimeValue * 3600000
-			}
 			else if (RBEmptyTimeLength = "days")
-			{
 				period := RBEmptyTimeValue * 86400000
-			}
 			else if (RBEmptyTimeLength = "weeks")
-			{
 				period := RBEmptyTimeValue * 604800000
-			}
 			
 			;Only update the timer if there is a new value
 			;This keeps it from getting reset
@@ -353,6 +276,7 @@ Loop
 		}
 		else
 		{
+			;turning off the RB Timer
 			SetTimer, emptyRB, Off
 			Log("Recycle Bin - empty interval has been disabled", "System")
 		}
@@ -361,11 +285,13 @@ Loop
 	Sleep, %SleepTime%
 }
 
+;This is repsonsible for emptying the Recycle Bin at the interval set
 emptyRB:
 	FileRecycleEmpty
 	Log("Recycle Bin - Interval Empty", "Action")
 return
 
+;Here we are creating all the variables for usage as well as the resource files
 SetVars:
 	APPNAME = Belvedere
 	Version = 0.4
@@ -384,13 +310,13 @@ SetVars:
 	DateUnits = minutes||hours|days|weeks
 	NoDefaultDateUnits = minutes|hours|days|weeks|
 	MatchList = ALL|ANY|
-	DeleteApproach = Oldest First|Youngest First|Largest First|Smallest First
-	LogTypes = System|Actions|Both
+	LogTypes = System|Actions|Both|
+	
 	IfNotExist,resources
-	{
 		FileCreateDir,resources
-	}
+	
 	FileInstall, resources\belvedere.ico, resources\belvedere.ico
+	FileInstall, resources\belvedere-paused.ico, resources\belvedere-paused.ico
 	FileInstall, resources\belvederename.png, resources\belvederename.png
 	FileInstall, resources\both.png, resources\both.png
 	Menu, TRAY, Icon, resources\belvedere.ico,,1
@@ -398,6 +324,7 @@ SetVars:
 	LogFile = %A_ScriptDir%\event.log
 return
 
+;If I don't have the INI file existent, I will go ahead and build it
 BuildINI:
 	IfNotExist, rules.ini
 	{
@@ -407,9 +334,11 @@ BuildINI:
 		IniWrite,0,rules.ini, Preferences, RBEnable
 		IniWrite,0,rules.ini, Preferences, EnableLogging
 		IniWrite,%A_Space%,rules.ini, Preferences, LogType
+		IniWrite,1,rules.ini, Preferences, CaseSensitivity
 	}
 return
 
+;Menu that sits in the system tray
 TRAYMENU:
 	Menu,TRAY,NoStandard 
 	Menu,TRAY,DeleteAll 
@@ -423,13 +352,14 @@ TRAYMENU:
 	Menu,Tray,Tip,%APPNAME% %Version%
 Return
 
+;Menu that is at the top of the main GUI
 MENUBAR:
 	Menu, FileMenu, Add,&Pause, PAUSE
 	Menu, FileMenu, Add
 	Menu, FileMenu, Add, Backup Settings..., BACKUP
 	Menu, FileMenu, Add, Import Settings..., IMPORT
 	Menu, FileMenu, Add
-	Menu, FileMenu, Add, Veiw Log..., VIEWLOG
+	Menu, FileMenu, Add, View Log..., VIEWLOG
 	Menu, FileMenu, Add
 	Menu, FileMenu, Add,E&xit,EXIT
 	Menu, HelpMenu, Add, &Help, HELP
@@ -438,11 +368,17 @@ MENUBAR:
 	Menu, MenuBar, Add, &Help, :HelpMenu
 Return
 
+;Run when the 'Preferences' tray menu option is clicked
+;Preferences Option in Tray Menu
 PREFS:
 	GoSub MANAGE
 	GuiControl, 1: Choose, Tabs, 3
 return
 
+;Run when the 'Pause' menu option is clicked
+;Pauses the application either from the Tray or Main GUI menu
+; changes the tray icon color as well as the status bar text and
+; a check mark next to the Pause option on the Main GUI menu
 PAUSE:
 	if (A_IsPaused = 1)
 	{
@@ -462,12 +398,12 @@ PAUSE:
 	Pause, Toggle
 return
 
+;Run when the 'Backup Settings...' menu item is clicked on the Main Menu
+; Saves the rules.ini file if the user chooses to back it up
 BACKUP:
 	FileSelectFile, BackupFile, S, ,Backup %APPNAME% Settings, 
 	if (BackupFile = "")
-	{	
 		return
-	}
 	
 	IfExist %BackupFile%
 	{
@@ -486,12 +422,13 @@ BACKUP:
 		MsgBox,,Backup Success, Backup has completed successfully!
 Return
 
+;Run when the 'Import Settings...' menu item is clicked on the Main Menu
+;Imports the rules.ini file if the user chooses to do so
+; this will irretrevably overwrite the current rules.ini file
 IMPORT:
 	FileSelectFile, ImportFile, , , Import %APPNAME% Settings,
 	if (ImportFile = "")
-	{
 		return
-	}
 	
 	IniRead, Folders, %ImportFile%, Folders, Folders, %A_Space%
 	IniRead, AllRuleNames, %ImportFile%, Rules, AllRuleNames, %A_Space%
@@ -514,6 +451,8 @@ IMPORT:
 	GoSub, VerifyConfig
 Return
 
+;Run when the 'View Log...' menu item is clicked on the Main Menu
+;Shows the log file in a new window
 VIEWLOG:
 	Gui, 5: Destroy
 	Gui, 5: Add, Edit, h425 w600 vLogView ReadOnly
@@ -524,11 +463,15 @@ VIEWLOG:
 	Gui, 5: Show, auto, %APPNAME% Log
 Return
 
+;Run when the 'Refresh' button is clicked under the log screen
+; will re-read the log and display in the same window
 RefreshLog:
 	FileRead, FileContents, %A_ScriptDir%\event.log
 	GuiControl, 5: , LogView, %FileContents%
 Return
 
+;Run when the 'Clear Log' button is clicked under the log screen
+; will delete the curent log file without backing it up
 ClearLog:
 	MsgBox, 4, Clear Log?, Are you sure you would like to clear the application log?
 	IfMsgBox No
@@ -537,12 +480,13 @@ ClearLog:
 	GoSub, RefreshLog
 Return
 
+;Run when the 'Save Log...' button is clicked under the log screen
+; will prompt the user to save the current file and still keep the
+; current one in the directory
 SaveLog:
 	FileSelectFile, BackupFile, S, ,Save %APPNAME% Log, 
 	if (BackupFile = "")
-	{	
 		return
-	}
 	
 	IfExist %BackupFile%
 	{
@@ -561,18 +505,23 @@ SaveLog:
 		MsgBox,,Save Success, Log Save has completed successfully!
 Return
 
+;Run when the 'Help' menu item is clicked on the Main Menu
+; displays the CHM file
 HELP:
 	Run, "resources\Belvedere Help.chm"
 return
 
+;Link to the homepage on Lifehacker (used in About dialog)
 HOMEPAGE:
 	Run, http://lifehacker.com/341950/
 return
 
+;Link to the homepage on What Cheer (used in About dialog)
 WCHOMEPAGE:
 	Run, http://what-cheer.com/
 return
 
+;Run when the 'About Belvedere' menu item is clicked on the Main Menu
 ABOUT:
 	Gui,4: Destroy
 	Gui,4: +owner
@@ -600,6 +549,7 @@ Return
 #Include includes\test.ahk
 #Include includes\maint.ahk
 
+;Closing the app; w/ confirmation
 EXIT:
 	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
 	IfMsgBox No

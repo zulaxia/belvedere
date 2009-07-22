@@ -63,6 +63,7 @@ MANAGE:
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
+	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, 1
 	
 	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
@@ -70,6 +71,7 @@ MANAGE:
 	Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
+	Gui, 1: Add, Checkbox, x62 y132 vCaseSensitivity Checked%CaseSensitivity%, Enable all filename searches to be case sensitive (you must restart %APPNAME% for this setting to be applied)
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
 	Gui, 1: Add, Button, x580 y382 h30 vVerifyConfig gVerifyConfig, Verify Configuration
 	
@@ -730,6 +732,7 @@ SavePrefs:
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
+	IniWrite, %CaseSensitivity%, rules.ini, Preferences, CaseSensitivity
 	if (EnableLogging = 1)
 	{
 		if(LogType = "")
