@@ -2,15 +2,15 @@
 ; Belvedere Installer Script
 ;
 ;	Author:		Matthew Shorts <mshorts@gmail.com> 
-;	Version: 	0.1
+;	Version: 	0.2
 ;	
 
 ;General Application defines
 !define PRODUCT_NAME "Belvedere"
-!define PRODUCT_VERSION "0.3"
+!define PRODUCT_VERSION "0.5"
 !define PRODUCT_PUBLISHER "Lifehacker"
 !define PRODUCT_WEB_SITE "http://lifehacker.com/341950/belvedere-automates-your-self+cleaning-pc"
-;!define PRODUCT_README "README"
+!define PRODUCT_HELP_TEXT "Belvedere Help.chm"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\${PRODUCT_NAME}.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
@@ -25,7 +25,8 @@
 
 ;Finish Page Defines
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_NAME}.exe"
-;!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\${PRODUCT_README}"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\${PRODUCT_HELP_TEXT}"
+!define MUI_FINISHPAGE_SHOWREADME_TEXT "Show Help Text"
 
 ;Product information
 VIAddVersionKey ProductName "${PRODUCT_NAME}"
@@ -56,8 +57,6 @@ BrandingText "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 ;-- Pages --
 ;Welcome page
 !insertmacro MUI_PAGE_WELCOME
-;License page
-;!insertmacro MUI_PAGE_LICENSE ".\gpl-3.0.txt"
 ;Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ;Instfiles page
@@ -80,8 +79,8 @@ ShowUnInstDetails show
 Section "Installation" secApp
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
-  File .\Belvedere.exe
-  ;File .\README
+  File Belvedere.exe
+  File "${PRODUCT_HELP_TEXT}"
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
   CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
@@ -106,10 +105,48 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
 
+;Initialization of Install
+Function .onInit
+   StrCpy $0 "${PRODUCT_NAME}.exe"
+   KillProc::FindProcesses
+   StrCmp $1 "-1" uhoh
+   StrCmp $0 "0" completed
+   MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "You must end ${PRODUCT_NAME} before I proceed.  Would you like me to do that for you?" IDYES kill IDNO buhbye
+ 
+kill:
+   StrCpy $0 "${PRODUCT_NAME}.exe"
+   KillProc::KillProcesses
+   StrCmp $1 "-1" uhoh
+   Goto completed
+ 
+uhoh:
+   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!"
+   Abort
+
+buhbye:
+  MessageBox MB_ICONINFORMATION|MB_OK "${PRODUCT_NAME} ${PRODUCT_VERSION} installation has been aborted."
+  Abort  
+   
+completed:
+   Return
+FunctionEnd
+
 ;Initialization of Unistall
 Function un.onInit
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name) and all of its components?" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name) and all of its components?" IDYES +2 IDNO
   Abort
+  
+  StrCpy $0 "${PRODUCT_NAME}.exe"
+  KillProc::KillProcesses
+  StrCmp $1 "-1" uhoh
+  Goto completed
+
+uhoh:
+   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!"
+   Abort
+   
+completed:
+   Return
 FunctionEnd
 
 ;Success of Uninstallation
@@ -122,12 +159,13 @@ FunctionEnd
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
-  ;Delete "$INSTDIR\${PRODUCT_README}"
+  Delete "$INSTDIR\${PRODUCT_HELP_TEXT}"
   Delete "$INSTDIR\Belvedere.exe"
   Delete "$INSTDIR\rules.ini"
   Delete "$INSTDIR\resources\both.png"
   Delete "$INSTDIR\resources\belvederename.png"
   Delete "$INSTDIR\resources\belvedere.ico"
+  Delete "$INSTDIR\resources\belvedere-paused.ico"
 
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Website.lnk"
