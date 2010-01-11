@@ -27,8 +27,12 @@ MANAGE:
 	{
 		Loop, Parse, ListFolders, |
 		{
-			SplitPath, A_LoopField, FileName
-			LV_Add(0, FileName, A_LoopField)
+			SplitPath, A_LoopField, FileName,,,,FileDrive
+			;If no name is present we are assuming a root drive
+			if (FileName = "")
+				LV_Add(0, FileDrive, A_LoopField)
+			else
+				LV_Add(0, FileName, A_LoopField)
 		}
 		LV_ModifyCol(1, 171)
 		LV_ModifyCol(2, 0)
@@ -148,7 +152,7 @@ EnableButton:
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
-		MsgBox, Please select a rule to enable/disable.
+		MsgBox,,Select Rule, Please select a rule to enable/disable.
 		return
 	}
 
@@ -178,7 +182,7 @@ return
 RemoveFolder:
 	if (CurrentlySelected = "")
 	{
-		Msgbox, Select the folder you'd like to delete.
+		Msgbox,,Select Folder, Select the folder you'd like to delete.
 		return
 	}
 	
@@ -238,7 +242,7 @@ AddRule:
 	;Get the currently selected folder, if any
 	if (CurrentlySelected = "")
 	{
-		MsgBox, You must select a folder to create a rule
+		MsgBox,,Select Folder, You must select a folder to create a rule
 		return
 	}
 	Gui, ListView, Folders
@@ -271,7 +275,8 @@ AddRule:
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 vGUIDestination , 
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
-	Gui, 2: Add, Checkbox, x482 y242 vOverwrite, Overwrite?
+	Gui, 2: Add, Checkbox, x482 y237 vOverwrite, Overwrite?
+	Gui, 2: Add, Checkbox, x482 y252 vCompress, Compress?
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
 	Gui, 2: Add, Button, x372 y302 w100 h30 vOKButton gSaveRule, OK
 	Gui, 2: Add, Button, x482 y302 w100 h30 vCancelButton gGui2Close, Cancel
@@ -291,7 +296,7 @@ EditRule:
 	;make sure a rule is selected
 	if (ActiveRule = "")
 	{
-		MsgBox, Please select a rule to edit.
+		MsgBox,,Select Rule, Please select a rule to edit.
 		return
 	}
 	OldName = %ActiveRule%
@@ -312,6 +317,7 @@ EditRule:
 	IniRead, Action, rules.ini, %ActiveRule%, Action, %A_Space%
 	IniRead, Destination, rules.ini, %ActiveRule%, Destination, %A_Space%
 	IniRead, Overwrite, rules.ini, %ActiveRule%, Overwrite, 0
+	IniRead, Compress, rules.ini, %ActiveRule%, Compress, 0
 	IniRead, Matches, rules.ini, %ActiveRule%, Matches, %A_Space%
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	IniRead, ConfirmAction, rules.ini, %ActiveRule%, ConfirmAction, 0
@@ -417,7 +423,8 @@ EditRule:
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 vGUIDestination , %Destination%
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
-	Gui, 2: Add, Checkbox, x482 y242 vOverwrite Checked%Overwrite%, Overwrite?
+	Gui, 2: Add, Checkbox, x482 y237 vOverwrite Checked%Overwrite%, Overwrite?
+	Gui, 2: Add, Checkbox, x482 y252 vCompress Checked%Compress%, Compress?
 	FirstEdit := 1
 	GUIAction = %Action%
 	Gosub, SetDestination
@@ -430,7 +437,8 @@ EditRule:
 	GuiControl, 2: Move, ActionTo, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, GUIDestination, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, GUIChooseFolder,% "y" (NumOfRules-1) * 30 + 242
-	GuiControl, 2: Move, Overwrite, % "y" (NumOfRules-1) * 30 + 242
+	GuiControl, 2: Move, Overwrite, % "y" (NumOfRules-1) * 30 + 237
+	GuiControl, 2: Move, Compress, % "y" (NumOfRules-1) * 30 + 252
 	GuiControl, 2: Move, TestButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, OKButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, CancelButton, % "y" (NumOfRules-1) * 30 + 302
@@ -500,7 +508,8 @@ NewLine:
 	GuiControl, 2: Move, ActionTo, % "y" LineNum * 30 + 242
 	GuiControl, 2: Move, GUIDestination, % "y" LineNum * 30 + 242
 	GuiControl, 2: Move, GUIChooseFolder,% "y" LineNum * 30 + 242
-	GuiControl, 2: Move, Overwrite, % "y" LineNum * 30 + 242
+	GuiControl, 2: Move, Overwrite, % "y" LineNum * 30 + 237
+	GuiControl, 2: Move, Compress, % "y" (NumOfRules-1) * 30 + 252
 	GuiControl, 2: Move, TestButton, % "y" LineNum * 30 + 302
 	GuiControl, 2: Move, OKButton, % "y" LineNum * 30 + 302
 	GuiControl, 2: Move, CancelButton, % "y" LineNum * 30 + 302
@@ -544,6 +553,7 @@ SetDestination:
 		GuiControl, 2: , ActionTo, to folder:
 		GuiControl, 2: Show, ActionTo
 		GuiControl, 2: Show, Overwrite
+		GuiControl, 2: Show, Compress
 	}
 	else if (GUIAction = "Rename file")
 	{
@@ -552,6 +562,7 @@ SetDestination:
 		GuiControl, 2: Show, GUIDestination
 		GuiControl, 2: Hide, GUIChooseFolder
 		GuiControl, 2: Hide, Overwrite
+		GuiControl, 2: Hide, Compress
 	}
 	else if (GUIAction = "Open file") or (GUIAction = "Delete file") or (GUIAction = "Send file to Recycle Bin")
 	{
@@ -559,6 +570,7 @@ SetDestination:
 		GuiControl, 2: Hide, GUIChooseFolder
 		GuiControl, 2: Hide, GUIDestination
 		GuiControl, 2: Hide, Overwrite
+		GuiControl, 2: Hide, Compress
 	}
 return
 
@@ -568,7 +580,7 @@ return
 RemoveRule:
 	if (ActiveRule = "")
 	{
-		MsgBox, Please select a rule to delete.
+		MsgBox,,Select Rule, Please select a rule to delete.
 		return
 	}
 	
@@ -595,12 +607,12 @@ SaveRule:
 	Gui, 2: Submit, NoHide
 	if (RuleName = "")
 	{
-		Msgbox, You need to write a description for your rule.
+		Msgbox,,Missing Description, You need to write a description for your rule.
 		return
 	}
 	else if RuleName contains |
 	{
-		Msgbox, Your description cannot contain the | (pipe) character
+		Msgbox,,Bad Description, Your description cannot contain the | (pipe) character
 		return
 	}
 
@@ -609,7 +621,7 @@ SaveRule:
 	{
 		if !Edit
 		{
-			Msgbox, A rule with this name already exists. Please rename your rule.
+			Msgbox,,Duplicate Name, A rule with this name already exists. Please rename your rule.
  			return
 		}
 	}
@@ -636,7 +648,7 @@ SaveRule:
 			}
 			else
 			{
-				Msgbox, % "You're missing data in one of your " GUISubject%CheckLine% " rules."
+				Msgbox,,Missing Data, % "You're missing data in one of your " GUISubject%CheckLine% " rules."
 				return
 			}
 		}
@@ -644,7 +656,7 @@ SaveRule:
 		{
 			if (GUIAction = "Move file") or (GUIAction = "Rename file") or (GUIAction = "Copy file")
 			{
-				Msgbox, % "You need to enter a destination folder for the " GUIAction " action."
+				Msgbox,,Missing Folder, % "You need to enter a destination folder for the " GUIAction " action."
 				return
 			}
 		}
@@ -652,7 +664,7 @@ SaveRule:
 		{
 			IfNotExist, %GUIDestination%
 			{
-				Msgbox, %GUIDestination% is not a real folder.
+				Msgbox,,Invalid Folder, %GUIDestination% is not a real folder.
 				return
 			}
 		}
@@ -681,6 +693,7 @@ SaveRule:
 	{
 		IniWrite, %GUIDestination%, rules.ini, %RuleName%, Destination
 		IniWrite, %Overwrite%, rules.ini, %RuleName%, Overwrite
+		IniWrite, %Compress%, rules.ini, %RuleName%, Compress
 	}
 	
 	;save the rest of the subject combos
@@ -737,7 +750,7 @@ SavePrefs:
 	{
 		if(LogType = "")
 		{
-			MsgBox, Please select a logging type
+			MsgBox,,Missing Logging Type, Please select a logging type
 			return
 		}
 		
@@ -817,24 +830,25 @@ return
 	}
 return
 
-;A quick routine to update teh master Folder list and rule names as well as the status bar
+;A quick routine to update the master Folder list and rule names as well as the status bar
 RefreshVars:
 	IniRead, Folders, rules.ini, Folders, Folders
 	IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames
 		
 	ListFolders := SubStr(Folders, 1, -1)
-	FolderCount :=
+	FolderCount := 0
 	Loop, Parse, ListFolders, |
 	{
 		FolderCount++
 	}
 	
 	ListRules := SubStr(AllRuleNames, 1, -1)
-	RuleCount :=
+	RuleCount := 0
 	Loop, Parse, ListRules, |
 	{
 		RuleCount++
 	}
+	
 	SB_SetText(APPNAME . " is currently managing " . FolderCount . " folders with " . RuleCount .  " total rules" , 1)
 return
 

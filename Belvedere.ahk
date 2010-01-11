@@ -87,8 +87,10 @@ Loop
 		}
 
 		;if we're moving something, need to find out if I can overwrite it
+		;also checking to see if the user wants to compress it as well
 		if (Destination != "")
 			IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
+			IniRead, Compress, rules.ini, %thisRule%, Compress, 0
 
 		;Loop through all of the folder contents
 		Loop %Folder%, 0, %Recursive%
@@ -120,7 +122,7 @@ Loop
 				else if (Subject%RuleNum% = "Date created")
 					thisSubject := getDateCreated(file)
 				else
-					MsgBox, Subject does not have a match
+					MsgBox,,No Match, Subject does not have a match
 				
 				; Below determines the comparison verb
 				if (Verb%RuleNum% = "contains")
@@ -202,7 +204,7 @@ Loop
 				;Here is where we cat upon the files that matched
 				if (Action = "Move file") or (Action = "Rename file")
 				{
-					move(file, Destination, Overwrite)
+					move(file, Destination, Overwrite, Compress)
 					Log("Destination: " . Destination, "Action")
 					if errorCheck
 					{
@@ -220,7 +222,7 @@ Loop
 				}
 				else if (Action = "Copy file")
 				{
-					copy(file, Destination, Overwrite)
+					copy(file, Destination, Overwrite, Compress)
 					Log("Destination: " . Destination, "Action")
 					if errorCheck
 					{
@@ -234,7 +236,7 @@ Loop
 				}
 				else
 				{
-					Msgbox, You've detemerined no action to take.
+					Msgbox,,No Action, You've detemerined no action to take.
 				}
 				
 				Log("======================================", "Action")
@@ -294,7 +296,7 @@ return
 ;Here we are creating all the variables for usage as well as the resource files
 SetVars:
 	APPNAME = Belvedere
-	Version = 0.4
+	Version = 0.5
 	AllSubjects = Name||Extension|Size|Date last modified|Date last opened|Date created|
 	NoDefaultSubject = Name|Extension|Size|Date last modified|Date last opened|Date created|
 	NameVerbs = is||is not|matches one of|does not match one of|contains|does not contain|
