@@ -25,7 +25,7 @@
 
 ;Finish Page Defines
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_NAME}.exe"
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\${PRODUCT_HELP_TEXT}"
+!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show Help Text"
 
 ;Product information
@@ -80,7 +80,10 @@ Section "Installation" secApp
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File Belvedere.exe
+  SetOutPath "$INSTDIR\resources"
   File "${PRODUCT_HELP_TEXT}"
+  File 7za.exe
+  SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
   CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
@@ -88,10 +91,11 @@ Section "Installation" secApp
 SectionEnd
 
 Section -AdditionalIcons
+  SetShellVarContext all
   WriteIniStr "$INSTDIR\${PRODUCT_NAME}.url" "InternetShortcut" "URL" "${PRODUCT_WEB_SITE}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Website.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Help.lnk" "$INSTDIR\${PRODUCT_HELP_TEXT}"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Help.lnk" "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
 SectionEnd
 
 ;Post Installation Process
@@ -160,14 +164,16 @@ FunctionEnd
 Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
-  Delete "$INSTDIR\${PRODUCT_HELP_TEXT}"
   Delete "$INSTDIR\Belvedere.exe"
   Delete "$INSTDIR\rules.ini"
   Delete "$INSTDIR\resources\both.png"
   Delete "$INSTDIR\resources\belvederename.png"
   Delete "$INSTDIR\resources\belvedere.ico"
   Delete "$INSTDIR\resources\belvedere-paused.ico"
+  Delete "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
+  Delete "$INSTDIR\resources\7za.exe"
 
+  SetShellVarContext all
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Website.lnk"
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Help.lnk"
