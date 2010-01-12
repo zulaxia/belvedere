@@ -29,6 +29,7 @@ MANAGE:
 		{
 			SplitPath, A_LoopField, FileName,,,,FileDrive
 			;If no name is present we are assuming a root drive
+			;MsgBox, --%FileName%--%FileDrive%--
 			if (FileName = "")
 				LV_Add(0, FileDrive, A_LoopField)
 			else
@@ -38,7 +39,9 @@ MANAGE:
 		LV_ModifyCol(2, 0)
 	}
 
-	Gui, 1: Add, ListView, NoSortHdr x252 y52 w410 h310 vRules gSetActive, Enabled|Rules
+	Gui, 1: Add, ListView, NoSortHdr x252 y82 w410 h280 vRules gSetActive, Enabled|Rules
+	Gui, 1: Add, Text, x252 y55, Folder:
+	Gui, 1: Add, Text, x290 y55 w410 vFolderPath,
 	Gui, 1: Add, Button, x62 y382 w30 h30 gAddFolder, +
 	Gui, 1: Add, Button, x92 y382 w30 h30 gRemoveFolder, -
 	Gui, 1: Add, Button, x252 y382 w30 h30 gAddRule, +
@@ -107,6 +110,7 @@ ListRules:
 		Gui, 1: ListView, Folders
 		LV_GetText(ActiveFolder, A_EventInfo, 2)
 		CurrentlySelected = %A_eventinfo%
+		GuiControl, 1: Text, FolderPath, %ActiveFolder%
 	}
 
 	;Retrieves the rules for the actively selected folder and displays them
@@ -221,8 +225,12 @@ RemoveFolder:
 
 	Loop, Parse, Folders, |
 	{
-		SplitPath, A_LoopField, FileName
-		LV_Add(0, FileName, A_LoopField)
+		SplitPath, A_LoopField, FileName,,,,FileDrive
+		;If no name is present we are assuming a root drive
+		if (FileName = "")
+			LV_Add(0, FileDrive, A_LoopField)
+		else
+			LV_Add(0, FileName, A_LoopField)
 	}
 	
 	Log("Folder Removed: " CurrentlySelected, "System")
@@ -884,8 +892,12 @@ SaveFolders(NewFolder, Folders)
 	LV_Delete()
 	Loop, Parse, Folders, |
 	{
-		SplitPath, A_LoopField, FileName
-		LV_Add(0, FileName, A_LoopField)
+		SplitPath, A_LoopField, FileName,,,,FileDrive
+		;If no name is present we are assuming a root drive
+		if (FileName = "")
+			LV_Add(0, FileDrive, A_LoopField)
+		else
+			LV_Add(0, FileName, A_LoopField)
 	}
 	
 	Log("Folder Added: " NewFolder, "System")
