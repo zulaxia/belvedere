@@ -241,8 +241,6 @@ Loop
 				
 				Log("======================================", "Action")
 			}
-
-			StringCaseSense, On
 		}
 	}
 	
@@ -431,10 +429,13 @@ IMPORT:
 	FileSelectFile, ImportFile, , , Import %APPNAME% Settings,
 	if (ImportFile = "")
 		return
-	
-	IniRead, Folders, %ImportFile%, Folders, Folders, %A_Space%
-	IniRead, AllRuleNames, %ImportFile%, Rules, AllRuleNames, %A_Space%
-	if (Folders = "" or AllRuleNames = "")
+		
+	;Check that all the key settings are present to determine if this is a true settings file
+	IniRead, Sleeptime, rules.ini, Preferences, Sleeptime, %A_Space%
+	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, %A_Space%
+	IniRead, RBEnable, rules.ini, Preferences, RBEnable, %A_Space%
+	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, %A_Space%
+	if (Sleeptime = "" or EnableLogging = "" or RBEnable = "" or CaseSensitivity = "")
 	{
 		MsgBox,,Import Error, The file you are attempting to import is not a %APPNAME% rules file!
 		return
@@ -451,12 +452,28 @@ IMPORT:
 		MsgBox,,Import Success, Rules import was completed successfully!
 	
 	GoSub, VerifyConfig
+	Gosub, RefreshVars
+	
+	Gui, 1: Default
+	Gui, 1: ListView, Folders
+	LV_Delete()
+	Loop, Parse, Folders, |
+	{
+		SplitPath, A_LoopField, FileName,,,,FileDrive
+		;If no name is present we are assuming a root drive
+		if (FileName = "")
+			LV_Add(0, FileDrive, A_LoopField)
+		else
+			LV_Add(0, FileName, A_LoopField)
+	}
 Return
 
 ;Run when the 'View Log...' menu item is clicked on the Main Menu
 ;Shows the log file in a new window
 VIEWLOG:
 	Gui, 5: Destroy
+	Gui, 5: +owner
+	Gui, 5: -MinimizeBox
 	Gui, 5: Add, Edit, h425 w600 vLogView ReadOnly
 	Gui, 5: Add, Button, x10 y440 h30 vRefreshLog gRefreshLog, Refresh
 	Gui, 5: Add, Button, x280 y440 h30 vClearLog gClearLog, Clear Log
@@ -523,15 +540,21 @@ WCHOMEPAGE:
 	Run, http://what-cheer.com/
 return
 
+7ZIPHOMEPAGE:
+	Run, http://www.7-zip.org
+return
+
 ;Run when the 'About Belvedere' menu item is clicked on the Main Menu
 ABOUT:
 	Gui,4: Destroy
 	Gui,4: +owner
+	Gui,4: -MinimizeBox
+	Gui,4: +AlwaysOnTop
 	Gui,4: Add,Picture,x45 y0,%BelvederePNG%
 	Gui,4: font, s8, Courier New
 	Gui,4: Add, Text,x275 y235,%Version%
 	Gui,4: font, s9, Arial 
-	Gui,4: Add,Text,x10 y250 Center,Belvedere is an automated file managment application`nthat performs actions on files based on user-defined criteria.`n`nBelvedere is written by Adam Pash and distributed`nby Lifehacker under the GNU Public License.`nFor details on how to use Belvedere, check out the
+	Gui,4: Add,Text,x10 y250 Center,Belvedere is an automated file management application`nthat performs actions on files based on user-defined criteria.`n`nBelvedere is written by Adam Pash and distributed`nby Lifehacker under the GNU Public License.`nFor details on how to use Belvedere, check out the
 	Gui,4:Font,underline bold
 	Gui,4:Add,Text,cBlue gHELP Center x115 y350, %APPNAME% Help Text
 	Gui,4: font, norm
@@ -539,6 +562,7 @@ ABOUT:
 	Gui,4:Font,underline bold
 	Gui,4:Add,Text,cBlue gHomepage Center x115 y385,%APPNAME% homepage
 	Gui,4:Add,Text,cBlue gWCHomepage Center x105 y400,Icon design by What Cheer
+	Gui,4:Add,Text,cBlue g7zipHomepage Center x30 y415, 7-Zip used for compression under GNU LGPL license
 	Gui,4: Color,F8FAF0
 	Gui,4: Show,auto,About Belvedere
 Return

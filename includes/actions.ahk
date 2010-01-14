@@ -90,7 +90,7 @@ compressFile(file)
 {
 	SplitPath, file,fullname,directory,, name
 	zipname := name . ".zip"
-	RunWait, %A_ScriptDir%\resources\7za.exe a "%directory%\%zipname%" "%directory%\%fullname%"
+	RunWait, %A_ScriptDir%\resources\7za.exe a "%directory%\%zipname%" "%directory%\%fullname%",,hide
 	
 	ifExist, %directory%\%zipname%
 		FileDelete, %directory%\%fullname%
