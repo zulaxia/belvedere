@@ -29,7 +29,6 @@ MANAGE:
 		{
 			SplitPath, A_LoopField, FileName,,,,FileDrive
 			;If no name is present we are assuming a root drive
-			;MsgBox, --%FileName%--%FileDrive%--
 			if (FileName = "")
 				LV_Add(0, FileDrive, A_LoopField)
 			else
@@ -85,7 +84,7 @@ MANAGE:
 	;Status Bar with the various sections
 	Gui, 1: Add, StatusBar
 	SB_SetParts(650, 74)
-	
+
 	Gui, 1: Show, h463 w724, %APPNAME%
 	GoSub, RefreshVars
 Return
@@ -517,7 +516,7 @@ NewLine:
 	GuiControl, 2: Move, GUIDestination, % "y" LineNum * 30 + 242
 	GuiControl, 2: Move, GUIChooseFolder,% "y" LineNum * 30 + 242
 	GuiControl, 2: Move, Overwrite, % "y" LineNum * 30 + 237
-	GuiControl, 2: Move, Compress, % "y" (NumOfRules-1) * 30 + 252
+	GuiControl, 2: Move, Compress, % "y" LineNum * 30 + 252
 	GuiControl, 2: Move, TestButton, % "y" LineNum * 30 + 302
 	GuiControl, 2: Move, OKButton, % "y" LineNum * 30 + 302
 	GuiControl, 2: Move, CancelButton, % "y" LineNum * 30 + 302
@@ -750,10 +749,12 @@ return
 SavePrefs:
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
+	IniRead, Old_CaseSensitivity, rules.ini, Preferences, CaseSensitivity
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
 	IniWrite, %CaseSensitivity%, rules.ini, Preferences, CaseSensitivity
+	
 	if (EnableLogging = 1)
 	{
 		if(LogType = "")
@@ -771,6 +772,15 @@ SavePrefs:
 	
 	Log("Preferences have been saved", "System")
 	MsgBox,,Saved Settings, Your settings have been saved.
+	
+	if (Old_CaseSensitivity <> CaseSensitivity)
+	{
+		MsgBox, 4, Restart Required, You must restart %APPNAME% for some settings to take effect.`nWould you like to restart now?
+		IfMsgBox Yes
+			GoSub, RESTART
+		else
+			MsgBox,,Restart Required, Please restart %APPNAME% manually at your earliest convenience for the new settings to take effect.
+	}
 return
 
 ;Run when the 'Save Preferences' button is clicked on the Recycle Bin tab

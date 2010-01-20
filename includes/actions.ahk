@@ -1,6 +1,10 @@
 delete(file)
 {
 	FileDelete, %file%
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
 }
 
 move(file, destination, overwrite, compress)
@@ -12,33 +16,48 @@ move(file, destination, overwrite, compress)
 	zipname := name . ".zip"
 	newfile = %destination%\%fullname%
 	
-	IfExist, %destination%
-	{
-		if (compress = 1)
-		{		
-			if (overwrite = 1)
+	IfNotExist, %destination%
+		return -1 ;missing destination folder
+	
+	if (compress = 1)
+	{		
+		if (overwrite = 1)
+		{
+			FileMove, %file%, %destination%, %overwrite%
+			if ErrorLevel
 			{
-				FileMove, %file%, %destination%, %overwrite%
-				compressFile(newfile)
+				return ErrorLevel
 			}
 			else
 			{
-				IfNotExist, %destination%\%zipname%
-				{
-					FileMove, %file%, %destination%, %overwrite%
-					compressFile(newfile)
-				}
+				compressFile(newfile)
+				return 0
 			}
 		}
 		else
 		{
-			FileMove, %file%, %destination%, %overwrite%
+			IfNotExist, %destination%\%zipname%
+			{
+				FileMove, %file%, %destination%, %overwrite%
+				if ErrorLevel
+				{
+					return ErrorLevel
+				}
+				else
+				{
+					compressFile(newfile)
+					return 0
+				}
+			}
 		}
 	}
 	else
 	{
-		Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %destination% exists.
-		errorCheck := 1
+		FileMove, %file%, %destination%, %overwrite%
+		if ErrorLevel
+			return ErrorLevel
+		else
+			return 0
 	}
 }
 
@@ -50,40 +69,68 @@ copy(file, destination, overwrite, compress)
 	SplitPath, file,fullname,,, name
 	zipname := name . ".zip"
 	newfile = %destination%\%fullname%
-	
-	IfExist, %destination%
-	{
-		if (compress = 1)
-		{		
-			if (overwrite = 1)
+
+	IfNotExist, %destination%
+		return -1 ;missing destination folder	
+
+	if (compress = 1)
+	{		
+		if (overwrite = 1)
+		{
+			FileCopy, %file%, %destination%, %overwrite%
+			if ErrorLevel
 			{
-				FileCopy, %file%, %destination%, %overwrite%
-				compressFile(newfile)
+				return ErrorLevel
 			}
 			else
 			{
-				IfNotExist, %destination%\%zipname%
-				{
-					FileCopy, %file%, %destination%, %overwrite%
-					compressFile(newfile)
-				}
+				compressFile(newfile)
+				return 0
 			}
 		}
 		else
 		{
-			FileCopy, %file%, %destination%, %overwrite%
+			IfNotExist, %destination%\%zipname%
+			{
+				FileCopy, %file%, %destination%, %overwrite%
+				if ErrorLevel
+				{
+					return ErrorLevel
+				}
+				else
+				{
+					compressFile(newfile)
+					return 0
+				}
+			}
 		}
 	}
 	else
 	{
-		Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %destination% exists.
-		errorCheck := 1
+		FileCopy, %file%, %destination%, %overwrite%
+		if ErrorLevel
+			return ErrorLevel
+		else
+			return 0
 	}
 }
 
 recycle(file)
 {
 	FileRecycle, %file%
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
+}
+
+open(file)
+{
+	Run, %file%,,UseErrorLevel
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
 }
 
 compressFile(file)

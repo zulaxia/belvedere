@@ -33,7 +33,7 @@ if CaseSensitivity = 0
 	StringCaseSense, Off
 else
 	StringCaseSense, On
-
+	
 Log("Starting " . APPNAME . " " . Version, "System")
 
 ;main execution loop
@@ -201,38 +201,52 @@ Loop
 				Log("Action taken: " . Action, "Action")
 				Log("File: " . file, "Action")
 				
-				;Here is where we cat upon the files that matched
+				;Here is where we act upon the files that matched
 				if (Action = "Move file") or (Action = "Rename file")
 				{
-					move(file, Destination, Overwrite, Compress)
 					Log("Destination: " . Destination, "Action")
-					if errorCheck
+					errcode := move(file, Destination, Overwrite, Compress)
+					if (errcode = -1)
 					{
-						errorCheck := 0
-						break
+						Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
+						Log("ERROR: Unable to move file, destination folder missing", "Action")
+					}
+					else if (errcode <> 0)
+					{
+						Log("ERROR: Unable to move file", "Action")
 					}
 				}
 				else if (Action = "Send file to Recycle Bin")
 				{
-					recycle(file)
+					errcode := recycle(file)
+					if errcode
+						Log("ERROR: Unable to move file to recycle bin", "Action")
 				}
 				else if (Action = "Delete file")
 				{
-					delete(file)
+					errcode := delete(file)
+					if errcode
+						Log("ERROR: Unable to delete file", "Action")
 				}
 				else if (Action = "Copy file")
 				{
-					copy(file, Destination, Overwrite, Compress)
 					Log("Destination: " . Destination, "Action")
-					if errorCheck
+					errcode := copy(file, Destination, Overwrite, Compress)
+					if (errcode = -1)
 					{
-						errorCheck := 0
-						break
+						Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
+						Log("ERROR: Unable to copy file, destination folder missing", "Action")
 					}
+					else if (errcode <> 0)
+					{
+						Log("ERROR: Unable to copy file", "Action")
+					}					
 				}
 				else if (Action = "Open file")
 				{
-					Run, %file%
+					errcode := open(file)
+					if errcode
+						Log("ERROR: Unable to open file", "Action")
 				}
 				else
 				{
@@ -288,7 +302,10 @@ Loop
 ;This is repsonsible for emptying the Recycle Bin at the interval set
 emptyRB:
 	FileRecycleEmpty
-	Log("Recycle Bin - Interval Empty", "Action")
+	if ErrorLevel
+		Log("ERROR: Recycle Bin - Interval Empty Failed", "Action")
+	else
+		Log("Recycle Bin - Interval Empty Successful", "Action")
 return
 
 ;Here we are creating all the variables for usage as well as the resource files
@@ -356,10 +373,10 @@ Return
 MENUBAR:
 	Menu, FileMenu, Add,&Pause, PAUSE
 	Menu, FileMenu, Add
-	Menu, FileMenu, Add, Backup Settings..., BACKUP
-	Menu, FileMenu, Add, Import Settings..., IMPORT
+	Menu, FileMenu, Add, &Backup Settings..., BACKUP
+	Menu, FileMenu, Add, &Import Settings..., IMPORT
 	Menu, FileMenu, Add
-	Menu, FileMenu, Add, View Log..., VIEWLOG
+	Menu, FileMenu, Add, &View Log..., VIEWLOG
 	Menu, FileMenu, Add
 	Menu, FileMenu, Add,E&xit,EXIT
 	Menu, HelpMenu, Add, &Help, HELP
@@ -396,6 +413,12 @@ PAUSE:
 	Menu, TRAY, ToggleCheck, &Pause
 	Menu, FileMenu, ToggleCheck, &Pause
 	Pause, Toggle
+return
+
+RESTART:
+	Reload
+	Sleep 1000 ; If successful, the reload will close this instance during the Sleep, so the line below will never be reached.
+	MsgBox,,Restart Failed, I was unable to restart myself.`nPlease manually restart %APPNAME% at your earliest convenience for your new settings to take effect.
 return
 
 ;Run when the 'Backup Settings...' menu item is clicked on the Main Menu
@@ -486,6 +509,9 @@ Return
 ; will re-read the log and display in the same window
 RefreshLog:
 	FileRead, FileContents, %A_ScriptDir%\event.log
+	if ErrorLevel
+		MsgBox,,Read Error, Unable to read %APPNAME% log.
+		
 	GuiControl, 5: , LogView, %FileContents%
 Return
 
