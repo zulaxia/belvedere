@@ -808,11 +808,19 @@ RBSavePrefs:
 		}
 	}
 
+	;Get Old values before writing new ones
+	IniRead, Old_RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue, 0
+	IniRead, Old_RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength, %A_Space%
+	
 	IniWrite, %RBEmpty%, rules.ini, RecycleBin, RBEmpty
 	IniWrite, %RBEmptyTimeValue%, rules.ini, RecycleBin, RBEmptyTimeValue
 	IniWrite, %RBEmptyTimeLength%, rules.ini, RecycleBin, RBEmptyTimeLength
+	IniWrite, %A_Now%, rules.ini, RecycleBin, RBLastEmpty
 
 	Log("Recycle Bin - Preferences have been saved", "System")
+	
+	if (Old_RBEmptyTimeValue <> RBEmptyTimeValue or Old_RBEmptyTimeLength <> RBEmptyTimeLength)
+		Log("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 

@@ -19,7 +19,6 @@ GoSub, SetVars
 GoSub, TRAYMENU
 GoSub, MENUBAR
 GoSub, BuildINI
-SetTimer, emptyRB, Off
 IniRead, Folders, rules.ini, Folders, Folders, %A_Space%
 IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
 IniRead, SleepTime, rules.ini, Preferences, SleepTime, 300000
@@ -186,7 +185,7 @@ Loop
 				}
 			}
 
-			;if we have mathces, then we act upon them below
+			;if we have matches, then we act upon them below
 			if result
 			{
 				;User can ask to confirm the actions, and if so, we ask them if they woudl liek to procede
@@ -268,31 +267,28 @@ Loop
 		{
 			IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue, %A_Space%
 			IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength,  %A_Space%
+			IniRead, RBLastEmpty, rules.ini, RecycleBin, RBLastEmpty, %A_Now%
 			period :=
 			
+			;Everything is converted to seconds just to make sure
 			if (RBEmptyTimeLength = "minutes")
-				period := RBEmptyTimeValue * 60000
+				period := RBEmptyTimeValue * 60
 			else if (RBEmptyTimeLength = "hours")
-				period := RBEmptyTimeValue * 3600000
+				period := RBEmptyTimeValue * 3600
 			else if (RBEmptyTimeLength = "days")
-				period := RBEmptyTimeValue * 86400000
+				period := RBEmptyTimeValue * 86400
 			else if (RBEmptyTimeLength = "weeks")
-				period := RBEmptyTimeValue * 604800000
+				period := RBEmptyTimeValue * 604800
 			
-			;Only update the timer if there is a new value
-			;This keeps it from getting reset
-			if (oldperiod != period)
+			ElapsedPeriod := %A_Now%
+			EnvSub, ElapsedPeriod, RBLastEmpty, Seconds
+			
+			;Empty the RB if we have passed the time set
+			if (ElapsedPeriod > period)
 			{
-				SetTimer, emptyRB, %period%
-				Log("Recycle Bin - Sleeptime changed from ". oldperiod . " to " . period, "System")
-				oldperiod := period
+				GoSub, emptyRB
+				IniWrite, %A_Now%, rules.ini, RecycleBin, RBLastEmpty
 			}
-		}
-		else
-		{
-			;turning off the RB Timer
-			SetTimer, emptyRB, Off
-			Log("Recycle Bin - empty interval has been disabled", "System")
 		}
 	}
 
@@ -508,11 +504,18 @@ Return
 ;Run when the 'Refresh' button is clicked under the log screen
 ; will re-read the log and display in the same window
 RefreshLog:
-	FileRead, FileContents, %A_ScriptDir%\event.log
-	if ErrorLevel
-		MsgBox,,Read Error, Unable to read %APPNAME% log.
-		
-	GuiControl, 5: , LogView, %FileContents%
+	IfNotExist, %A_ScriptDir%\event.log
+	{
+		GuiControl, 5: , LogView, %A_Space%
+	}
+	else
+	{
+		FileRead, FileContents, %A_ScriptDir%\event.log
+		if ErrorLevel
+			MsgBox,,Read Error, Unable to read %APPNAME% log.
+			
+		GuiControl, 5: , LogView, %FileContents%
+	}
 Return
 
 ;Run when the 'Clear Log' button is clicked under the log screen
