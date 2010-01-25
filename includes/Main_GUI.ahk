@@ -55,11 +55,18 @@ MANAGE:
 	IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength, %A_Space%
 	StringReplace, thisEmptyTimeLength, NoDefaultDateUnits, %RBEmptyTimeLength%, %RBEmptyTimeLength%|
 	
+	IniRead, RBLastEmpty, rules.ini, RecycleBin, RBLastEmpty, 0
+	if RBLastEmpty
+		FormatTime, DT, %RBLastEmpty%
+	else
+		DT := 
+	
 	Gui, 1: Tab, 2
 	Gui, 1: Add, Checkbox, x62 y52 w585 vRBEnable gRBEnable Checked%RBEnable%, Allow %APPNAME% to manage my Recycle Bin
 	Gui, 1: Add, Checkbox, x100 y100 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
 	Gui, 1: Add, Edit, x255 y100 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
 	Gui, 1: Add, DropDownList, x325 y100 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
+	Gui, 1: Add, Text, x400 y100, Last Empty:  %DT%
 	Gui, 1: Add, Button, x62 y382 h30 vRBSavePrefs gRBSavePrefs, Save Preferences
 	
 	GoSub, RBEnable ;Need to Enable/Disable the controls based on first checkbox
@@ -109,7 +116,17 @@ ListRules:
 		Gui, 1: ListView, Folders
 		LV_GetText(ActiveFolder, A_EventInfo, 2)
 		CurrentlySelected = %A_eventinfo%
-		GuiControl, 1: Text, FolderPath, %ActiveFolder%
+
+		Len := StrLen(ActiveFolder) - 70 
+		if (Len <= 0)
+		{
+			GuiControl, 1: Text, FolderPath, %ActiveFolder%
+		}
+		else
+		{
+			NewPath := RegExReplace(ActiveFolder, "^(\w+:|\\)(\\[^\\]+\\[^\\]+\\).*(\\[^\\]+\\[^\\]+)$", "$1$2...$3")
+			GuiControl, 1: Text, FolderPath, %NewPath%
+		}
 	}
 
 	;Retrieves the rules for the actively selected folder and displays them
@@ -260,7 +277,7 @@ AddRule:
 	Gui, 2: Destroy
 	Gui, 2: +owner1
 	Gui, 2: +toolwindow
-	Gui, 2: Add, Text, x52 y32 h20 , Folder: %ActiveFolder%
+	Gui, 2: Add, Text, x52 y32 h20 vFolderPath, Folder: %ActiveFolder%
 	Gui, 2: Add, Text, x32 y62 w60 h20 , Description:
 	Gui, 2: Add, Edit, x92 y62 w250 h20 vRuleName , 
 	Gui, 2: Add, Checkbox, x448 y30 vEnabled, Enabled
@@ -287,6 +304,13 @@ AddRule:
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
 	Gui, 2: Add, Button, x372 y302 w100 h30 vOKButton gSaveRule, OK
 	Gui, 2: Add, Button, x482 y302 w100 h30 vCancelButton gGui2Close, Cancel
+	
+	Len := StrLen(ActiveFolder) - 60 
+	if (Len > 0)
+	{
+		NewPath := RegExReplace(ActiveFolder, "^(\w+:|\\)(\\[^\\]+\\[^\\]+\\).*(\\[^\\]+\\[^\\]+)$", "$1$2...$3")
+		GuiControl, 2: Text, FolderPath, Folder: %NewPath%
+	}
 
 	Gui, 2: Show, h348 w598, Create a rule...
 	Gosub, RefreshVars
@@ -334,7 +358,7 @@ EditRule:
 	Gui, 2: Destroy
 	Gui, 2: +owner1
 	Gui, 2: +toolwindow
-	Gui, 2: Add, Text, x52 y32 h20 , Folder: %ActiveFolder%
+	Gui, 2: Add, Text, x52 y32 h20 vFolderPath, Folder: %ActiveFolder%
 	Gui, 2: Add, Text, x32 y62 w60 h20 , Description:
 	Gui, 2: Add, Edit, x92 y62 w250 h20 vRuleName , %ActiveRule%
 	Gui, 2: Add, Checkbox, x448 y30 Checked%Enabled% vEnabled, Enabled
@@ -346,6 +370,13 @@ EditRule:
 	StringReplace, thisMatchList, MatchList, %Matches%, %Matches%|
 	Gui, 2: Add, DropDownList, x45 y120 w46 h20 r2 vMatches , %thisMatchList%
 	Gui, 2: Add, Text, x96 y122 w240 h20 , of the following conditions are met:
+	
+	Len := StrLen(ActiveFolder) - 60 
+	if (Len > 0)
+	{
+		NewPath := RegExReplace(ActiveFolder, "^(\w+:|\\)(\\[^\\]+\\[^\\]+\\).*(\\[^\\]+\\[^\\]+)$", "$1$2...$3")
+		GuiControl, 2: Text, FolderPath, Folder: %NewPath%
+	}
 	
 	; this loop creates the controls for all of the conditions in the rule
 	height =

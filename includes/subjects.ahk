@@ -8,6 +8,15 @@ getExtension(file)
 {
 	StringCaseSense, Off
 	SplitPath, file,,,extension
+	
+	;Need to reset back to what it was after finding the extension
+	; was turned off to do a global extension search
+	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, 1
+	if CaseSensitivity = 0
+		StringCaseSense, Off
+	else
+		StringCaseSense, On
+	
 	return extension
 }
 
@@ -42,7 +51,6 @@ getDateLastModified(file)
 getDateCreated(file)
 {
 	FileGetTime, created, %file%, C
-	;Msgbox, %created%
 	return created
 }
 
