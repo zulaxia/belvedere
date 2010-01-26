@@ -24,6 +24,7 @@
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PRODUCT_STARTMENU_REGVAL}"
 
 ;Finish Page Defines
+!define MUI_FINISHPAGE_TEXT "Thank you for installing ${PRODUCT_NAME}, we hope you enjoy using this application. Please run 'Verify Configuration' on the Preferences if you have just completed an upgrade."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_NAME}.exe"
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show Help Text"
@@ -125,7 +126,7 @@ kill:
    Goto completed
  
 uhoh:
-   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!"
+   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!  Please report this problem."
    Abort
 
 buhbye:
@@ -147,7 +148,7 @@ Function un.onInit
   Goto completed
 
 uhoh:
-   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!"
+   MessageBox MB_ICONINFORMATION|MB_OK "Uh oh, system failure!  The tubes must be clogged!  Please report this problem."
    Abort
    
 completed:
