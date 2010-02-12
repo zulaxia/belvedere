@@ -11,7 +11,7 @@
 <img src="images/tab-prefs-full.JPG"><br /><br />
 <a href="#sleep">Sleeptime</a><br />
 <a href="#log">System Logging</a><br />
-<a href="#case">Case Sensitive Search</a><br />
+<a href="#cmd">Command Line Parameters</a><br />
 <a href="#verify">Verify Configuration</a><br />
 <hr />
 <a name="sleep"><h2>Sleeptime</h2></a>
@@ -34,7 +34,6 @@
 </ol>
 <h3>Examples:</h3>
 <ul>
-<style="monospace">
 <dl>
 <dt>System Events</dt><br />
 <dd style="font-family: monospace">2009-04-28 10:38:00 Logging has been enabled with type: Both</dd><br />
@@ -46,12 +45,20 @@
 <dd style="font-family: monospace">2009-04-28 10:38:14 Destination: C:\Documents and Settings\test\Desktop\pdf</dd>
 <dd style="font-family: monospace">2009-04-28 10:38:14 ======================================</dd>
 </dl>
-</style>
 </ul>
 <a href="#top">Top</a><br />
 <hr />
-<a name="case"><h2>Case Sensitive Search</h2></a>
-<p>Case sensitivity can be turned on or off globally for all filename searches.  To enable or disable this setting, check or uncheck the box, respectively.  A change to this particular setting will not take place until the application has been restarted.  Users will be prompted to restart immediately after the setting is changed, but may decline in order to delay the setting take place until after the next start of the application.</p>
+<a name="cmd"><h2>Command Line Parameters</h2></a>
+<p>Belvedere has the ability accept command line parameters to alter various settings of the application at runtime.  The following parameters and their values are currently accepted by Belvedere:</p>
+<ul>
+<dl>
+<dt style="font-family: monospace">-r&nbsp;&lt;integer&gt;</dt>
+<dd style="font-family: monospace">Specifies the number of times that you would like Belvedere to run and then exit quietly.</dd>
+<dd style="font-family: monospace">Example:  Belvedere.exe -r 5  will result in Belvedere running through all rules 5 times and then exiting quietly.</dd> 
+</dl>
+</ul>
+<p>NOTE:  All parameters and their corresponding values must be separated by a space in order to be accepted.  If any invalid parameters or values are entered, Belvedere will run normally without any settings modified.</p>
+<p>If <em>System</em> logging is enabled, both the initial acceptance of the setting and the exit event will be recorded in the event log.</p>
 <a href="#top">Top</a><br />
 <hr />
 <a name="verify"><h2>Verify Configuration</h2></a>

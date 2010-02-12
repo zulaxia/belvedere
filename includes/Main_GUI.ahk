@@ -76,7 +76,6 @@ MANAGE:
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
-	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, 1
 	
 	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
@@ -84,7 +83,9 @@ MANAGE:
 	Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
-	Gui, 1: Add, Checkbox, x62 y132 vCaseSensitivity Checked%CaseSensitivity%, Enable all filename searches to be case sensitive (you must restart %APPNAME% for this setting to be applied)
+	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
+	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
+	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
 	Gui, 1: Add, Button, x580 y382 h30 vVerifyConfig gVerifyConfig, Verify Configuration
 	
@@ -249,7 +250,7 @@ RemoveFolder:
 			LV_Add(0, FileName, A_LoopField)
 	}
 	
-	Log("Folder Removed: " CurrentlySelected, "System")
+	Log("Folder Removed: " ActiveFolder, "System")
 	
 	Gosub, ListRules
 return
@@ -780,11 +781,9 @@ return
 SavePrefs:
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
-	IniRead, Old_CaseSensitivity, rules.ini, Preferences, CaseSensitivity
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
-	IniWrite, %CaseSensitivity%, rules.ini, Preferences, CaseSensitivity
 	
 	if (EnableLogging = 1)
 	{
@@ -803,15 +802,6 @@ SavePrefs:
 	
 	Log("Preferences have been saved", "System")
 	MsgBox,,Saved Settings, Your settings have been saved.
-	
-	if (Old_CaseSensitivity <> CaseSensitivity)
-	{
-		MsgBox, 4, Restart Required, You must restart %APPNAME% for some settings to take effect.`nWould you like to restart now?
-		IfMsgBox Yes
-			GoSub, RESTART
-		else
-			MsgBox,,Restart Required, Please restart %APPNAME% manually at your earliest convenience for the new settings to take effect.
-	}
 return
 
 ;Run when the 'Save Preferences' button is clicked on the Recycle Bin tab

@@ -99,6 +99,8 @@ TESTMatches:
 				result%RuleNum% := contains(thisSubject, Object%RuleNum%)
 			else if (Verb%RuleNum% = "does not contain")
 				result%RuleNum% := !(contains(thisSubject, Object%RuleNum%))
+			else if (Verb%RuleNum% = "contains one of")
+				result%RuleNum% := containsOneOf(thisSubject, Object%RuleNum%)
 			else if (Verb%RuleNum% = "is")
 				result%RuleNum% := isEqual(thisSubject, Object%RuleNum%)
 			else if (Verb%RuleNum% = "matches one of")

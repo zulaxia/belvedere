@@ -12,6 +12,20 @@ contains(Subject, Object)
 	return result
 }
 
+containsOneOf(Subject, Object)
+{
+	if Subject contains %Object%
+	{
+		result := true
+	}
+	else
+	{
+		result := false
+	}
+	;Msgbox, %subject% contains %object%? %result%
+	return result
+}
+
 isEqual(Subject, Object)
 {
 	;Msgbox, %subject% is equal to %object%?

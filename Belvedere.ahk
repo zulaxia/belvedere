@@ -15,6 +15,7 @@
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 SetFormat, float, 0.2
+StringCaseSense, Off
 GoSub, SetVars
 GoSub, TRAYMENU
 GoSub, MENUBAR
@@ -24,16 +25,9 @@ IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
 IniRead, SleepTime, rules.ini, Preferences, SleepTime, 300000
 IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
-IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, 1
-
-;Will be set based on global settings in ini file
-; will default to On just to be safe
-if CaseSensitivity = 0
-	StringCaseSense, Off
-else
-	StringCaseSense, On
 	
 Log("Starting " . APPNAME . " " . Version, "System")
+GoSub, getParams
 
 ;main execution loop
 Loop
@@ -128,6 +122,8 @@ Loop
 					result%RuleNum% := contains(thisSubject, Object%RuleNum%)
 				else if (Verb%RuleNum% = "does not contain")
 					result%RuleNum% := !(contains(thisSubject, Object%RuleNum%))
+				else if (Verb%RuleNum% = "contains one of")
+					result%RuleNum% := containsOneOf(thisSubject, Object%RuleNum%)
 				else if (Verb%RuleNum% = "is")
 					result%RuleNum% := isEqual(thisSubject, Object%RuleNum%)
 				else if (Verb%RuleNum% = "matches one of")
@@ -256,7 +252,7 @@ Loop
 			}
 		}
 	}
-	
+
 	;Now that we've done the rules, time to handle to Recycle Bin (if enabled)
 	IniRead, RBEnable, rules.ini, Preferences, RBEnable, 0
 	if (RBEnable = 1)
@@ -292,8 +288,33 @@ Loop
 		}
 	}
 
+	if (MaxRunCount && A_Index >= MaxRunCount)
+	{
+		Log(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
+		ExitApp
+	}
 	Sleep, %SleepTime%
 }
+
+;This is responsible for grabbing and validating command line paramenters
+; code segment by Ace_NoOne & toralf
+; http://www.autohotkey.com/forum/topic7556.html
+getParams:
+	Loop, %0% ;for each command line parameter
+	{
+		param := %A_Index%
+		if (param = "-r")
+		{
+			value := A_Index + 1
+			param_val := %value%
+			if param_val is integer
+			{
+				Log("Command Line Paramter " . param . " accepted with value " . param_val, "System")
+				MaxRunCount := param_val
+			}
+		}
+	}
+return
 
 ;This is repsonsible for emptying the Recycle Bin at the interval set
 emptyRB:
@@ -310,8 +331,8 @@ SetVars:
 	Version = 0.5
 	AllSubjects = Name||Extension|Size|Date last modified|Date last opened|Date created|
 	NoDefaultSubject = Name|Extension|Size|Date last modified|Date last opened|Date created|
-	NameVerbs = is||is not|matches one of|does not match one of|contains|does not contain|
-	NoDefaultNameVerbs = is|is not|matches one of|does not match one of|contains|does not contain|
+	NameVerbs = is||is not|matches one of|does not match one of|contains|does not contain|contains one of|
+	NoDefaultNameVerbs = is|is not|matches one of|does not match one of|contains|does not contain|contains one of|
 	NumVerbs =	is||is not|is greater than|is less than|
 	NoDefaultNumVerbs = is|is not|is greater than|is less than|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
@@ -347,7 +368,6 @@ BuildINI:
 		IniWrite,0,rules.ini, Preferences, RBEnable
 		IniWrite,0,rules.ini, Preferences, EnableLogging
 		IniWrite,%A_Space%,rules.ini, Preferences, LogType
-		IniWrite,1,rules.ini, Preferences, CaseSensitivity
 	}
 return
 
@@ -453,8 +473,7 @@ IMPORT:
 	IniRead, Sleeptime, rules.ini, Preferences, Sleeptime, %A_Space%
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, %A_Space%
 	IniRead, RBEnable, rules.ini, Preferences, RBEnable, %A_Space%
-	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity, %A_Space%
-	if (Sleeptime = "" or EnableLogging = "" or RBEnable = "" or CaseSensitivity = "")
+	if (Sleeptime = "" or EnableLogging = "" or RBEnable = "")
 	{
 		MsgBox,,Import Error, The file you are attempting to import is not a %APPNAME% rules file!
 		return

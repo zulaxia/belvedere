@@ -14,7 +14,6 @@ VerifyConfig:
 	IniRead, Sleeptime, rules.ini, Preferences, Sleeptime
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, LogType, rules.ini, Preferences, LogType
-	IniRead, CaseSensitivity, rules.ini, Preferences, CaseSensitivity
 	
 	;Check each of the critical items, and if they are missing, create them
 	; text of 'ERROR' denotes a missing tag
@@ -84,13 +83,6 @@ VerifyConfig:
 		else
 			IniWrite, %A_Space%, rules.ini, Preferences, LogType
 		
-		ChangeCount++
-	}
-	
-	;Default to being case sensitive if not there
-	if CaseSensitivity = ERROR
-	{
-		IniWrite, 1, rules.ini, Preferences, CaseSensitivity
 		ChangeCount++
 	}
 	
