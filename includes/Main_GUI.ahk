@@ -66,7 +66,7 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x100 y100 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
 	Gui, 1: Add, Edit, x255 y100 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
 	Gui, 1: Add, DropDownList, x325 y100 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
-	Gui, 1: Add, Text, x400 y100, Last Empty:  %DT%
+	Gui, 1: Add, Text, x400 y100 vRBLastEmpty, Last Empty:  %DT%
 	Gui, 1: Add, Button, x62 y382 h30 vRBSavePrefs gRBSavePrefs, Save Preferences
 	
 	GoSub, RBEnable ;Need to Enable/Disable the controls based on first checkbox

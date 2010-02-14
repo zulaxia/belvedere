@@ -282,8 +282,8 @@ Loop
 			;Empty the RB if we have passed the time set
 			if (ElapsedPeriod > period)
 			{
-				GoSub, emptyRB
 				IniWrite, %A_Now%, rules.ini, RecycleBin, RBLastEmpty
+				GoSub, emptyRB
 			}
 		}
 	}
@@ -320,9 +320,19 @@ return
 emptyRB:
 	FileRecycleEmpty
 	if ErrorLevel
+	{
 		Log("ERROR: Recycle Bin - Interval Empty Failed", "Action")
+	}
 	else
+	{
+		IniRead, RBLastEmpty, rules.ini, RecycleBin, RBLastEmpty, 0
+		if RBLastEmpty
+			FormatTime, DT, %RBLastEmpty%
+		else
+			DT := 
+		GuiControl, 1: ,RBLastEmpty, Last Empty:  %DT%
 		Log("Recycle Bin - Interval Empty Successful", "Action")
+	}
 return
 
 ;Here we are creating all the variables for usage as well as the resource files
