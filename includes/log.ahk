@@ -21,3 +21,13 @@ Log(LogString, Type)
 		}
 	}
 }
+
+Notify(String, Type)
+{
+	global
+	if (GrowlEnabled = 1)
+	{
+		Title = Belvedere %Type% Message
+		RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /n:%Type% /t:"%Title%" "%String%"
+	}
+}

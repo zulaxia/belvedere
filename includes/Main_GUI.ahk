@@ -16,6 +16,7 @@
 ;  This window is always identified by Gui, 1
 MANAGE:
 	Gui, 1: Destroy
+	Gui, 1: +OwnDialogs
 	Gui, 1: Add, Tab2, w700 h425 vTabs , Folders|Recycle Bin|Preferences
 	Gui, 1: Menu, MenuBar
 	
@@ -65,24 +66,29 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x62 y52 w585 vRBEnable gRBEnable Checked%RBEnable%, Allow %APPNAME% to manage my Recycle Bin
 	Gui, 1: Add, Checkbox, x100 y100 vRBEmpty Checked%RBEmpty%, Empty my Recycle Bin every
 	Gui, 1: Add, Edit, x255 y100 w70 vRBEmptyTimeValue Number, %RBEmptyTimeValue%
-	Gui, 1: Add, DropDownList, x325 y100 w60 vRBEmptyTimeLength, %thisEmptyTimeLength%
+	Gui, 1: Add, DropDownList, x325 y100 w65 vRBEmptyTimeLength, %thisEmptyTimeLength%
 	Gui, 1: Add, Text, x400 y100 vRBLastEmpty, Last Empty:  %DT%
 	Gui, 1: Add, Button, x62 y382 h30 vRBSavePrefs gRBSavePrefs, Save Preferences
 	
 	GoSub, RBEnable ;Need to Enable/Disable the controls based on first checkbox
 	
 	;Items found on Third Tab
-	IniRead, Sleep, rules.ini, Preferences, Sleeptime, 300000
+	IniRead, Sleep, rules.ini, Preferences, Sleeptime, 3
+	IniRead, SleepLength, rules.ini, Preferences, SleeptimeLength, minutes
+	StringReplace, thisSleeptimeLength, NoDefaultDateUnits, %SleepLength%, %SleepLength%|
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
+	IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
 	
 	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
-	Gui, 1: Add, Edit, x120 y60 w100 h20 Number vSleep, %Sleep%
-	Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
+	Gui, 1: Add, Edit, x120 y60 w70 h20 Number vSleep, %Sleep%
+	Gui, 1: Add, DropDownList, x190 y60 w65 vSleeptimeLength, %thisSleeptimeLength%
+	;Gui, 1: Add, Text, x225 y62, (Time in milliseconds)
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
+	Gui, 1: Add, Checkbox, x62 y132 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
 	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
 	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
 	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
@@ -603,7 +609,7 @@ SetDestination:
 		GuiControl, 2: Hide, Overwrite
 		GuiControl, 2: Hide, Compress
 	}
-	else if (GUIAction = "Open file") or (GUIAction = "Delete file") or (GUIAction = "Send file to Recycle Bin")
+	else if (GUIAction = "Open file") or (GUIAction = "Delete file") or (GUIAction = "Send file to Recycle Bin") or (GUIAction = "Print file")
 	{
 		GuiControl, 2: Hide, ActionTo
 		GuiControl, 2: Hide, GUIChooseFolder
@@ -781,9 +787,18 @@ return
 SavePrefs:
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
+	SleeptimeLength := SleeptimeLength
+	
+	;Getting old values for enhanced logging prior to writing new ones
+	IniRead, Old_Sleeptime, rules.ini, Preferences, Sleeptime
+	IniRead, Old_SleeptimeLength, rules.ini, Preferences, SleeptimeLength
+	IniRead, Old_GrowlEnabled, rules.ini, Preferences, GrowlEnabled
+	
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
+	IniWrite, %SleeptimeLength%, rules.ini, Preferences, SleeptimeLength
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
+	IniWrite, %GrowlEnabled%, rules.ini, Preferences, GrowlEnabled
 	
 	if (EnableLogging = 1)
 	{
@@ -801,6 +816,19 @@ SavePrefs:
 	}
 	
 	Log("Preferences have been saved", "System")
+	
+	if (Old_Sleeptime <> SleepTime or Old_SleeptimeLength <> SleeptimeLength)
+		Log("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+	
+	if (Old_GrowlEnabled <> GrowlEnabled)
+	{
+		MsgBox, 4, Restart?, You must restart %APPNAME% for your new setting to take effect.`nWould you like to restart now?
+		IfMsgBox No
+			return
+		
+		GoSub, Restart
+	}
+	
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 

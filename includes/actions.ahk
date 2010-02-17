@@ -133,6 +133,15 @@ open(file)
 		return 0
 }
 
+print(file)
+{
+	Run, print %file%,,Hide UseErrorLevel
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
+}
+
 compressFile(file)
 {
 	SplitPath, file,fullname,directory,, name

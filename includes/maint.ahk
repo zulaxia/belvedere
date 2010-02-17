@@ -12,6 +12,7 @@ VerifyConfig:
 	IniRead, RBEmptyTimeValue, rules.ini, RecycleBin, RBEmptyTimeValue
 	IniRead, RBEmptyTimeLength, rules.ini, RecycleBin, RBEmptyTimeLength
 	IniRead, Sleeptime, rules.ini, Preferences, Sleeptime
+	IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, LogType, rules.ini, Preferences, LogType
 	
@@ -63,10 +64,16 @@ VerifyConfig:
 	;Default to 3 minutes if not there
 	if Sleeptime = ERROR
 	{
-		IniWrite, 300000, rules.ini, Preferences, Sleeptime
+		IniWrite, 3, rules.ini, Preferences, Sleeptime
 		ChangeCount++
 	}
 
+	if SleeptimeLength = ERROR
+	{
+		IniWrite, minutes, rules.ini, Preferences, SleeptimeLength
+		ChangeCount++
+	}
+	
 	;Disable logging if missing the tag
 	if EnableLogging = ERROR
 	{

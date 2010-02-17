@@ -22,11 +22,18 @@ GoSub, MENUBAR
 GoSub, BuildINI
 IniRead, Folders, rules.ini, Folders, Folders, %A_Space%
 IniRead, AllRuleNames, rules.ini, Rules, AllRuleNames, %A_Space%
-IniRead, SleepTime, rules.ini, Preferences, SleepTime, 300000
+IniRead, SleepTime, rules.ini, Preferences, SleepTime, 3
+IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength, minutes
 IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
+IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
+
+;Register Belvedere with the Growl for Windows Application
+if GrowlEnabled = 1
+	RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /r:"Action"`,"System"`,"Error" "Belvedere has been registered"
 	
 Log("Starting " . APPNAME . " " . Version, "System")
+Notify("Starting " . APPNAME . " " . Version, "System")
 GoSub, getParams
 
 ;main execution loop
@@ -205,23 +212,31 @@ Loop
 					{
 						Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
 						Log("ERROR: Unable to move file, destination folder missing", "Action")
+						Notify("Unable to move file, destination folder missing", "Error")
 					}
 					else if (errcode <> 0)
 					{
 						Log("ERROR: Unable to move file", "Action")
+						Notify("Unable to move file", "Error")
 					}
 				}
 				else if (Action = "Send file to Recycle Bin")
 				{
 					errcode := recycle(file)
 					if errcode
+					{
 						Log("ERROR: Unable to move file to recycle bin", "Action")
+						Notify("Unable to move file to recycle bin", "Error")
+					}
 				}
 				else if (Action = "Delete file")
 				{
 					errcode := delete(file)
 					if errcode
+					{
 						Log("ERROR: Unable to delete file", "Action")
+						Notify("Unable to delete file", "Error")
+					}
 				}
 				else if (Action = "Copy file")
 				{
@@ -231,17 +246,31 @@ Loop
 					{
 						Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
 						Log("ERROR: Unable to copy file, destination folder missing", "Action")
+						Notify("Unable to copy file, destination folder missing", "Error")
 					}
 					else if (errcode <> 0)
 					{
 						Log("ERROR: Unable to copy file", "Action")
+						Notify("Unable to copy file", "Error")
 					}					
 				}
 				else if (Action = "Open file")
 				{
 					errcode := open(file)
 					if errcode
+					{
 						Log("ERROR: Unable to open file", "Action")
+						Notify("Unable to open file", "Error")
+					}
+				}
+				else if (Action = "Print file")
+				{
+					errcode := print(file)
+					if errcode
+					{
+						Log("ERROR: Unable to print file", "Action")
+						Notify("Unable to print file", "Error")
+					}
 				}
 				else
 				{
@@ -275,6 +304,8 @@ Loop
 				period := RBEmptyTimeValue * 86400
 			else if (RBEmptyTimeLength = "weeks")
 				period := RBEmptyTimeValue * 604800
+			else
+				period := RBEmptyTimeValue
 			
 			ElapsedPeriod := %A_Now%
 			EnvSub, ElapsedPeriod, RBLastEmpty, Seconds
@@ -291,9 +322,23 @@ Loop
 	if (MaxRunCount && A_Index >= MaxRunCount)
 	{
 		Log(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
+		Notify(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
 		ExitApp
 	}
-	Sleep, %SleepTime%
+
+	;Everything is converted to milliseconds because of Sleep command
+	if (SleeptimeLength = "minutes")
+		SleepPeriod := Sleeptime * 60000
+	else if (SleeptimeLength = "hours")
+		SleepPeriod := Sleeptime * 3600000
+	else if (SleeptimeLength = "days")
+		SleepPeriod := Sleeptime * 86400000
+	else if (SleeptimeLength = "weeks")
+		SleepPeriod := Sleeptime * 604800000
+	else
+		SleepPeriod := Sleeptime * 1000
+	
+	Sleep, %SleepPeriod%
 }
 
 ;This is responsible for grabbing and validating command line paramenters
@@ -310,6 +355,7 @@ getParams:
 			if param_val is integer
 			{
 				Log("Command Line Paramter " . param . " accepted with value " . param_val, "System")
+				Notify("Command Line Paramter " . param . " accepted with value " . param_val, "System")
 				MaxRunCount := param_val
 			}
 		}
@@ -322,6 +368,7 @@ emptyRB:
 	if ErrorLevel
 	{
 		Log("ERROR: Recycle Bin - Interval Empty Failed", "Action")
+		Notify("Recycle Bin - Interval Empty Failed", "Error")
 	}
 	else
 	{
@@ -332,6 +379,7 @@ emptyRB:
 			DT := 
 		GuiControl, 1: ,RBLastEmpty, Last Empty:  %DT%
 		Log("Recycle Bin - Interval Empty Successful", "Action")
+		Notify("Recycle Bin - Interval Empty Successful", "Action")
 	}
 return
 
@@ -347,12 +395,12 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is less than|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|
-	AllActionsNoDefault = Move file|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|
+	AllActions = Move file||Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|
+	AllActionsNoDefault = Move file|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
-	DateUnits = minutes||hours|days|weeks
-	NoDefaultDateUnits = minutes|hours|days|weeks|
+	DateUnits = seconds|minutes||hours|days|weeks
+	NoDefaultDateUnits = seconds|minutes|hours|days|weeks|
 	MatchList = ALL|ANY|
 	LogTypes = System|Actions|Both|
 	
@@ -374,7 +422,8 @@ BuildINI:
 	{
 		IniWrite,%A_Space%,rules.ini, Folders, Folders
 		IniWrite,%A_Space%,rules.ini, Rules, AllRuleNames
-		IniWrite,300000,rules.ini, Preferences, Sleeptime
+		IniWrite,3,rules.ini, Preferences, Sleeptime
+		IniWrite,minutes,rules.ini, Preferences, SleeptimeLength
 		IniWrite,0,rules.ini, Preferences, RBEnable
 		IniWrite,0,rules.ini, Preferences, EnableLogging
 		IniWrite,%A_Space%,rules.ini, Preferences, LogType
@@ -426,12 +475,14 @@ PAUSE:
 	if (A_IsPaused = 1)
 	{
 		Log(APPNAME . " has resumed from being paused", "System")
+		Notify(APPNAME . " has resumed from being paused", "System")
 		Menu, TRAY, Icon, resources\belvedere.ico
 		SB_SetText("", 2)
 	}
 	else
 	{
 		Log(APPNAME . " has been paused", "System")
+		Notify(APPNAME . " has been paused", "System")
 		Menu, TRAY, Icon, resources\belvedere-paused.ico
 		SB_SetText("PAUSED", 2)
 	}
@@ -481,9 +532,10 @@ IMPORT:
 		
 	;Check that all the key settings are present to determine if this is a true settings file
 	IniRead, Sleeptime, rules.ini, Preferences, Sleeptime, %A_Space%
+	IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength, %A_Space%
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, %A_Space%
 	IniRead, RBEnable, rules.ini, Preferences, RBEnable, %A_Space%
-	if (Sleeptime = "" or EnableLogging = "" or RBEnable = "")
+	if (Sleeptime = "" or SleeptimeLength = "" or EnableLogging = "" or RBEnable = "")
 	{
 		MsgBox,,Import Error, The file you are attempting to import is not a %APPNAME% rules file!
 		return
@@ -605,22 +657,20 @@ return
 ;Run when the 'About Belvedere' menu item is clicked on the Main Menu
 ABOUT:
 	Gui,4: Destroy
-	Gui,4: +owner
-	Gui,4: -MinimizeBox
-	Gui,4: +AlwaysOnTop
+	Gui,4: +owner +AlwaysOnTop -MinimizeBox +ToolWindow
 	Gui,4: Add,Picture,x45 y0,%BelvederePNG%
 	Gui,4: font, s8, Courier New
 	Gui,4: Add, Text,x275 y235,%Version%
 	Gui,4: font, s9, Arial 
 	Gui,4: Add,Text,x10 y250 Center,Belvedere is an automated file management application`nthat performs actions on files based on user-defined criteria.`n`nBelvedere is written by Adam Pash and distributed`nby Lifehacker under the GNU Public License.`nFor details on how to use Belvedere, check out the
-	Gui,4:Font,underline bold
-	Gui,4:Add,Text,cBlue gHELP Center x115 y350, %APPNAME% Help Text
-	Gui,4: font, norm
-	Gui,4:Add,Text, Center x165 y367, or
-	Gui,4:Font,underline bold
-	Gui,4:Add,Text,cBlue gHomepage Center x115 y385,%APPNAME% homepage
-	Gui,4:Add,Text,cBlue gWCHomepage Center x105 y400,Icon design by What Cheer
-	Gui,4:Add,Text,cBlue g7zipHomepage Center x30 y415, 7-Zip used for compression under GNU LGPL license
+	Gui,4: Font,underline bold
+	Gui,4: Add,Text,cBlue gHELP Center x115 y350, %APPNAME% Help Text
+	Gui,4: Font, norm
+	Gui,4: Add,Text, Center x165 y367, or
+	Gui,4: Font,underline bold
+	Gui,4: Add,Text,cBlue gHomepage Center x115 y385,%APPNAME% homepage
+	Gui,4: Add,Text,cBlue gWCHomepage Center x105 y400,Icon design by What Cheer
+	Gui,4: Add,Text,cBlue g7zipHomepage Center x30 y415, 7-Zip used for compression under GNU LGPL license
 	Gui,4: Color,F8FAF0
 	Gui,4: Show,auto,About Belvedere
 Return
@@ -640,4 +690,5 @@ EXIT:
 		return
 	
 	Log(APPNAME . " is closing. Good-bye!", "System")
+	Notify(APPNAME . " is closing. Good-bye!", "System")
 	ExitApp
