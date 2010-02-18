@@ -7,17 +7,21 @@ delete(file)
 		return 0
 }
 
-move(file, destination, overwrite, compress)
+move(file, destination, overwrite, compress, shortcut)
 {
 	global thisRule
 	global errorCheck
 	
-	SplitPath, file,fullname,,, name
+	SplitPath, file,fullname,directory,, name
 	zipname := name . ".zip"
+	scname := directory . "\" . name . ".lnk"
 	newfile = %destination%\%fullname%
 	
 	IfNotExist, %destination%
 		return -1 ;missing destination folder
+
+	if (shortcut = 1)
+		FileCreateShortcut, %newfile%, %scname%
 	
 	if (compress = 1)
 	{		

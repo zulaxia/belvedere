@@ -218,10 +218,15 @@ Loop
 					Log("File: " . file, "Action")
 					
 					;Here is where we act upon the files that matched
-					if (Action = "Move file") or (Action = "Rename file")
+					if (Action = "Move file") or (Action = "Rename file") or (Action = "Move file & leave shortcut")
 					{
 						Log("Destination: " . Destination, "Action")
-						errcode := move(file, Destination, Overwrite, Compress)
+						
+						if (Action = "Move file & leave shortcut")
+							errcode := move(file, Destination, Overwrite, Compress, 1)
+						else
+							errcode := move(file, Destination, Overwrite, Compress, 0)
+							
 						if (errcode = -1)
 						{
 							Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
@@ -418,8 +423,8 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is greater than or equal|is less than|is less than or equal|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
-	AllActionsNoDefault = Move file|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
 	DateUnits = seconds|minutes||hours|days|weeks
