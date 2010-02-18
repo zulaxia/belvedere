@@ -39,65 +39,49 @@ GoSub, getParams
 ;main execution loop
 Loop
 {
-	;Loops through all the rule names for execution
-	Loop, Parse, AllRuleNames, |
+	;Loops through all the folder names for rules
+	IniRead, Folders, rules.ini, Folders, Folders
+	Loop, Parse, Folders, |
 	{
-		thisRule = %A_LoopField%
-		NumOfRules := 1
-
-		;Loops to determine number of subjects within a rule
-		Loop
-		{
-			IniRead, MultiRule, rules.ini, %thisRule%, Subject%A_Index%
-			if (MultiRule != "ERROR")
-				NumOfRules++ 
-			else
-				break
-		}
-		
-		if (thisRule = "ERROR") or (thisRule = "")
+		thisFolder = %A_LoopField%
+		if (thisFolder = "ERROR") or (thisFolder = "")
 			continue
 
-		IniRead, Folder, rules.ini, %thisRule%, Folder, %A_Space%
-		IniRead, Enabled, rules.ini, %thisRule%, Enabled, 0
-		IniRead, ConfirmAction, rules.ini, %thisRule%, ConfirmAction, 0
-		IniRead, Recursive, rules.ini, %thisRule%, Recursive, 0
-		IniRead, Action, rules.ini, %thisRule%, Action, %A_Space%
-		IniRead, Destination, rules.ini, %thisRule%, Destination, %A_Space%
-		IniRead, Matches, rules.ini, %thisRule%, Matches, %A_Space%
-		
-		;If rule is not enabled, just skip over it
-		if (Enabled = 0)
-			continue
-
-		;Loop to read the subjects, verbs and objects for the list defined
-		Loop
+		;Loops through all the rule names for the specific folder for execution
+		IniRead, FolderRules, rules.ini, %thisFolder%, RuleNames
+		Loop, Parse, FolderRules, |
 		{
-			if ((A_Index-1) = NumOfRules)
-				break
+			thisRule = %A_LoopField%
+			if (thisRule = "ERROR") or (thisRule = "")
+				continue
 
-			if (A_Index = 1)
-				RuleNum =
-			else
-				RuleNum := A_Index - 1
-
-			IniRead, Subject%RuleNum%, rules.ini, %thisRule%, Subject%RuleNum%
-			IniRead, Verb%RuleNum%, rules.ini, %thisRule%, Verb%RuleNum%
-			IniRead, Object%RuleNum%, rules.ini, %thisRule%, Object%RuleNum%
-		}
-
-		;if we're moving something, need to find out if I can overwrite it
-		;also checking to see if the user wants to compress it as well
-		if (Destination != "")
-			IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
-			IniRead, Compress, rules.ini, %thisRule%, Compress, 0
-
-		;Loop through all of the folder contents
-		Loop %Folder%, 0, %Recursive%
-		{
+			;Loops to determine number of subjects within a rule
+			NumOfRules := 1
 			Loop
 			{
-				if ((A_Index - 1) = NumOfRules)
+				IniRead, MultiRule, rules.ini, %thisRule%, Subject%A_Index%
+				if (MultiRule != "ERROR")
+					NumOfRules++ 
+				else
+					break
+			}
+			
+			IniRead, Folder, rules.ini, %thisRule%, Folder, %A_Space%
+			IniRead, Enabled, rules.ini, %thisRule%, Enabled, 0
+			IniRead, ConfirmAction, rules.ini, %thisRule%, ConfirmAction, 0
+			IniRead, Recursive, rules.ini, %thisRule%, Recursive, 0
+			IniRead, Action, rules.ini, %thisRule%, Action, %A_Space%
+			IniRead, Destination, rules.ini, %thisRule%, Destination, %A_Space%
+			IniRead, Matches, rules.ini, %thisRule%, Matches, %A_Space%
+			
+			;If rule is not enabled, just skip over it
+			if (Enabled = 0)
+				continue
+
+			;Loop to read the subjects, verbs and objects for the list defined
+			Loop
+			{
+				if ((A_Index-1) = NumOfRules)
 					break
 
 				if (A_Index = 1)
@@ -105,198 +89,222 @@ Loop
 				else
 					RuleNum := A_Index - 1
 
-				file = %A_LoopFileLongPath%
-				fileName = %A_LoopFileName%
-
-				; Below determines the subject of the comparison
-				if (Subject%RuleNum% = "Name")
-					thisSubject := getName(file)
-				else if (Subject%RuleNum% = "Extension")
-					thisSubject := getExtension(file)
-				else if (Subject%RuleNum% = "Size")
-					thisSubject := getSize(file)
-				else if (Subject%RuleNum% = "Date last modified")
-					thisSubject := getDateLastModified(file)
-				else if (Subject%RuleNum% = "Date last opened")
-					thisSubject := getDateLastOpened(file)
-				else if (Subject%RuleNum% = "Date created")
-					thisSubject := getDateCreated(file)
-				else
-					MsgBox,,No Match, Subject does not have a match
-				
-				; Below determines the comparison verb
-				if (Verb%RuleNum% = "contains")
-					result%RuleNum% := contains(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "does not contain")
-					result%RuleNum% := !(contains(thisSubject, Object%RuleNum%))
-				else if (Verb%RuleNum% = "contains one of")
-					result%RuleNum% := containsOneOf(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is")
-					result%RuleNum% := isEqual(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "matches one of")
-					result%RuleNum% := isOneOf(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "does not match one of")
-					result%RuleNum% := !(isOneOf(thisSubject, Object%RuleNum%))
-				else if (Verb%RuleNum% = "RegEx")
-					result%RuleNum% := RegEx(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is less than")
-					result%RuleNum% := isLessThan(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is less than or equal")
-					result%RuleNum% := isLessThanEqual(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is greater than")
-					result%RuleNum% := isGreaterThan(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is greater than or equal")
-					result%RuleNum% := isGreaterThanEqual(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is not")
-					result%RuleNum% := !(isEqual(thisSubject, Object%RuleNum%))
-				else if (Verb%RuleNum% = "is in the last")
-					result%RuleNum% := isInTheLast(thisSubject, Object%RuleNum%)
-				else if (Verb%RuleNum% = "is not in the last")
-					result%RuleNum% := !isInTheLast(thisSubject, Object%RuleNum%)
+				IniRead, Subject%RuleNum%, rules.ini, %thisRule%, Subject%RuleNum%
+				IniRead, Verb%RuleNum%, rules.ini, %thisRule%, Verb%RuleNum%
+				IniRead, Object%RuleNum%, rules.ini, %thisRule%, Object%RuleNum%
 			}
-			
-			; Below evaluates result and takes action
-			Loop
+
+			;if we're moving something, need to find out if I can overwrite it
+			;also checking to see if the user wants to compress it as well
+			if (Destination != "")
+				IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
+				IniRead, Compress, rules.ini, %thisRule%, Compress, 0
+
+			;Loop through all of the folder contents
+			Loop %Folder%, 0, %Recursive%
 			{
-				if (NumOfRules < A_Index)
-					break
-
-				if (A_Index = 1)
-					RuleNum=
-				else
-					RuleNum := A_Index - 1
-
-				if (Matches = "ALL")
+				Loop
 				{
-					if (result%RuleNum% = 0)
-					{
-						result := 0
+					if ((A_Index - 1) = NumOfRules)
 						break
+
+					if (A_Index = 1)
+						RuleNum =
+					else
+						RuleNum := A_Index - 1
+
+					file = %A_LoopFileLongPath%
+					fileName = %A_LoopFileName%
+
+					; Below determines the subject of the comparison
+					if (Subject%RuleNum% = "Name")
+						thisSubject := getName(file)
+					else if (Subject%RuleNum% = "Extension")
+						thisSubject := getExtension(file)
+					else if (Subject%RuleNum% = "Size")
+						thisSubject := getSize(file)
+					else if (Subject%RuleNum% = "Date last modified")
+						thisSubject := getDateLastModified(file)
+					else if (Subject%RuleNum% = "Date last opened")
+						thisSubject := getDateLastOpened(file)
+					else if (Subject%RuleNum% = "Date created")
+						thisSubject := getDateCreated(file)
+					else
+						MsgBox,,No Match, Subject does not have a match
+					
+					; Below determines the comparison verb
+					if (Verb%RuleNum% = "contains")
+						result%RuleNum% := contains(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "does not contain")
+						result%RuleNum% := !(contains(thisSubject, Object%RuleNum%))
+					else if (Verb%RuleNum% = "contains one of")
+						result%RuleNum% := containsOneOf(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is")
+						result%RuleNum% := isEqual(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "matches one of")
+						result%RuleNum% := isOneOf(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "does not match one of")
+						result%RuleNum% := !(isOneOf(thisSubject, Object%RuleNum%))
+					else if (Verb%RuleNum% = "RegEx")
+						result%RuleNum% := RegEx(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is less than")
+						result%RuleNum% := isLessThan(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is less than or equal")
+						result%RuleNum% := isLessThanEqual(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is greater than")
+						result%RuleNum% := isGreaterThan(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is greater than or equal")
+						result%RuleNum% := isGreaterThanEqual(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is not")
+						result%RuleNum% := !(isEqual(thisSubject, Object%RuleNum%))
+					else if (Verb%RuleNum% = "is in the last")
+						result%RuleNum% := isInTheLast(thisSubject, Object%RuleNum%)
+					else if (Verb%RuleNum% = "is not in the last")
+						result%RuleNum% := !isInTheLast(thisSubject, Object%RuleNum%)
+				}
+				
+				; Below evaluates result and takes action
+				Loop
+				{
+					if (NumOfRules < A_Index)
+						break
+
+					if (A_Index = 1)
+						RuleNum=
+					else
+						RuleNum := A_Index - 1
+
+					if (Matches = "ALL")
+					{
+						if (result%RuleNum% = 0)
+						{
+							result := 0
+							break
+						}
+						else
+						{
+							result := 1
+							continue
+						}
+					}
+					else if (Matches = "ANY")
+					{
+						if (result%RuleNum% = 1)
+						{
+							result := 1
+							break
+						}
+						else
+						{
+							result := 0
+							continue
+						}
+					}
+				}
+
+				;if we have matches, then we act upon them below
+				if result
+				{
+					;User can ask to confirm the actions, and if so, we ask them if they woudl liek to procede
+					if (ConfirmAction = 1)
+					{
+						MsgBox, 4, Action Confirmation, Are you sure you want to %Action% %fileName% because of rule %thisRule%?
+						IfMsgBox No
+							continue
+					}
+					
+					Log("======================================", "Action")
+					Log("Action taken: " . Action, "Action")
+					Log("File: " . file, "Action")
+					
+					;Here is where we act upon the files that matched
+					if (Action = "Move file") or (Action = "Rename file")
+					{
+						Log("Destination: " . Destination, "Action")
+						errcode := move(file, Destination, Overwrite, Compress)
+						if (errcode = -1)
+						{
+							Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
+							Log("ERROR: Unable to move file, destination folder missing", "Action")
+							Notify("Unable to move file, destination folder missing", "Error")
+						}
+						else if (errcode <> 0)
+						{
+							Log("ERROR: Unable to move file", "Action")
+							Notify("Unable to move file", "Error")
+						}
+					}
+					else if (Action = "Send file to Recycle Bin")
+					{
+						errcode := recycle(file)
+						if errcode
+						{
+							Log("ERROR: Unable to move file to recycle bin", "Action")
+							Notify("Unable to move file to recycle bin", "Error")
+						}
+					}
+					else if (Action = "Delete file")
+					{
+						errcode := delete(file)
+						if errcode
+						{
+							Log("ERROR: Unable to delete file", "Action")
+							Notify("Unable to delete file", "Error")
+						}
+					}
+					else if (Action = "Copy file")
+					{
+						Log("Destination: " . Destination, "Action")
+						errcode := copy(file, Destination, Overwrite, Compress)
+						if (errcode = -1)
+						{
+							Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
+							Log("ERROR: Unable to copy file, destination folder missing", "Action")
+							Notify("Unable to copy file, destination folder missing", "Error")
+						}
+						else if (errcode <> 0)
+						{
+							Log("ERROR: Unable to copy file", "Action")
+							Notify("Unable to copy file", "Error")
+						}					
+					}
+					else if (Action = "Open file")
+					{
+						errcode := open(file)
+						if errcode
+						{
+							Log("ERROR: Unable to open file", "Action")
+							Notify("Unable to open file", "Error")
+						}
+					}
+					else if (Action = "Print file")
+					{
+						errcode := print(file)
+						if errcode
+						{
+							Log("ERROR: Unable to print file", "Action")
+							Notify("Unable to print file", "Error")
+						}
+					}
+					else if (Action = "Custom")
+					{
+						errcode := custom(file, Destination)
+						if errcode
+						{
+							Log("ERROR: Unable to complete custom action on file", "Action")
+							Notify("Unable to complete custom action on file", "Error")
+						}
 					}
 					else
 					{
-						result := 1
-						continue
+						Msgbox,,No Action, You've detemerined no action to take.
 					}
+					
+					Log("======================================", "Action")
 				}
-				else if (Matches = "ANY")
-				{
-					if (result%RuleNum% = 1)
-					{
-						result := 1
-						break
-					}
-					else
-					{
-						result := 0
-						continue
-					}
-				}
-			}
-
-			;if we have matches, then we act upon them below
-			if result
-			{
-				;User can ask to confirm the actions, and if so, we ask them if they woudl liek to procede
-				if (ConfirmAction = 1)
-				{
-					MsgBox, 4, Action Confirmation, Are you sure you want to %Action% %fileName% because of rule %thisRule%?
-					IfMsgBox No
-						continue
-				}
-				
-				Log("======================================", "Action")
-				Log("Action taken: " . Action, "Action")
-				Log("File: " . file, "Action")
-				
-				;Here is where we act upon the files that matched
-				if (Action = "Move file") or (Action = "Rename file")
-				{
-					Log("Destination: " . Destination, "Action")
-					errcode := move(file, Destination, Overwrite, Compress)
-					if (errcode = -1)
-					{
-						Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
-						Log("ERROR: Unable to move file, destination folder missing", "Action")
-						Notify("Unable to move file, destination folder missing", "Error")
-					}
-					else if (errcode <> 0)
-					{
-						Log("ERROR: Unable to move file", "Action")
-						Notify("Unable to move file", "Error")
-					}
-				}
-				else if (Action = "Send file to Recycle Bin")
-				{
-					errcode := recycle(file)
-					if errcode
-					{
-						Log("ERROR: Unable to move file to recycle bin", "Action")
-						Notify("Unable to move file to recycle bin", "Error")
-					}
-				}
-				else if (Action = "Delete file")
-				{
-					errcode := delete(file)
-					if errcode
-					{
-						Log("ERROR: Unable to delete file", "Action")
-						Notify("Unable to delete file", "Error")
-					}
-				}
-				else if (Action = "Copy file")
-				{
-					Log("Destination: " . Destination, "Action")
-					errcode := copy(file, Destination, Overwrite, Compress)
-					if (errcode = -1)
-					{
-						Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
-						Log("ERROR: Unable to copy file, destination folder missing", "Action")
-						Notify("Unable to copy file, destination folder missing", "Error")
-					}
-					else if (errcode <> 0)
-					{
-						Log("ERROR: Unable to copy file", "Action")
-						Notify("Unable to copy file", "Error")
-					}					
-				}
-				else if (Action = "Open file")
-				{
-					errcode := open(file)
-					if errcode
-					{
-						Log("ERROR: Unable to open file", "Action")
-						Notify("Unable to open file", "Error")
-					}
-				}
-				else if (Action = "Print file")
-				{
-					errcode := print(file)
-					if errcode
-					{
-						Log("ERROR: Unable to print file", "Action")
-						Notify("Unable to print file", "Error")
-					}
-				}
-				else if (Action = "Custom")
-				{
-					errcode := custom(file, Destination)
-					if errcode
-					{
-						Log("ERROR: Unable to complete custom action on file", "Action")
-						Notify("Unable to complete custom action on file", "Error")
-					}
-				}
-				else
-				{
-					Msgbox,,No Action, You've detemerined no action to take.
-				}
-				
-				Log("======================================", "Action")
 			}
 		}
 	}
-
 	;Now that we've done the rules, time to handle to Recycle Bin (if enabled)
 	IniRead, RBEnable, rules.ini, Preferences, RBEnable, 0
 	if (RBEnable = 1)
