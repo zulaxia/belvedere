@@ -142,6 +142,15 @@ print(file)
 		return 0
 }
 
+custom(file, destination)
+{
+	Run, %destination% %file%,,hide
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
+}
+
 compressFile(file)
 {
 	SplitPath, file,fullname,directory,, name

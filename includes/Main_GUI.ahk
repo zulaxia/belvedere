@@ -47,6 +47,8 @@ MANAGE:
 	Gui, 1: Add, Button, x252 y382 w30 h30 gAddRule, +
 	Gui, 1: Add, Button, x282 y382 w30 h30 gRemoveRule, -
 	Gui, 1: Add, Button, x312 y382 h30 vEditRule gEditRule, Edit Rule
+	Gui, 1: Add, Button, x436 y382 h30 vMoveUp gMoveUp, Move Up
+	Gui, 1: Add, Button, x492 y382 h30 vMoveDown gMoveDown, Move Down
 	Gui, 1: Add, Button, x620 y382 h30 vEnableButton gEnableButton, Enable
 	
 	;Items found on Second Tab
@@ -172,6 +174,72 @@ SetActive:
 		GuiControl, 1:, EnableButton, Disable
 	else
 		GuiControl, 1:, EnableButton, Enable
+return
+
+;Moves rules up in the rule list on the right side of the main GUI
+; the order of the rules in this list is the order of precedence
+; that the application will process them in
+MoveUp:
+	; make sure a rule is selected
+	if (ActiveRule = "")
+	{
+		MsgBox,,Select Rule, Please select a rule to move up.
+		return
+	}
+	
+	SelectedRow := LV_GetNext(RowNumber)
+	if (SelectedRow = 1) ;if first rule we can't move up any more
+		return
+	
+	LV_GetText(SelectedRule, SelectedRow, 2)
+	LV_GetText(PreviousRule, SelectedRow-1, 2)
+	
+	;Taking the previous rule, replacing with a temp value and then 
+	; replacing with the new rule then writing to the file
+	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
+	StringReplace RuleNames, RuleNames, %SelectedRule%, --
+	StringReplace RuleNames, RuleNames, %PreviousRule%, %SelectedRule%
+	StringReplace RuleNames, RuleNames, --, %PreviousRule%
+	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
+
+	;Refresh the list then restore focus and select so that you can
+	; continue to press the button
+	Gosub, ListRules
+	LV_Modify(SelectedRow-1, "Select")
+	GuiControl, 1: Focus, Rules
+	ActiveRule := SelectedRule ;overridden because ListRules zeros it out
+return
+
+;Moves rules down in the rule list on the right side of the main GUI
+; the order of the rules in this list is the order of precedence
+; that the application will process them in
+MoveDown:
+	; make sure a rule is selected
+	if (ActiveRule = "")
+	{
+		MsgBox,,Select Rule, Please select a rule to move down.
+		return
+	}
+
+	SelectedRow := LV_GetNext(RowNumber)
+	if (SelectedRow = LV_GetCount()) ;if last rule we can't move down any more
+		return
+
+	LV_GetText(SelectedRule, SelectedRow, 2)
+	LV_GetText(NextRule, SelectedRow+1, 2)
+	
+	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
+	StringReplace RuleNames, RuleNames, %SelectedRule%, --
+	StringReplace RuleNames, RuleNames, %NextRule%, %SelectedRule%
+	StringReplace RuleNames, RuleNames, --, %NextRule%
+	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
+
+	;Refresh the list then restore focus and select so that you can
+	; continue to press the button
+	Gosub, ListRules
+	LV_Modify(SelectedRow+1, "Select")
+	GuiControl, 1: Focus, Rules
+	ActiveRule := SelectedRule ;overridden because ListRules zeros it out
 return
 
 ;Toggles the active state of the selected rule and saves it to the ini
@@ -304,8 +372,9 @@ AddRule:
 	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
 	Gui, 2: Add, DropDownList, x32 y242 w160 h20 vGUIAction gSetDestination r6 , %AllActions%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
-	Gui, 2: Add, Edit, x248 y242 w190 h20 vGUIDestination , 
+	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , 
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
+	Gui, 2: Add, Button, x515 y242 gChooseAction vGUIChooseAction h20, ...
 	Gui, 2: Add, Checkbox, x482 y237 vOverwrite, Overwrite?
 	Gui, 2: Add, Checkbox, x482 y252 vCompress, Compress?
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
@@ -466,8 +535,9 @@ EditRule:
 
 	Gui, 2: Add, DropDownList, x32 y242 w160 h20 vGUIAction gSetDestination r6 , %RuleAction%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
-	Gui, 2: Add, Edit, x248 y242 w190 h20 vGUIDestination , %Destination%
+	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , %Destination%
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
+	Gui, 2: Add, Button, x515 y242 gChooseAction vGUIChooseAction h20, ...
 	Gui, 2: Add, Checkbox, x482 y237 vOverwrite Checked%Overwrite%, Overwrite?
 	Gui, 2: Add, Checkbox, x482 y252 vCompress Checked%Compress%, Compress?
 	FirstEdit := 1
@@ -482,6 +552,7 @@ EditRule:
 	GuiControl, 2: Move, ActionTo, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, GUIDestination, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, GUIChooseFolder,% "y" (NumOfRules-1) * 30 + 242
+	GuiControl, 2: Move, GUIChooseAction,% "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, Overwrite, % "y" (NumOfRules-1) * 30 + 237
 	GuiControl, 2: Move, Compress, % "y" (NumOfRules-1) * 30 + 252
 	GuiControl, 2: Move, TestButton, % "y" (NumOfRules-1) * 30 + 302
@@ -553,6 +624,7 @@ NewLine:
 	GuiControl, 2: Move, ActionTo, % "y" LineNum * 30 + 242
 	GuiControl, 2: Move, GUIDestination, % "y" LineNum * 30 + 242
 	GuiControl, 2: Move, GUIChooseFolder,% "y" LineNum * 30 + 242
+	GuiControl, 2: Move, GUIChooseAction,% "y" LineNum * 30 + 242
 	GuiControl, 2: Move, Overwrite, % "y" LineNum * 30 + 237
 	GuiControl, 2: Move, Compress, % "y" LineNum * 30 + 252
 	GuiControl, 2: Move, TestButton, % "y" LineNum * 30 + 302
@@ -595,6 +667,8 @@ SetDestination:
 	{
 		GuiControl, 2: Show, GUIDestination
 		GuiControl, 2: Show, GUIChooseFolder
+		GuiControl, 2: Move, GUIDestination, w200
+		GuiControl, 2: Hide, GUIChooseAction
 		GuiControl, 2: , ActionTo, to folder:
 		GuiControl, 2: Show, ActionTo
 		GuiControl, 2: Show, Overwrite
@@ -605,7 +679,9 @@ SetDestination:
 		GuiControl, 2: , ActionTo, to:
 		GuiControl, 2: Show, ActionTo
 		GuiControl, 2: Show, GUIDestination
+		GuiControl, 2: Move, GUIDestination, w200
 		GuiControl, 2: Hide, GUIChooseFolder
+		GuiControl, 2: Hide, GUIChooseAction
 		GuiControl, 2: Hide, Overwrite
 		GuiControl, 2: Hide, Compress
 	}
@@ -613,7 +689,19 @@ SetDestination:
 	{
 		GuiControl, 2: Hide, ActionTo
 		GuiControl, 2: Hide, GUIChooseFolder
+		GuiControl, 2: Hide, GUIChooseAction
 		GuiControl, 2: Hide, GUIDestination
+		GuiControl, 2: Hide, Overwrite
+		GuiControl, 2: Hide, Compress
+	}
+	else if (GUIAction = "Custom")
+	{
+		GuiControl, 2: , ActionTo, action:
+		GuiControl, 2: Show, ActionTo
+		GuiControl, 2: Show, GUIDestination
+		GuiControl, 2: Move, GUIDestination, w265
+		GuiControl, 2: Show, GUIChooseAction
+		GuiControl, 2: Hide, GUIChooseFolder
 		GuiControl, 2: Hide, Overwrite
 		GuiControl, 2: Hide, Compress
 	}
@@ -704,12 +792,17 @@ SaveRule:
 				Msgbox,,Missing Folder, % "You need to enter a destination folder for the " GUIAction " action."
 				return
 			}
+			else if (GUIAction = "Custom")
+			{
+				Msgbox,,Missing Custom Action, % "You need to choose an action for the " GUIAction " action."
+				return
+			}
 		}
 		else
 		{
 			IfNotExist, %GUIDestination%
 			{
-				Msgbox,,Invalid Folder, %GUIDestination% is not a real folder.
+				Msgbox,,Invalid Folder/Action, %GUIDestination% is not a real folder or action.
 				return
 			}
 		}
@@ -774,11 +867,19 @@ SaveRule:
 	Gosub, ListRules
 return
 
-;Run when the '...' button is clicked under to the right of the action section
+;Run when the '...' button is clicked to the right of the action section
 ; this is responsible displaying a selection box and posting it to the rule
 ; creation screen
 ChooseFolder:
 	FileSelectFolder, GUIDestination
+	GuiControl, 2:, GUIDestination, %GUIDestination%
+return
+
+;Run when the '...' button is clicked to the right of the action section
+; this is responsible displaying a selection box and posting it to the rule
+; creation screen
+ChooseAction:
+	FileSelectFile, GUIDestination, 3, , Select Custom Action, Programs (*.exe; *.com; *.bat; *.cmd; *.pif; *.vbs)
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return
 

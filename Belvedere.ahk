@@ -278,6 +278,15 @@ Loop
 						Notify("Unable to print file", "Error")
 					}
 				}
+				else if (Action = "Custom")
+				{
+					errcode := custom(file, Destination)
+					if errcode
+					{
+						Log("ERROR: Unable to complete custom action on file", "Action")
+						Notify("Unable to complete custom action on file", "Error")
+					}
+				}
 				else
 				{
 					Msgbox,,No Action, You've detemerined no action to take.
@@ -401,8 +410,8 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is greater than or equal|is less than|is less than or equal|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|
-	AllActionsNoDefault = Move file|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|
+	AllActions = Move file||Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActionsNoDefault = Move file|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
 	DateUnits = seconds|minutes||hours|days|weeks
