@@ -264,6 +264,7 @@ return
 ;Run when the '+' button is clicked under the folder list
 ; responsible for showing a selection dialog and saving the folder
 AddFolder:
+	Gui, 1: +OwnDialogs
 	FileSelectFolder, NewFolder,
 	if (NewFolder = "")
 		return
@@ -275,6 +276,7 @@ return
 ; responsible for deleting the selected folder and all rules
 ; associated with that folder
 RemoveFolder:
+	Gui, 1: +OwnDialogs
 	if (CurrentlySelected = "")
 	{
 		Msgbox,,Select Folder, Select the folder you'd like to delete.
@@ -325,6 +327,7 @@ RemoveFolder:
 	}
 	
 	Log("Folder Removed: " ActiveFolder, "System")
+	Notify("Folder Removed: " ActiveFolder, "System")
 	
 	Gosub, ListRules
 return
@@ -364,13 +367,13 @@ AddRule:
 	Gui, 2: Add, DropDownList, x45 y120 w46 h20 r2 vMatches , ALL||ANY
 	Gui, 2: Add, Text, x96 y122 w240 h20 , of the following conditions are met:
 	Gui, 2: Add, DropDownList, x32 y152 w160 h20 r6 vGUISubject gSetVerbList , %AllSubjects%
-	Gui, 2: Add, DropDownList, x202 y152 w160 h21 r6 vGUIVerb , %NameVerbs%
+	Gui, 2: Add, DropDownList, x202 y152 w160 h21 r8 vGUIVerb , %NameVerbs%
 	Gui, 2: Add, Edit, x372 y152 w140 h20 vGUIObject , 
 	Gui, 2: Add, DropDownList, x445 y152 vGUIUnits w60 ,
 	GuiControl, 2: Hide, GUIUnits
 	Gui, 2: Add, Button, vGUINewLine x515 y152 w20 h20 gNewLine , +
 	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
-	Gui, 2: Add, DropDownList, x32 y242 w160 h20 vGUIAction gSetDestination r6 , %AllActions%
+	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %AllActions%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , 
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
@@ -498,7 +501,7 @@ EditRule:
 		StringReplace, RuleVerb, NoDefaultVerbs, %defaultVerb%, %defaultVerb%|
 
 		Gui, 2: Add, DropDownList, x32 y%height% w160 h20 r6 vGUISubject%RuleNum% gSetVerbList , %RuleSubject%
-		Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r6 vGUIVerb%RuleNum% , %RuleVerb%
+		Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r8 vGUIVerb%RuleNum% , %RuleVerb%
 		Gui, 2: Add, Edit, x372 y%height% w140 h20 vGUIObject%RuleNum% , % Object%RuleNum%
 		
 		;Change the GUI objects based on the subject of each line
@@ -533,7 +536,7 @@ EditRule:
 	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
 	StringReplace, RuleAction, AllActionsNoDefault, %Action%, %Action%|
 
-	Gui, 2: Add, DropDownList, x32 y242 w160 h20 vGUIAction gSetDestination r6 , %RuleAction%
+	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %RuleAction%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , %Destination%
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
@@ -611,7 +614,7 @@ NewLine:
 
 	height := (LineNum * 30) + 152
 	Gui, 2: Add, DropDownList, x32 y%height% w160 h20 r6 vGUISubject%LineNum% gSetVerbList , %AllSubjects%
-	Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r6 vGUIVerb%LineNum% , %NameVerbs%
+	Gui, 2: Add, DropDownList, x202 y%height% w160 h21 r8 vGUIVerb%LineNum% , %NameVerbs%
 	Gui, 2: Add, Edit, x372 y%height% w140 h20 vGUIObject%LineNum% , 
 	Gui, 2: Add, DropDownList, x445 y%height% vGUIUnits%LineNum% w60 ,
 	GuiControl, 2: Hide, GUIUnits%LineNum%
@@ -711,6 +714,7 @@ return
 ; this is responsible for confirming and completing the actual
 ; delete from the ini file
 RemoveRule:
+	Gui, 1: +OwnDialogs
 	if (ActiveRule = "")
 	{
 		MsgBox,,Select Rule, Please select a rule to delete.
@@ -728,6 +732,7 @@ RemoveRule:
 	Inidelete, rules.ini, %ActiveRule%
 	
 	Log("Rule Removed: " ActiveRule, "System")
+	Notify("Rule Removed: " ActiveRule, "System")
 	
 	Gosub, RefreshVars
 	Gosub, ListRules
@@ -862,6 +867,7 @@ SaveRule:
 	}
 	
 	Log("Rule Saved: " RuleName, "System")
+	Notify("Rule Saved: " RuleName, "System")
 	
 	Gosub, RefreshVars
 	Gosub, ListRules
@@ -871,6 +877,7 @@ return
 ; this is responsible displaying a selection box and posting it to the rule
 ; creation screen
 ChooseFolder:
+	Gui, 1: +OwnDialogs
 	FileSelectFolder, GUIDestination
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return
@@ -879,6 +886,7 @@ return
 ; this is responsible displaying a selection box and posting it to the rule
 ; creation screen
 ChooseAction:
+	Gui, 1: +OwnDialogs
 	FileSelectFile, GUIDestination, 3, , Select Custom Action, Programs (*.exe; *.com; *.bat; *.cmd; *.pif; *.vbs)
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return
@@ -886,6 +894,7 @@ return
 ;Run when the 'Save Preferences' button is clicked on the Preferences tab
 ; writes the information to the ini file
 SavePrefs:
+	Gui, 1: +OwnDialogs
 	Gui, 1: Submit, NoHide
 	SleepTime := Sleep
 	SleeptimeLength := SleeptimeLength
@@ -910,16 +919,22 @@ SavePrefs:
 		}
 		
 		Log("Logging has been enabled with type: " . LogType, "System")
+		Notify("Logging has been enabled with type: " . LogType, "System")
 	}
 	else if (EnableLogging = 0)
 	{
 		Log("Logging has been disabled", "System")
+		Notify("Logging has been disabled", "System")
 	}
 	
 	Log("Preferences have been saved", "System")
+	Notify("Preferences have been saved", "System")
 	
 	if (Old_Sleeptime <> SleepTime or Old_SleeptimeLength <> SleeptimeLength)
+	{
 		Log("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+		Notify("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+	}
 	
 	if (Old_GrowlEnabled <> GrowlEnabled)
 	{
@@ -936,6 +951,7 @@ return
 ;Run when the 'Save Preferences' button is clicked on the Recycle Bin tab
 ; writes the information to the ini file
 RBSavePrefs:
+	Gui, 1: +OwnDialogs
 	Gui, 1: Submit, NoHide
 	IniWrite, %RBEnable%, rules.ini, Preferences, RBEnable
 
@@ -968,9 +984,13 @@ RBSavePrefs:
 	IniWrite, %A_Now%, rules.ini, RecycleBin, RBLastEmpty
 
 	Log("Recycle Bin - Preferences have been saved", "System")
+	Notify("Recycle Bin - Preferences have been saved", "System")
 	
 	if (Old_RBEmptyTimeValue <> RBEmptyTimeValue or Old_RBEmptyTimeLength <> RBEmptyTimeLength)
+	{
 		Log("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+		Notify("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+	}
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
 
@@ -1032,6 +1052,7 @@ return
 ; you can drag both a file or a folder and it will confirm the addition of the folder
 ; only works on the folder list for the time being
 GuiDropFiles:
+	Gui, 1: +OwnDialogs
 	;Only accept DnD in the folders list box
 	if A_GuiControl = Folders
 	{
@@ -1069,6 +1090,7 @@ SaveFolders(NewFolder, Folders)
 	}
 	
 	Log("Folder Added: " NewFolder, "System")
+	Notify("Folder Added: " NewFolder, "System")
 	Gosub, RefreshVars
 	return
 }

@@ -217,10 +217,14 @@ Loop
 					Log("Action taken: " . Action, "Action")
 					Log("File: " . file, "Action")
 					
+					Message = Action taken: %Action%`r`n
+					Message = %Message%File: %file%`r`n
+					
 					;Here is where we act upon the files that matched
 					if (Action = "Move file") or (Action = "Rename file") or (Action = "Move file & leave shortcut")
 					{
 						Log("Destination: " . Destination, "Action")
+						Message = %Message%Destination: %Destination%`r`n
 						
 						if (Action = "Move file & leave shortcut")
 							errcode := move(file, Destination, Overwrite, Compress, 1)
@@ -231,13 +235,20 @@ Loop
 						{
 							Msgbox,,Missing Folder,A folder you're attempting to move files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
 							Log("ERROR: Unable to move file, destination folder missing", "Action")
-							Notify("Unable to move file, destination folder missing", "Error")
+							Message = %Message%Unable to move file, destination folder missing
+							Notify(Message, "Error")
 						}
 						else if (errcode <> 0)
 						{
 							Log("ERROR: Unable to move file", "Action")
-							Notify("Unable to move file", "Error")
+							Message = %Message%Unable to move file
+							Notify(Message, "Error")
 						}
+						else
+						{
+							Notify(Message, "Action")
+						}
+						
 					}
 					else if (Action = "Send file to Recycle Bin")
 					{
@@ -245,7 +256,12 @@ Loop
 						if errcode
 						{
 							Log("ERROR: Unable to move file to recycle bin", "Action")
-							Notify("Unable to move file to recycle bin", "Error")
+							Message = %Message%Unable to move file to recycle bin
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
 						}
 					}
 					else if (Action = "Delete file")
@@ -254,7 +270,12 @@ Loop
 						if errcode
 						{
 							Log("ERROR: Unable to delete file", "Action")
-							Notify("Unable to delete file", "Error")
+							Message = %Message%Unable to delete file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
 						}
 					}
 					else if (Action = "Copy file")
@@ -265,13 +286,19 @@ Loop
 						{
 							Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.
 							Log("ERROR: Unable to copy file, destination folder missing", "Action")
-							Notify("Unable to copy file, destination folder missing", "Error")
+							Message = %Message%Unable to copy file, destination folder missing
+							Notify(Message, "Error")
 						}
 						else if (errcode <> 0)
 						{
 							Log("ERROR: Unable to copy file", "Action")
-							Notify("Unable to copy file", "Error")
-						}					
+							Message = %Message%Unable to copy file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
+						}
 					}
 					else if (Action = "Open file")
 					{
@@ -279,7 +306,12 @@ Loop
 						if errcode
 						{
 							Log("ERROR: Unable to open file", "Action")
-							Notify("Unable to open file", "Error")
+							Message = %Message%Unable to open file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
 						}
 					}
 					else if (Action = "Print file")
@@ -288,7 +320,12 @@ Loop
 						if errcode
 						{
 							Log("ERROR: Unable to print file", "Action")
-							Notify("Unable to print file", "Error")
+							Message = %Message%Unable to print file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
 						}
 					}
 					else if (Action = "Custom")
@@ -297,7 +334,12 @@ Loop
 						if errcode
 						{
 							Log("ERROR: Unable to complete custom action on file", "Action")
-							Notify("Unable to complete custom action on file", "Error")
+							Message = %Message%Unable to complete custom action on file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
 						}
 					}
 					else
@@ -529,6 +571,7 @@ return
 ;Run when the 'Backup Settings...' menu item is clicked on the Main Menu
 ; Saves the rules.ini file if the user chooses to back it up
 BACKUP:
+	Gui, 1: +OwnDialogs
 	FileSelectFile, BackupFile, S, ,Backup %APPNAME% Settings, 
 	if (BackupFile = "")
 		return
@@ -554,6 +597,7 @@ Return
 ;Imports the rules.ini file if the user chooses to do so
 ; this will irretrevably overwrite the current rules.ini file
 IMPORT:
+	Gui, 1: +OwnDialogs
 	FileSelectFile, ImportFile, , , Import %APPNAME% Settings,
 	if (ImportFile = "")
 		return
@@ -630,6 +674,7 @@ Return
 ;Run when the 'Clear Log' button is clicked under the log screen
 ; will delete the curent log file without backing it up
 ClearLog:
+	Gui +OwnDialogs
 	MsgBox, 4, Clear Log?, Are you sure you would like to clear the application log?
 	IfMsgBox No
 		return
@@ -641,6 +686,7 @@ Return
 ; will prompt the user to save the current file and still keep the
 ; current one in the directory
 SaveLog:
+	Gui +OwnDialogs
 	FileSelectFile, BackupFile, S, ,Save %APPNAME% Log, 
 	if (BackupFile = "")
 		return
@@ -713,6 +759,7 @@ Return
 
 ;Closing the app; w/ confirmation
 EXIT:
+	Gui, 1: +OwnDialogs
 	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
 	IfMsgBox No
 		return

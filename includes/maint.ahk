@@ -2,6 +2,7 @@
 ; what we expect to get.  It is run on-demand from the GUI or whenever a new configuration
 ; file is imported
 VerifyConfig:
+	Gui +OwnDialogs
 	ChangeCount := 0
 
 	;Read all the main sections and replace with defaults if not correct
