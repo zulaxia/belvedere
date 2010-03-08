@@ -1064,6 +1064,66 @@ GuiDropFiles:
 	}
 Return
 
+;Response for handling the right click event and displaying of the context menu
+; used right now for the context menu for all the rules
+GuiContextMenu:
+	;Only displaying for the Rules section right now
+	if (A_GuiControl = "Rules" and A_EventInfo != 0)
+	{
+	
+		Gui, 1: ListView, Folders
+		FocusedRowNumber := LV_GetNext(0, "F")
+		LV_GetText(FolderName, FocusedRowNumber, 2)
+		
+		Menu, ContextMenu, UseErrorLevel ;allows us to try to delete the menu, even if it doesn't exist, by surpressing hard stop
+		Menu, MoveSubmenu, DeleteAll
+		
+		ListFolders := SubStr(Folders, 1, -1)
+		Loop, Parse, ListFolders, |
+		{
+			if (A_LoopField != FolderName)
+			{
+				Menu, MoveSubmenu, Add, %A_LoopField%, MoveRule
+			}
+		}
+
+		Menu, ContextMenu, Add, Move to, :MoveSubmenu		
+		Menu, ContextMenu, Show, %A_GuiX%, %A_GuiY%
+	}
+Return
+
+;Reponsible for moving a rule from one folder to another
+MoveRule:
+	;Getting the selected rule
+	Gui, 1: ListView, Rules
+	FocusedRowNumber := LV_GetNext(0, "F")
+	LV_GetText(RuleName, FocusedRowNumber, 2)
+	
+	;getting the current folder
+	Gui, 1: ListView, Folders
+	FocusedRowNumber := LV_GetNext(0, "F")
+	LV_GetText(FolderName, FocusedRowNumber, 2)
+
+	;deleting from the current folder
+	IniRead, RuleNames, rules.ini, %FolderName%, RuleNames
+	StringReplace, RuleNames, RuleNames, %RuleName%|,,
+	IniWrite, %RuleNames%, rules.ini, %FolderName%, RuleNames
+	
+	;creating in the new folder
+	IniRead, RuleNames, rules.ini, %A_ThisMenuItem%, RuleNames
+	IniWrite, %RuleNames%%RuleName%|, rules.ini, %A_ThisMenuItem%, RuleNames
+	
+	;updating rule's own folder path
+	IniWrite, %A_ThisMenuItem%\*, rules.ini, %RuleName%, Folder
+	
+	;Refresh the list then restore focus and select so that you can
+	; continue to press the button
+	Gosub, ListRules
+	LV_Modify(SelectedRow-1, "Select")
+	GuiControl, 1: Focus, Rules
+	ActiveRule := SelectedRule ;overridden because ListRules zeros it out
+Return
+
 ;Responsible for checking for duplicate folders and saving the newly added folder to the ini file
 SaveFolders(NewFolder, Folders)
 {
@@ -1076,6 +1136,7 @@ SaveFolders(NewFolder, Folders)
 	
 	Folders = %Folders%%NewFolder%|
 	IniWrite, %Folders%, rules.ini, Folders, Folders
+	IniWrite, %A_Space%, rules.ini, %NewFolder%, RuleNames
 	Gui, 1: Default
 	Gui, 1: ListView, Folders
 	LV_Delete()
