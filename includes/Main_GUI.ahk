@@ -167,7 +167,7 @@ SetActive:
 		ActiveRule =
 	else 
 		LV_GetText(ActiveRule, A_EventInfo, 2)
-	
+
 	;Change the button based on the selected rule's enable status
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	If (Enabled = 1)
@@ -743,6 +743,7 @@ return
 ; rule has proper form and then writes it to the ini file
 SaveRule:
 	Gui, 2: Submit, NoHide
+
 	if (RuleName = "")
 	{
 		Msgbox,,Missing Description, You need to write a description for your rule.
@@ -755,12 +756,29 @@ SaveRule:
 	}
 
 	StringReplace, RuleMatchList, AllRuleNames, |,`,,ALL
-	if RuleName in %RuleMatchList%
+	Loop
 	{
-		if !Edit
+		;If we didnt' change rule name, no need to check for matches
+		if (RuleName == OldName)
+			break
+		
+		if RuleName in %RuleMatchList%
 		{
-			Msgbox,,Duplicate Name, A rule with this name already exists. Please rename your rule.
- 			return
+			RegExMatch(RuleName, "^(.*)\s(\((\d+)\))$", Match)
+			
+			if (Match3 != "")
+			{
+				Match3++
+				RuleName = %Match1% (%Match3%)
+			}
+			else
+			{
+				RuleName = %RuleName% (1)
+			}
+		}
+		else
+		{
+			break
 		}
 	}
 
@@ -1076,6 +1094,7 @@ GuiContextMenu:
 		LV_GetText(FolderName, FocusedRowNumber, 2)
 		
 		Menu, ContextMenu, UseErrorLevel ;allows us to try to delete the menu, even if it doesn't exist, by surpressing hard stop
+		Menu, CopySubmenu, DeleteAll
 		Menu, MoveSubmenu, DeleteAll
 		
 		ListFolders := SubStr(Folders, 1, -1)
@@ -1083,12 +1102,127 @@ GuiContextMenu:
 		{
 			if (A_LoopField != FolderName)
 			{
+				Menu, CopySubmenu, Add, %A_LoopField%, CopyRule
 				Menu, MoveSubmenu, Add, %A_LoopField%, MoveRule
 			}
 		}
 
+		Menu, ContextMenu, Add, Copy to, :CopySubmenu
 		Menu, ContextMenu, Add, Move to, :MoveSubmenu		
 		Menu, ContextMenu, Show, %A_GuiX%, %A_GuiY%
+	}
+Return
+
+;Reponsible for copying a rule from one folder to another
+CopyRule:
+	;Getting the selected rule
+	Gui, 1: ListView, Rules
+	FocusedRowNumber := LV_GetNext(0, "F")
+	LV_GetText(RuleName, FocusedRowNumber, 2)
+	
+	;getting the current folder
+	Gui, 1: ListView, Folders
+	FocusedRowNumber := LV_GetNext(0, "F")
+	LV_GetText(FolderName, FocusedRowNumber, 2)
+	
+	;Retrieve the current main settings for the rule selected for editing
+	IniRead, Folder, rules.ini, %RuleName%, Folder, %A_Space%
+	IniRead, Action, rules.ini, %RuleName%, Action, %A_Space%
+	IniRead, Destination, rules.ini, %RuleName%, Destination, %A_Space%
+	IniRead, Overwrite, rules.ini, %RuleName%, Overwrite, 0
+	IniRead, Compress, rules.ini, %RuleName%, Compress, 0
+	IniRead, Matches, rules.ini, %RuleName%, Matches, %A_Space%
+	IniRead, Enabled, rules.ini, %RuleName%, Enabled, 0
+	IniRead, ConfirmAction, rules.ini, %RuleName%, ConfirmAction, 0
+	IniRead, Recursive, rules.ini, %RuleName%, Recursive, 0
+	
+	LineNum =
+	Loop
+	{
+		if ((A_Index-1) = NumOfRules)
+			break
+
+		if (A_Index = 1)
+			RuleNum =
+		else
+			RuleNum := A_Index - 1
+
+		IniRead, Subject%RuleNum%, rules.ini, %RuleName%, Subject%RuleNum%
+		IniRead, Verb%RuleNum%, rules.ini, %RuleName%, Verb%RuleNum%
+		IniRead, Object%RuleNum%, rules.ini, %RuleName%, Object%RuleNum%
+		IniRead, Units%RuleNum%, rules.ini, %RuleName%, Units%RuleNum%
+
+		if (LineNum = "")
+			LineNum := 0
+		
+		LineNum++
+	}
+	
+	StringReplace, RuleMatchList, AllRuleNames, |,`,,ALL
+	Loop
+	{
+		if RuleName in %RuleMatchList%
+		{
+			RegExMatch(RuleName, "^(.*)\s(\((\d+)\))$", Match)
+			
+			if (Match3 != "")
+			{
+				Match3++
+				RuleName = %Match1% (%Match3%)
+			}
+			else
+			{
+				RuleName = %RuleName% (1)
+			}
+		}
+		else
+		{
+			break
+		}
+	}
+	
+	IniWrite, %RuleName%|, rules.ini, %A_ThisMenuItem%, RuleNames
+	IniWrite, %AllRuleNames%%RuleName%|, rules.ini, Rules, AllRuleNames
+	IniWrite, %A_ThisMenuItem%\*, rules.ini, %RuleName%, Folder
+	IniWrite, %Enabled%, rules.ini, %RuleName%, Enabled
+	IniWrite, %ConfirmAction%, rules.ini, %RuleName%, ConfirmAction
+	IniWrite, %Recursive%, rules.ini, %RuleName%, Recursive
+	IniWrite, %Matches%, rules.ini, %RuleName%, Matches
+	IniWrite, %GUIAction%, rules.ini, %RuleName%, Action
+	
+	;only need to write these tags if they need a destination
+	if  (GUIAction != "Send file to Recycle Bin") and (GUIAction != "Delete file")
+	{
+		IniWrite, %GUIDestination%, rules.ini, %RuleName%, Destination
+		IniWrite, %Overwrite%, rules.ini, %RuleName%, Overwrite
+		IniWrite, %Compress%, rules.ini, %RuleName%, Compress
+	}
+	
+	;save the rest of the subject combos
+	Loop
+	{
+		if (A_Index = 1)
+			thisLine =
+		else
+			thisLine := A_Index - 1
+
+		if (A_Index > LineNum)
+			break
+
+		if (Subject%thisLine% != "")
+		{
+			if (thisLine = "")
+				RuleNum =
+			else if (RuleNum = "")
+				RuleNum := 1
+			else
+				RuleNum++
+
+			IniWrite, % Subject%thisLine%, rules.ini, %RuleName%, Subject%RuleNum%
+			IniWrite, % Verb%thisLine%, rules.ini, %RuleName%, Verb%RuleNum%
+			IniWrite, % Object%thisLine%, rules.ini, %RuleName%, Object%RuleNum%
+			IniWrite, % Units%thisLine%, rules.ini, %RuleName%, Units%RuleNum%
+		}
 	}
 Return
 
