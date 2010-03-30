@@ -82,6 +82,7 @@ MANAGE:
 	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
 	IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
+	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
 	
 	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
@@ -91,6 +92,7 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Checkbox, x62 y132 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
+	Gui, 1: Add, Checkbox, x62 y162 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
 	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
 	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
 	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
@@ -372,12 +374,17 @@ AddRule:
 	Gui, 2: Add, DropDownList, x445 y152 vGUIUnits w60 ,
 	GuiControl, 2: Hide, GUIUnits
 	Gui, 2: Add, Button, vGUINewLine x515 y152 w20 h20 gNewLine , +
-	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
+	Gui, 2: Add, Text, x32 y202 vExclusions, Exclude files with any of these attributes:
+	Gui, 2: Add, Checkbox, x248 y202 vAttribReadOnly, Read Only
+	Gui, 2: Add, Checkbox, x328 y202 vAttribHidden, Hidden
+	Gui, 2: Add, Checkbox, x388 y202 vAttribSystem, System
+	Gui, 2: Add, Text, x32 y222 w260 h20 vConsequence , Do the following:
 	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %AllActions%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , 
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
 	Gui, 2: Add, Button, x515 y242 gChooseAction vGUIChooseAction h20, ...
+	GuiControl, 2: Hide, GUIChooseAction
 	Gui, 2: Add, Checkbox, x482 y237 vOverwrite, Overwrite?
 	Gui, 2: Add, Checkbox, x482 y252 vCompress, Compress?
 	Gui, 2: Add, Button, x32 y302 w100 h30 vTestButton gTESTMatches, Test
@@ -432,6 +439,9 @@ EditRule:
 	IniRead, Enabled, rules.ini, %ActiveRule%, Enabled, 0
 	IniRead, ConfirmAction, rules.ini, %ActiveRule%, ConfirmAction, 0
 	IniRead, Recursive, rules.ini, %ActiveRule%, Recursive, 0
+	IniRead, AttribReadOnly, rules.ini, %ActiveRule%, AttribReadOnly, 0
+	IniRead, AttribHidden, rules.ini, %ActiveRule%, AttribHidden, 0
+	IniRead, AttribSystem, rules.ini, %ActiveRule%, AttribSystem, 0
 	
 	;Create the GUI and insert the current main settings for the rules selected
 	Gui, 2: Destroy
@@ -533,7 +543,11 @@ EditRule:
 	}
 	
 	ActionHeight :=
-	Gui, 2: Add, Text, x32 y212 w260 h20 vConsequence , Do the following:
+	Gui, 2: Add, Text, x32 y202 vExclusions, Exclude files with any of these attributes:
+	Gui, 2: Add, Checkbox, x248 y202 Checked%AttribReadOnly% vAttribReadOnly, Read Only
+	Gui, 2: Add, Checkbox, x328 y202 Checked%AttribHidden% vAttribHidden, Hidden
+	Gui, 2: Add, Checkbox, x388 y202 Checked%AttribSystem% vAttribSystem, System
+	Gui, 2: Add, Text, x32 y222 w260 h20 vConsequence , Do the following:
 	StringReplace, RuleAction, AllActionsNoDefault, %Action%, %Action%|
 
 	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %RuleAction%
@@ -550,7 +564,11 @@ EditRule:
 	Gui, 2: Add, Button, x372 y302 w100 h30 vOKButton gSaveRule, OK
 	Gui, 2: Add, Button, x482 y302 w100 h30 vCancelButton gGui2Close, Cancel
 
-	GuiControl, 2: Move, Consequence , % "y" (NumOfRules-1) * 30 + 212
+	GuiControl, 2: Move, Exclusions,  % "y" (NumOfRules-1) * 30 + 202
+	GuiControl, 2: Move, AttribReadOnly,  % "y" (NumOfRules-1) * 30 + 202
+	GuiControl, 2: Move, AttribHidden,  % "y" (NumOfRules-1) * 30 + 202
+	GuiControl, 2: Move, AttribSystem,  % "y" (NumOfRules-1) * 30 + 202
+	GuiControl, 2: Move, Consequence , % "y" (NumOfRules-1) * 30 + 222
 	GuiControl, 2: Move, GUIAction, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, ActionTo, % "y" (NumOfRules-1) * 30 + 242
 	GuiControl, 2: Move, GUIDestination, % "y" (NumOfRules-1) * 30 + 242
@@ -622,17 +640,21 @@ NewLine:
 	Gui, 2: Add, Button, vGUIRemLine%LineNum% x535 y%height% w20 h20 gRemLine , - 
 
 	; now extend the size of the window
-	GuiControl, 2: Move, Consequence , % "y" LineNum * 30 + 212
-	GuiControl, 2: Move, GUIAction, % "y" LineNum * 30 + 242
-	GuiControl, 2: Move, ActionTo, % "y" LineNum * 30 + 242
-	GuiControl, 2: Move, GUIDestination, % "y" LineNum * 30 + 242
-	GuiControl, 2: Move, GUIChooseFolder,% "y" LineNum * 30 + 242
-	GuiControl, 2: Move, GUIChooseAction,% "y" LineNum * 30 + 242
-	GuiControl, 2: Move, Overwrite, % "y" LineNum * 30 + 237
-	GuiControl, 2: Move, Compress, % "y" LineNum * 30 + 252
-	GuiControl, 2: Move, TestButton, % "y" LineNum * 30 + 302
-	GuiControl, 2: Move, OKButton, % "y" LineNum * 30 + 302
-	GuiControl, 2: Move, CancelButton, % "y" LineNum * 30 + 302
+	GuiControl, 2: MoveDraw, Exclusions,  % "y" LineNum * 30 + 202
+	GuiControl, 2: MoveDraw, AttribReadOnly,  % "y" LineNum * 30 + 202
+	GuiControl, 2: MoveDraw, AttribHidden,  % "y" LineNum * 30 + 202
+	GuiControl, 2: MoveDraw, AttribSystem,  % "y" LineNum * 30 + 202
+	GuiControl, 2: MoveDraw, Consequence , % "y" LineNum * 30 + 222
+	GuiControl, 2: MoveDraw, GUIAction, % "y" LineNum * 30 + 242
+	GuiControl, 2: MoveDraw, ActionTo, % "y" LineNum * 30 + 242
+	GuiControl, 2: MoveDraw, GUIDestination, % "y" LineNum * 30 + 242
+	GuiControl, 2: MoveDraw, GUIChooseFolder,% "y" LineNum * 30 + 242
+	GuiControl, 2: MoveDraw, GUIChooseAction,% "y" LineNum * 30 + 242
+	GuiControl, 2: MoveDraw, Overwrite, % "y" LineNum * 30 + 237
+	GuiControl, 2: MoveDraw, Compress, % "y" LineNum * 30 + 252
+	GuiControl, 2: MoveDraw, TestButton, % "y" LineNum * 30 + 302
+	GuiControl, 2: MoveDraw, OKButton, % "y" LineNum * 30 + 302
+	GuiControl, 2: MoveDraw, CancelButton, % "y" LineNum * 30 + 302
 	Gui, 2: Show, % "h" LineNum * 30 + 348
 
 	LineNum++
@@ -848,6 +870,9 @@ SaveRule:
 	IniWrite, %Recursive%, rules.ini, %RuleName%, Recursive
 	IniWrite, %Matches%, rules.ini, %RuleName%, Matches
 	IniWrite, %GUIAction%, rules.ini, %RuleName%, Action
+	IniWrite, %AttribReadOnly%, rules.ini, %RuleName%, AttribReadOnly
+	IniWrite, %AttribHidden%, rules.ini, %RuleName%, AttribHidden
+	IniWrite, %AttribSystem%, rules.ini, %RuleName%, AttribSystem
 	
 	;only need to write these tags if they need a destination
 	if  (GUIAction != "Send file to Recycle Bin") and (GUIAction != "Delete file")
@@ -927,6 +952,7 @@ SavePrefs:
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
 	IniWrite, %GrowlEnabled%, rules.ini, Preferences, GrowlEnabled
+	IniWrite, %ConfirmExit%, rules.ini, Preferences, ConfirmExit
 	
 	if (EnableLogging = 1)
 	{

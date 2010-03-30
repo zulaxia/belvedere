@@ -27,6 +27,7 @@ IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength, minutes
 IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
+IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
 
 ;Register Belvedere with the Growl for Windows Application
 if GrowlEnabled = 1
@@ -73,6 +74,18 @@ Loop
 			IniRead, Action, rules.ini, %thisRule%, Action, %A_Space%
 			IniRead, Destination, rules.ini, %thisRule%, Destination, %A_Space%
 			IniRead, Matches, rules.ini, %thisRule%, Matches, %A_Space%
+			IniRead, AttribReadOnly, rules.ini, %thisRule%, AttribReadOnly, 0
+			IniRead, AttribHidden, rules.ini, %thisRule%, AttribHidden, 0
+			IniRead, AttribSystem, rules.ini, %thisRule%, AttribSystem, 0
+			
+			thisAttributes :=
+			if AttribReadOnly
+				thisAttributes = R,%thisAttributes%
+			if AttribHidden
+				thisAttributes = H,%thisAttributes%
+			if AttribSystem
+				thisAttributes = S,%thisAttributes%
+			StringTrimRight, thisAttributes, thisAttributes, 1
 			
 			;If rule is not enabled, just skip over it
 			if (Enabled = 0)
@@ -97,8 +110,10 @@ Loop
 			;if we're moving something, need to find out if I can overwrite it
 			;also checking to see if the user wants to compress it as well
 			if (Destination != "")
+			{
 				IniRead, Overwrite, rules.ini, %thisRule%, Overwrite, 0
 				IniRead, Compress, rules.ini, %thisRule%, Compress, 0
+			}
 
 			;Loop through all of the folder contents
 			Loop %Folder%, 0, %Recursive%
@@ -115,6 +130,11 @@ Loop
 
 					file = %A_LoopFileLongPath%
 					fileName = %A_LoopFileName%
+					FileGetAttrib, Attributes, %A_LoopFileLongPath%
+
+					;skip any further processing if it is an excluded attribute
+					if Attributes contains %thisAttributes%
+						continue
 
 					; Below determines the subject of the comparison
 					if (Subject%RuleNum% = "Name")
@@ -760,9 +780,13 @@ Return
 ;Closing the app; w/ confirmation
 EXIT:
 	Gui, 1: +OwnDialogs
-	MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
-	IfMsgBox No
-		return
+	
+	if ConfirmExit
+	{
+		MsgBox, 4, Exit?, Are you sure you would like to exit %APPNAME% ?
+		IfMsgBox No
+			return
+	}
 	
 	Log(APPNAME . " is closing. Good-bye!", "System")
 	Notify(APPNAME . " is closing. Good-bye!", "System")

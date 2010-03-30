@@ -16,6 +16,7 @@ VerifyConfig:
 	IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, LogType, rules.ini, Preferences, LogType
+	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit
 	
 	;Check each of the critical items, and if they are missing, create them
 	; text of 'ERROR' denotes a missing tag
@@ -92,6 +93,13 @@ VerifyConfig:
 			IniWrite, %A_Space%, rules.ini, Preferences, LogType
 		
 		ChangeCount++
+	}
+	
+	;Default to yes if not there
+	if ConfirmExit = ERROR
+	{
+		IniWrite, 1, rules.ini, Preferences, ConfirmExit
+		ChangeCount++	
 	}
 	
 	Log("Completed configuration file verification; making " . ChangeCount . " corrections", "System")
