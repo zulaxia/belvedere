@@ -820,11 +820,7 @@ SaveRule:
 
 		if (GUIObject%CheckLine% = "")
 		{
-			if Checkline in %Skip%
-			{
-				;msgbox, you want to skip this one because %checkline% is in %skip%
-			}
-			else
+			if Checkline not in %Skip%
 			{
 				Msgbox,,Missing Data, % "You're missing data in one of your " GUISubject%CheckLine% " rules."
 				return
@@ -843,7 +839,7 @@ SaveRule:
 				return
 			}
 		}
-		else
+		else if (GUIAction != "Rename file")
 		{
 			IfNotExist, %GUIDestination%
 			{

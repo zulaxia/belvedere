@@ -241,7 +241,7 @@ Loop
 					Message = %Message%File: %file%`r`n
 					
 					;Here is where we act upon the files that matched
-					if (Action = "Move file") or (Action = "Rename file") or (Action = "Move file & leave shortcut")
+					if (Action = "Move file") or (Action = "Move file & leave shortcut")
 					{
 						Log("Destination: " . Destination, "Action")
 						Message = %Message%Destination: %Destination%`r`n
@@ -269,6 +269,23 @@ Loop
 							Notify(Message, "Action")
 						}
 						
+					}
+					else if (Action = "Rename file")
+					{
+						Log("Destination: " . Destination, "Action")
+						Message = %Message%Destination: %Destination%`r`n
+						
+						errcode := rename(file, Destination)
+						if errcode
+						{
+							Log("ERROR: Unable to rename file", "Action")
+							Message = %Message%Unable to rename file
+							Notify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
+						}
 					}
 					else if (Action = "Send file to Recycle Bin")
 					{
