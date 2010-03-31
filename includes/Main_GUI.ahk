@@ -182,6 +182,7 @@ return
 ; the order of the rules in this list is the order of precedence
 ; that the application will process them in
 MoveUp:
+	Gui, 1: +OwnDialogs
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -216,6 +217,7 @@ return
 ; the order of the rules in this list is the order of precedence
 ; that the application will process them in
 MoveDown:
+	Gui, 1: +OwnDialogs
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -246,6 +248,7 @@ return
 
 ;Toggles the active state of the selected rule and saves it to the ini
 EnableButton:
+	Gui, 1: +OwnDialogs
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -338,6 +341,7 @@ return
 ; only the GUI creation of the rule process, saving is handled in
 ; SaveRule procedure below
 AddRule:
+	Gui, 1: +OwnDialogs
 	Skip=
 	Edit := 0 ; this is a new rule, not a rule being edited
 	LineNum=
@@ -398,6 +402,7 @@ AddRule:
 		GuiControl, 2: Text, FolderPath, Folder: %NewPath%
 	}
 
+	Gui, 1: +Disabled
 	Gui, 2: Show, h348 w598, Create a rule...
 	Gosub, RefreshVars
 	Gosub, ListRules
@@ -407,6 +412,7 @@ Return
 ; only the GUI creation of the rule process and population with the 
 ; current rule settings, saving is handled in SaveRule procedure below
 EditRule:
+	Gui, 1: +OwnDialogs
 	Skip = 
 	Edit := 1
 	
@@ -579,6 +585,8 @@ EditRule:
 	GuiControl, 2: Move, TestButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, OKButton, % "y" (NumOfRules-1) * 30 + 302
 	GuiControl, 2: Move, CancelButton, % "y" (NumOfRules-1) * 30 + 302
+	
+	Gui, 1: +Disabled
 	Gui, 2: Show, h348 w598, Edit Rule
 	Gui, 2: Show, % "h" (NumOfRules-1) * 30 + 348
 	Gosub, RefreshVars
@@ -587,6 +595,7 @@ return
 
 ;Destroys the create/edit rule dialog when closed
 Gui2Close:
+	Gui, 1: -Disabled
 	Gui, 2: Destroy
 return
 
@@ -857,6 +866,7 @@ SaveRule:
 		StringReplace, RuleNames, RuleNames, %OldName%|,,
 	}
 	
+	Gui, 1: -Disabled
 	Gui, 2: Destroy
 	IniWrite, %RuleNames%%RuleName%|, rules.ini, %ActiveFolder%, RuleNames
 	IniWrite, %AllRuleNames%%RuleName%|, rules.ini, Rules, AllRuleNames
@@ -916,7 +926,7 @@ return
 ; this is responsible displaying a selection box and posting it to the rule
 ; creation screen
 ChooseFolder:
-	Gui, 1: +OwnDialogs
+	Gui, 2: +OwnDialogs
 	FileSelectFolder, GUIDestination
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return
@@ -925,7 +935,7 @@ return
 ; this is responsible displaying a selection box and posting it to the rule
 ; creation screen
 ChooseAction:
-	Gui, 1: +OwnDialogs
+	Gui, 2: +OwnDialogs
 	FileSelectFile, GUIDestination, 3, , Select Custom Action, Programs (*.exe; *.com; *.bat; *.cmd; *.pif; *.vbs)
 	GuiControl, 2:, GUIDestination, %GUIDestination%
 return

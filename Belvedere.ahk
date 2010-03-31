@@ -681,15 +681,23 @@ Return
 ;Shows the log file in a new window
 VIEWLOG:
 	Gui, 5: Destroy
-	Gui, 5: +owner
-	Gui, 5: -MinimizeBox
+	Gui, 5: +owner1
+	Gui, 5: +toolwindow
 	Gui, 5: Add, Edit, h425 w600 vLogView ReadOnly
 	Gui, 5: Add, Button, x10 y440 h30 vRefreshLog gRefreshLog, Refresh
 	Gui, 5: Add, Button, x280 y440 h30 vClearLog gClearLog, Clear Log
 	Gui, 5: Add, Button, x545 y440 h30 vSaveLog gSaveLog, Save Log...
 	GoSub, RefreshLog
+	Gui, 1: +Disabled
 	Gui, 5: Show, auto, %APPNAME% Log
 Return
+
+4GuiClose:
+5GuiClose:
+	Gui, 1: -Disabled
+	Gui, 4: Destroy
+	Gui, 5: Destroy
+return
 
 ;Run when the 'Refresh' button is clicked under the log screen
 ; will re-read the log and display in the same window
@@ -768,7 +776,8 @@ return
 ;Run when the 'About Belvedere' menu item is clicked on the Main Menu
 ABOUT:
 	Gui,4: Destroy
-	Gui,4: +owner +AlwaysOnTop -MinimizeBox +ToolWindow
+	Gui,4: +owner1 
+	Gui,4: +toolwindow
 	Gui,4: Add,Picture,x45 y0,%BelvederePNG%
 	Gui,4: font, s8, Courier New
 	Gui,4: Add, Text,x275 y235,%Version%
@@ -783,6 +792,7 @@ ABOUT:
 	Gui,4: Add,Text,cBlue gWCHomepage Center x105 y400,Icon design by What Cheer
 	Gui,4: Add,Text,cBlue g7zipHomepage Center x30 y415, 7-Zip used for compression under GNU LGPL license
 	Gui,4: Color,F8FAF0
+	Gui,1: +Disabled
 	Gui,4: Show,auto,About Belvedere
 Return
 
