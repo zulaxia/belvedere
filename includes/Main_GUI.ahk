@@ -44,11 +44,13 @@ MANAGE:
 	Gui, 1: Add, Text, x290 y55 w410 vFolderPath,
 	Gui, 1: Add, Button, x62 y382 w30 h30 gAddFolder, +
 	Gui, 1: Add, Button, x92 y382 w30 h30 gRemoveFolder, -
+	Gui, 1: Add, Button, x30 y185 h30 vMoveUpFolder gMoveUpFolder, /\
+	Gui, 1: Add, Button, x30 y215 h30 vMoveDownFolder gMoveDownFolder, \/
 	Gui, 1: Add, Button, x252 y382 w30 h30 gAddRule, +
 	Gui, 1: Add, Button, x282 y382 w30 h30 gRemoveRule, -
 	Gui, 1: Add, Button, x312 y382 h30 vEditRule gEditRule, Edit Rule
-	Gui, 1: Add, Button, x436 y382 h30 vMoveUp gMoveUp, Move Up
-	Gui, 1: Add, Button, x492 y382 h30 vMoveDown gMoveDown, Move Down
+	Gui, 1: Add, Button, x675 y185 h30 vMoveUpRule gMoveUpRule, /\
+	Gui, 1: Add, Button, x675 y215 h30 vMoveDownRule gMoveDownRule, \/
 	Gui, 1: Add, Button, x620 y382 h30 vEnableButton gEnableButton, Enable
 	
 	;Items found on Second Tab
@@ -113,6 +115,24 @@ Return
 GuiClose:
 	Gui, 1: Destroy
 	Gui, 2: Destroy
+return
+
+ListFolders:
+	ActiveFolder=
+	Gui, 1: Default
+	Gui, 1: ListView, Folders
+	LV_Delete()
+	
+	IniRead, Folders, rules.ini, Folders, Folders
+	Loop, Parse, Folders, |
+	{
+		SplitPath, A_LoopField, FileName,,,,FileDrive
+		;If no name is present we are assuming a root drive
+		if (FileName = "")
+			LV_Add(0, FileDrive, A_LoopField)
+		else
+			LV_Add(0, FileName, A_LoopField)
+	}
 return
 
 ;Lists the rules on the right side of the screen for the actively 
@@ -181,8 +201,77 @@ return
 ;Moves rules up in the rule list on the right side of the main GUI
 ; the order of the rules in this list is the order of precedence
 ; that the application will process them in
-MoveUp:
+MoveUpFolder:
 	Gui, 1: +OwnDialogs
+	Gui, 1: ListView, Folders
+	; make sure a folder is selected
+	if (ActiveFolder = "")
+	{
+		MsgBox,,Select Folder, Please select a folder to move up.
+		return
+	}
+	
+	SelectedRow := LV_GetNext(RowNumber)
+	if (SelectedRow = 1) ;if first folder we can't move up any more
+		return
+	
+	LV_GetText(SelectedFolder, SelectedRow, 1)
+	LV_GetText(PreviousFolder, SelectedRow-1, 1)
+	
+	;Taking the previous folder, replacing with a temp value and then 
+	; replacing with the new folder then writing to the file
+	IniRead, Folders, rules.ini, Folders, Folders
+	StringReplace Folders, Folders, %SelectedFolder%, --
+	StringReplace Folders, Folders, %PreviousFolder%, %SelectedFolder%
+	StringReplace Folders, Folders, --, %PreviousFolder%
+	IniWrite, %Folders%, rules.ini, Folders, Folders
+
+	;Refresh the list then restore focus and select so that you can
+	; continue to press the button
+	Gosub, ListFolders
+	LV_Modify(SelectedRow-1, "Select")
+	GuiControl, 1: Focus, Folders
+	ActiveFolder := SelectedFolder ;overridden because ListFolders zeros it out
+return
+
+MoveDownFolder:
+	Gui, 1: +OwnDialogs
+	Gui, 1: ListView, Folders
+	
+	; make sure a folder is selected
+	if (ActiveFolder = "")
+	{
+		MsgBox,,Select Folder, Please select a folder to move down.
+		return
+	}
+
+	SelectedRow := LV_GetNext(RowNumber)
+	if (SelectedRow = LV_GetCount()-1) ;if last folder we can't move down any more
+		return
+
+	LV_GetText(SelectedFolder, SelectedRow, 2)
+	LV_GetText(NextFolder, SelectedRow+1, 2)
+	
+	IniRead, Folders, rules.ini, Folders, Folders
+	StringReplace Folders, Folders, %SelectedFolder%, --
+	StringReplace Folders, Folders, %NextFolder%, %SelectedFolder%
+	StringReplace Folders, Folders, --, %NextFolder%
+	IniWrite, %Folders%, rules.ini, Folders, Folders
+
+	;Refresh the list then restore focus and select so that you can
+	; continue to press the button
+	Gosub, ListFolders
+	LV_Modify(SelectedRow+1, "Select")
+	GuiControl, 1: Focus, Folders
+	ActiveFolder := SelectedFolder ;overridden because ListFolders zeros it out
+return
+
+;Moves rules up in the rule list on the right side of the main GUI
+; the order of the rules in this list is the order of precedence
+; that the application will process them in
+MoveUpRule:
+	Gui, 1: +OwnDialogs
+	Gui, 1: ListView, Rules
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -216,8 +305,9 @@ return
 ;Moves rules down in the rule list on the right side of the main GUI
 ; the order of the rules in this list is the order of precedence
 ; that the application will process them in
-MoveDown:
+MoveDownRule:
 	Gui, 1: +OwnDialogs
+	Gui, 1: ListView, Rules
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -298,7 +388,6 @@ RemoveFolder:
 	Gui, ListView, Folders
 	LV_GetText(RemoveFolder, CurrentlySelected, 2)
 	LV_GetText(RemoveFolderName, CurrentlySelected, 3)
-	success := LV_Delete()
 	
 	;Delete the selected folder from above from the ini file list
 	StringReplace, Folders, Folders, %RemoveFolder%|,,
@@ -315,21 +404,15 @@ RemoveFolder:
 		}
 	}
 	
+	;Clean-up GUI when folder is removed
+	GuiControl, 1: Text, FolderPath, %A_Space%
+	
 	;Rewrite the rule names now that we have delete all of the 
 	; ones associated with this folder
 	IniWrite, %AllRuleNames%, rules.ini, Rules, AllRuleNames
 	IniDelete, rules.ini, %RemoveFolder%
 	Gosub, RefreshVars
-
-	Loop, Parse, Folders, |
-	{
-		SplitPath, A_LoopField, FileName,,,,FileDrive
-		;If no name is present we are assuming a root drive
-		if (FileName = "")
-			LV_Add(0, FileDrive, A_LoopField)
-		else
-			LV_Add(0, FileName, A_LoopField)
-	}
+	Gosub, ListFolders
 	
 	Log("Folder Removed: " ActiveFolder, "System")
 	Notify("Folder Removed: " ActiveFolder, "System")
@@ -1305,19 +1388,10 @@ SaveFolders(NewFolder, Folders)
 	IniWrite, %A_Space%, rules.ini, %NewFolder%, RuleNames
 	Gui, 1: Default
 	Gui, 1: ListView, Folders
-	LV_Delete()
-	Loop, Parse, Folders, |
-	{
-		SplitPath, A_LoopField, FileName,,,,FileDrive
-		;If no name is present we are assuming a root drive
-		if (FileName = "")
-			LV_Add(0, FileDrive, A_LoopField)
-		else
-			LV_Add(0, FileName, A_LoopField)
-	}
 	
 	Log("Folder Added: " NewFolder, "System")
 	Notify("Folder Added: " NewFolder, "System")
+	Gosub, ListFolders
 	Gosub, RefreshVars
 	return
 }
