@@ -534,6 +534,7 @@ BuildINI:
 		IniWrite,0,rules.ini, Preferences, RBEnable
 		IniWrite,0,rules.ini, Preferences, EnableLogging
 		IniWrite,%A_Space%,rules.ini, Preferences, LogType
+		IniWrite,%A_Desktop%,rules.ini, Preferences, LastFolder
 	}
 return
 
@@ -803,6 +804,7 @@ Return
 #Include includes\log.ahk
 #Include includes\test.ahk
 #Include includes\maint.ahk
+#Include includes\gui-rule.ahk
 
 ;Closing the app; w/ confirmation
 EXIT:
