@@ -180,7 +180,7 @@ Loop
 					else if (Verb%RuleNum% = "is in the last")
 						result%RuleNum% := isInTheLast(thisSubject, Object%RuleNum%)
 					else if (Verb%RuleNum% = "is not in the last")
-						result%RuleNum% := !isInTheLast(thisSubject, Object%RuleNum%)
+						result%RuleNum% := !(isInTheLast(thisSubject, Object%RuleNum%))
 				}
 				
 				; Below evaluates result and takes action

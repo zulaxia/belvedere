@@ -1,3 +1,20 @@
+;
+; AutoHotkey Version: 1.x
+; Language:       English
+; Platform:       Windows
+; Author:         Adam Pash <adam.pash@gmail.com>
+; Contributor:	  Matthew Shorts <mshorts@gmail.com>
+;
+; Script Name:	  gui-rule.ahk
+;
+; This script is the rule gui portion of the application.  It also has all the logic
+;  to create and edit rules and their corresponding characteristics
+;
+; Some portions Generated using SmartGUI Creator 4.0 
+
+;This is the rule GUI screen with the rule name, subjects and verbs
+;  This window is always identified by Gui, 2
+
 ;Run when the '+' button is clicked under the rule list
 ; only the GUI creation of the rule process, saving is handled in
 ; SaveRule procedure below

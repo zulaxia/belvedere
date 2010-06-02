@@ -124,7 +124,8 @@ ListFolders:
 	LV_Delete()
 	
 	IniRead, Folders, rules.ini, Folders, Folders
-	Loop, Parse, Folders, |
+	ListFolders := SubStr(Folders, 1, -1)
+	Loop, Parse, ListFolders, |
 	{
 		SplitPath, A_LoopField, FileName,,,,FileDrive
 		;If no name is present we are assuming a root drive
@@ -249,7 +250,7 @@ MoveDownFolder:
 	}
 
 	SelectedRow := LV_GetNext(RowNumber)
-	if (SelectedRow = LV_GetCount()-1) ;if last folder we can't move down any more
+	if (SelectedRow = LV_GetCount()) ;if last folder we can't move down any more
 		return
 
 	LV_GetText(SelectedFolder, SelectedRow, 2)
@@ -363,7 +364,7 @@ return
 ; responsible for showing a selection dialog and saving the folder
 AddFolder:
 	Gui, 1: +OwnDialogs
-	FileSelectFolder, NewFolder,
+	FileSelectFolder, NewFolder, , 3, Please select a folder
 	if (NewFolder = "")
 		return
 
