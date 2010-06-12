@@ -85,6 +85,9 @@ MANAGE:
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
 	IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
 	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
+	IniRead, Default_Enabled, rules.ini, Preferences, Default_Enabled, 0
+	IniRead, Default_ConfirmAction, rules.ini, Preferences, Default_ConfirmAction, 0
+	IniRead, Default_Recursive, rules.ini, Preferences, Default_Recursive, 0
 	
 	Gui, 1: Tab, 3
 	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
@@ -94,6 +97,11 @@ MANAGE:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Checkbox, x62 y132 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
 	Gui, 1: Add, Checkbox, x62 y162 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
+	Gui, 1: Add, Groupbox, x63 y192 w620 h70, Default Rule Options
+	Gui, 1: Add, Text, x70 y212, The checked state of the following parameters will be the default for newly created rules:
+	Gui, 1: Add, Checkbox, x70 y232 w70 h20 vDefault_Enabled Checked%Default_Enabled%, Enabled
+	Gui, 1: Add, Checkbox, x140 y232 w95 h20 vDefault_ConfirmAction Checked%Default_ConfirmAction%, Confirm Action
+	Gui, 1: Add, Checkbox, x235 y232 w100 h20 vDefault_Recursive Checked%Default_Recursive%, Recursive
 	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
 	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
 	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
@@ -250,7 +258,7 @@ MoveDownFolder:
 	}
 
 	SelectedRow := LV_GetNext(RowNumber)
-	if (SelectedRow = LV_GetCount()) ;if last folder we can't move down any more
+	if (SelectedRow = LV_GetCount() or SelectedRow = 0) ;if last or only folder we can't move down any more
 		return
 
 	LV_GetText(SelectedFolder, SelectedRow, 2)
@@ -312,6 +320,7 @@ return
 MoveDownRule:
 	Gui, 1: +OwnDialogs
 	Gui, 1: ListView, Rules
+	
 	; make sure a rule is selected
 	if (ActiveRule = "")
 	{
@@ -320,7 +329,7 @@ MoveDownRule:
 	}
 
 	SelectedRow := LV_GetNext(RowNumber)
-	if (SelectedRow = LV_GetCount()) ;if last rule we can't move down any more
+	if (SelectedRow = LV_GetCount() or SelectedRow = 0) ;if last or only rule we can't move down any more
 		return
 
 	LV_GetText(SelectedRule, SelectedRow, 2)
@@ -364,7 +373,7 @@ return
 ; responsible for showing a selection dialog and saving the folder
 AddFolder:
 	Gui, 1: +OwnDialogs
-	FileSelectFolder, NewFolder, , 3, Please select a folder
+	FileSelectFolder, NewFolder, , 3, Please select a folder for %APPNAME% to monitor
 	if (NewFolder = "")
 		return
 
@@ -471,6 +480,9 @@ SavePrefs:
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
 	IniWrite, %GrowlEnabled%, rules.ini, Preferences, GrowlEnabled
 	IniWrite, %ConfirmExit%, rules.ini, Preferences, ConfirmExit
+	IniWrite, %Default_Enabled%, rules.ini, Preferences, Default_Enabled
+	IniWrite, %Default_ConfirmAction%, rules.ini, Preferences, Default_ConfirmAction
+	IniWrite, %Default_Recursive%, rules.ini, Preferences, Default_Recursive
 	
 	if (EnableLogging = 1)
 	{

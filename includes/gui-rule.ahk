@@ -35,6 +35,10 @@ AddRule:
 	LV_GetText(RemoveFolderName, CurrentlySelected, 3)
 	LV_GetText(FolderName, CurrentlySelected, 3)
 	
+	IniRead, Default_Enabled, rules.ini, Preferences, Default_Enabled, 0
+	IniRead, Default_ConfirmAction, rules.ini, Preferences, Default_ConfirmAction, 0
+	IniRead, Default_Recursive, rules.ini, Preferences, Default_Recursive, 0
+	
 	;Create a new 'Create a rule...' dialog box with base settings
 	Gui, 2: Destroy
 	Gui, 2: +owner1
@@ -42,9 +46,9 @@ AddRule:
 	Gui, 2: Add, Text, x52 y32 h20 vFolderPath, Folder: %ActiveFolder%
 	Gui, 2: Add, Text, x32 y62 w60 h20 , Description:
 	Gui, 2: Add, Edit, x92 y62 w250 h20 vRuleName , 
-	Gui, 2: Add, Checkbox, x448 y30 vEnabled, Enabled
-	Gui, 2: Add, Checkbox, x448 y50 vConfirmAction, Confirm Action
-	Gui, 2: Add, Checkbox, x448 y70 vRecursive, Recursive
+	Gui, 2: Add, Checkbox, x448 y30 vEnabled Checked%Default_Enabled%, Enabled
+	Gui, 2: Add, Checkbox, x448 y50 vConfirmAction Checked%Default_ConfirmAction%, Confirm Action
+	Gui, 2: Add, Checkbox, x448 y70 vRecursive Checked%Default_Recursive%, Recursive
 	Gui, 2: Add, Groupbox, x443 y10 w110 h80, Rule Options
 	Gui, 2: Add, Text, x32 y92 w520 h20 , __________________________________________________________________________________________
 	Gui, 2: Add, Text, x32 y122 w10 h20 , If

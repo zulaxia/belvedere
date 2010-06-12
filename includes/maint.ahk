@@ -17,6 +17,9 @@ VerifyConfig:
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, LogType, rules.ini, Preferences, LogType
 	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit
+	IniRead, Default_Enabled, rules.ini, Preferences, Default_Enabled
+	IniRead, Default_ConfirmAction, rules.ini, Preferences, Default_ConfirmAction
+	IniRead, Default_Recursive, rules.ini, Preferences, Default_Recursive
 	
 	;Check each of the critical items, and if they are missing, create them
 	; text of 'ERROR' denotes a missing tag
@@ -100,6 +103,27 @@ VerifyConfig:
 	{
 		IniWrite, 1, rules.ini, Preferences, ConfirmExit
 		ChangeCount++	
+	}
+	
+	;Default to no if not there
+	if Default_Enabled = ERROR
+	{
+		IniWrite, 0, rules.ini, Preferences, Default_Enabled
+		ChangeCount++
+	}
+	
+	;Default to no if not there
+	if Default_ConfirmAction = ERROR
+	{
+		IniWrite, 0, rules.ini, Preferences, Default_ConfirmAction
+		ChangeCount++
+	}
+	
+	;Default to no if not there
+	if Default_Recursive = ERROR
+	{
+		IniWrite, 0, rules.ini, Preferences, Default_Recursive
+		ChangeCount++
 	}
 	
 	Log("Completed configuration file verification; making " . ChangeCount . " corrections", "System")
