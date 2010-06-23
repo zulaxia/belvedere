@@ -27,6 +27,7 @@ IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength, minutes
 IniRead, EnableLogging, rules.ini, Preferences, EnableLogging, 0
 IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
+IniRead, TrayTipEnabled, rules.ini, Preferences, TrayTipEnabled, 0
 IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
 
 ;Register Belvedere with the Growl for Windows Application
@@ -35,6 +36,7 @@ if GrowlEnabled = 1
 	
 Log("Starting " . APPNAME . " " . Version, "System")
 Notify("Starting " . APPNAME . " " . Version, "System")
+WinNotify("Starting " . APPNAME . " " . Version, "System")
 GoSub, getParams
 
 ;main execution loop
@@ -257,16 +259,19 @@ Loop
 							Log("ERROR: Unable to move file, destination folder missing", "Action")
 							Message = %Message%Unable to move file, destination folder missing
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else if (errcode <> 0)
 						{
 							Log("ERROR: Unable to move file", "Action")
 							Message = %Message%Unable to move file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 						
 					}
@@ -281,10 +286,12 @@ Loop
 							Log("ERROR: Unable to rename file", "Action")
 							Message = %Message%Unable to rename file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Send file to Recycle Bin")
@@ -295,10 +302,12 @@ Loop
 							Log("ERROR: Unable to move file to recycle bin", "Action")
 							Message = %Message%Unable to move file to recycle bin
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Delete file")
@@ -309,10 +318,12 @@ Loop
 							Log("ERROR: Unable to delete file", "Action")
 							Message = %Message%Unable to delete file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Copy file")
@@ -325,16 +336,19 @@ Loop
 							Log("ERROR: Unable to copy file, destination folder missing", "Action")
 							Message = %Message%Unable to copy file, destination folder missing
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else if (errcode <> 0)
 						{
 							Log("ERROR: Unable to copy file", "Action")
 							Message = %Message%Unable to copy file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Open file")
@@ -345,10 +359,12 @@ Loop
 							Log("ERROR: Unable to open file", "Action")
 							Message = %Message%Unable to open file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Print file")
@@ -359,10 +375,12 @@ Loop
 							Log("ERROR: Unable to print file", "Action")
 							Message = %Message%Unable to print file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else if (Action = "Custom")
@@ -373,10 +391,42 @@ Loop
 							Log("ERROR: Unable to complete custom action on file", "Action")
 							Message = %Message%Unable to complete custom action on file
 							Notify(Message, "Error")
+							WinNotify(Message, "Error")
 						}
 						else
 						{
 							Notify(Message, "Action")
+							WinNotify(Message, "Action")
+						}
+					}
+					else if (Action = "Add to iTunes")
+					{
+						errcode := addtoitunes(file)
+						if errcode
+						{
+							if (errcode = -1)
+							{
+								Log("ERROR: Unable to add file to iTunes; iTunes not found", "Action")
+								Message = %Message%Unable to add file to iTunes; iTunes not found
+							}
+							else if (errcode = -2)
+							{
+								Log("ERROR: Unable to add file to iTunes; Unable to acccess iTunes", "Action")
+								Message = %Message%Unable to add file to iTunes; Unable to acccess iTunes
+							}
+							else if (errcode = -3)
+							{
+								Log("ERROR: Unable to add file to iTunes; Add file process failed", "Action")
+								Message = %Message%Unable to add file to iTunes; Add file process failed
+							}
+							
+							Notify(Message, "Error")
+							WinNotify(Message, "Error")
+						}
+						else
+						{
+							Notify(Message, "Action")
+							WinNotify(Message, "Action")
 						}
 					}
 					else
@@ -430,6 +480,7 @@ Loop
 	{
 		Log(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
 		Notify(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
+		WinNotify(APPNAME . " is closing due to run count command line parameter. Good-bye!", "System")
 		ExitApp
 	}
 
@@ -463,6 +514,7 @@ getParams:
 			{
 				Log("Command Line Paramter " . param . " accepted with value " . param_val, "System")
 				Notify("Command Line Paramter " . param . " accepted with value " . param_val, "System")
+				WinNotify("Command Line Paramter " . param . " accepted with value " . param_val, "System")
 				MaxRunCount := param_val
 			}
 		}
@@ -476,6 +528,7 @@ emptyRB:
 	{
 		Log("ERROR: Recycle Bin - Interval Empty Failed", "Action")
 		Notify("Recycle Bin - Interval Empty Failed", "Error")
+		WinNotify("Recycle Bin - Interval Empty Failed", "Error")
 	}
 	else
 	{
@@ -487,6 +540,7 @@ emptyRB:
 		GuiControl, 1: ,RBLastEmpty, Last Empty:  %DT%
 		Log("Recycle Bin - Interval Empty Successful", "Action")
 		Notify("Recycle Bin - Interval Empty Successful", "Action")
+		WinNotify("Recycle Bin - Interval Empty Successful", "Action")
 	}
 return
 
@@ -502,8 +556,8 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is greater than or equal|is less than|is less than or equal|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
-	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
+	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
 	DateUnits = seconds|minutes||hours|days|weeks
@@ -584,6 +638,7 @@ PAUSE:
 	{
 		Log(APPNAME . " has resumed from being paused", "System")
 		Notify(APPNAME . " has resumed from being paused", "System")
+		WinNotify(APPNAME . " has resumed from being paused", "System")
 		Menu, TRAY, Icon, resources\belvedere.ico
 		SB_SetText("", 2)
 	}
@@ -591,6 +646,7 @@ PAUSE:
 	{
 		Log(APPNAME . " has been paused", "System")
 		Notify(APPNAME . " has been paused", "System")
+		WinNotify(APPNAME . " has been paused", "System")
 		Menu, TRAY, Icon, resources\belvedere-paused.ico
 		SB_SetText("PAUSED", 2)
 	}
@@ -805,6 +861,7 @@ Return
 #Include includes\test.ahk
 #Include includes\maint.ahk
 #Include includes\gui-rule.ahk
+#Include includes\COM.ahk
 
 ;Closing the app; w/ confirmation
 EXIT:

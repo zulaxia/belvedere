@@ -84,6 +84,7 @@ MANAGE:
 	IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 	StringReplace, thisLogTypes, LogTypes, %LogType%, %LogType%|
 	IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
+	IniRead, TrayTipEnabled, rules.ini, Preferences, TrayTipEnabled, 0
 	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
 	IniRead, Default_Enabled, rules.ini, Preferences, Default_Enabled, 0
 	IniRead, Default_ConfirmAction, rules.ini, Preferences, Default_ConfirmAction, 0
@@ -96,12 +97,13 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Checkbox, x62 y132 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
-	Gui, 1: Add, Checkbox, x62 y162 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
-	Gui, 1: Add, Groupbox, x63 y192 w620 h70, Default Rule Options
-	Gui, 1: Add, Text, x70 y212, The checked state of the following parameters will be the default for newly created rules:
-	Gui, 1: Add, Checkbox, x70 y232 w70 h20 vDefault_Enabled Checked%Default_Enabled%, Enabled
-	Gui, 1: Add, Checkbox, x140 y232 w95 h20 vDefault_ConfirmAction Checked%Default_ConfirmAction%, Confirm Action
-	Gui, 1: Add, Checkbox, x235 y232 w100 h20 vDefault_Recursive Checked%Default_Recursive%, Recursive
+	Gui, 1: Add, Checkbox, x62 y162 vTrayTipEnabled Checked%TrayTipEnabled%, Enable support for Windows Tray Tips (yellow pop-up bubble)
+	Gui, 1: Add, Checkbox, x62 y192 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
+	Gui, 1: Add, Groupbox, x63 y222 w620 h70, Default Rule Options
+	Gui, 1: Add, Text, x70 y242, The checked state of the following parameters will be the default for newly created rules:
+	Gui, 1: Add, Checkbox, x70 y262 w70 h20 vDefault_Enabled Checked%Default_Enabled%, Enabled
+	Gui, 1: Add, Checkbox, x140 y262 w95 h20 vDefault_ConfirmAction Checked%Default_ConfirmAction%, Confirm Action
+	Gui, 1: Add, Checkbox, x235 y262 w100 h20 vDefault_Recursive Checked%Default_Recursive%, Recursive
 	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
 	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
 	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
@@ -265,9 +267,9 @@ MoveDownFolder:
 	LV_GetText(NextFolder, SelectedRow+1, 2)
 	
 	IniRead, Folders, rules.ini, Folders, Folders
-	StringReplace Folders, Folders, %SelectedFolder%, --
-	StringReplace Folders, Folders, %NextFolder%, %SelectedFolder%
-	StringReplace Folders, Folders, --, %NextFolder%
+	StringReplace Folders, Folders, %SelectedFolder%|, --|
+	StringReplace Folders, Folders, %NextFolder%|, %SelectedFolder%|
+	StringReplace Folders, Folders, --|, %NextFolder%|
 	IniWrite, %Folders%, rules.ini, Folders, Folders
 
 	;Refresh the list then restore focus and select so that you can
@@ -301,9 +303,9 @@ MoveUpRule:
 	;Taking the previous rule, replacing with a temp value and then 
 	; replacing with the new rule then writing to the file
 	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
-	StringReplace RuleNames, RuleNames, %SelectedRule%, --
-	StringReplace RuleNames, RuleNames, %PreviousRule%, %SelectedRule%
-	StringReplace RuleNames, RuleNames, --, %PreviousRule%
+	StringReplace RuleNames, RuleNames, %SelectedRule%|, --|
+	StringReplace RuleNames, RuleNames, %PreviousRule%|, %SelectedRule%|
+	StringReplace RuleNames, RuleNames, --|, %PreviousRule%|
 	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
 
 	;Refresh the list then restore focus and select so that you can
@@ -336,9 +338,9 @@ MoveDownRule:
 	LV_GetText(NextRule, SelectedRow+1, 2)
 	
 	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
-	StringReplace RuleNames, RuleNames, %SelectedRule%, --
-	StringReplace RuleNames, RuleNames, %NextRule%, %SelectedRule%
-	StringReplace RuleNames, RuleNames, --, %NextRule%
+	StringReplace RuleNames, RuleNames, %SelectedRule%|, --|
+	StringReplace RuleNames, RuleNames, %NextRule%|, %SelectedRule%|
+	StringReplace RuleNames, RuleNames, --|, %NextRule%|
 	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
 
 	;Refresh the list then restore focus and select so that you can
@@ -429,6 +431,7 @@ RemoveFolder:
 	
 	Log("Folder Removed: " ActiveFolder, "System")
 	Notify("Folder Removed: " ActiveFolder, "System")
+	WinNotify("Folder Removed: " ActiveFolder, "System")
 	
 	Gosub, ListRules
 return
@@ -456,6 +459,7 @@ RemoveRule:
 	
 	Log("Rule Removed: " ActiveRule, "System")
 	Notify("Rule Removed: " ActiveRule, "System")
+	WinNotify("Rule Removed: " ActiveRule, "System")
 	
 	Gosub, RefreshVars
 	Gosub, ListRules
@@ -473,12 +477,15 @@ SavePrefs:
 	IniRead, Old_Sleeptime, rules.ini, Preferences, Sleeptime
 	IniRead, Old_SleeptimeLength, rules.ini, Preferences, SleeptimeLength
 	IniRead, Old_GrowlEnabled, rules.ini, Preferences, GrowlEnabled
+	IniRead, Old_TrayTipEnabled, rules.ini, Preferences, TrayTipEnabled
+
 	
 	IniWrite, %Sleep%, rules.ini, Preferences, Sleeptime
 	IniWrite, %SleeptimeLength%, rules.ini, Preferences, SleeptimeLength
 	IniWrite, %EnableLogging%, rules.ini, Preferences, EnableLogging
 	IniWrite, %LogType%, rules.ini, Preferences, LogType
 	IniWrite, %GrowlEnabled%, rules.ini, Preferences, GrowlEnabled
+	IniWrite, %TrayTipEnabled%, rules.ini, Preferences, TrayTipEnabled
 	IniWrite, %ConfirmExit%, rules.ini, Preferences, ConfirmExit
 	IniWrite, %Default_Enabled%, rules.ini, Preferences, Default_Enabled
 	IniWrite, %Default_ConfirmAction%, rules.ini, Preferences, Default_ConfirmAction
@@ -494,23 +501,27 @@ SavePrefs:
 		
 		Log("Logging has been enabled with type: " . LogType, "System")
 		Notify("Logging has been enabled with type: " . LogType, "System")
+		WinNotify("Logging has been enabled with type: " . LogType, "System")
 	}
 	else if (EnableLogging = 0)
 	{
 		Log("Logging has been disabled", "System")
 		Notify("Logging has been disabled", "System")
+		WinNotify("Logging has been disabled", "System")
 	}
 	
 	Log("Preferences have been saved", "System")
 	Notify("Preferences have been saved", "System")
+	WinNotify("Preferences have been saved", "System")
 	
 	if (Old_Sleeptime <> SleepTime or Old_SleeptimeLength <> SleeptimeLength)
 	{
 		Log("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
 		Notify("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+		WinNotify("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
 	}
 	
-	if (Old_GrowlEnabled <> GrowlEnabled)
+	if (Old_GrowlEnabled <> GrowlEnabled or Old_TrayTipEnabled <> TrayTipEnabled)
 	{
 		MsgBox, 4, Restart?, You must restart %APPNAME% for your new setting to take effect.`nWould you like to restart now?
 		IfMsgBox No
@@ -559,11 +570,13 @@ RBSavePrefs:
 
 	Log("Recycle Bin - Preferences have been saved", "System")
 	Notify("Recycle Bin - Preferences have been saved", "System")
+	WinNotify("Recycle Bin - Preferences have been saved", "System")
 	
 	if (Old_RBEmptyTimeValue <> RBEmptyTimeValue or Old_RBEmptyTimeLength <> RBEmptyTimeLength)
 	{
 		Log("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
 		Notify("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+		WinNotify("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
 	}
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
@@ -832,6 +845,7 @@ SaveFolders(NewFolder, Folders)
 	
 	Log("Folder Added: " NewFolder, "System")
 	Notify("Folder Added: " NewFolder, "System")
+	WinNotify("Folder Added: " NewFolder, "System")
 	Gosub, ListFolders
 	Gosub, RefreshVars
 	return

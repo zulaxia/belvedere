@@ -31,3 +31,20 @@ Notify(String, Type)
 		RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /n:%Type% /t:"%Title%" "%String%"
 	}
 }
+
+WinNotify(String, Type)
+{
+	global
+	if (TrayTipEnabled = 1)
+	{
+		if (Type = "System" or Type = "Action")
+			Option := 1
+		else if (Type = "Error")
+			Option := 3
+		else
+			Option := 0
+		
+		Title = Belvedere %Type% Message
+		TrayTip, %Title%, %String%, 20, %Option%
+	}
+}

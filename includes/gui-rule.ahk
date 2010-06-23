@@ -65,7 +65,7 @@ AddRule:
 	Gui, 2: Add, Checkbox, x328 y202 vAttribHidden, Hidden
 	Gui, 2: Add, Checkbox, x388 y202 vAttribSystem, System
 	Gui, 2: Add, Text, x32 y222 w260 h20 vConsequence , Do the following:
-	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %AllActions%
+	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r10 vGUIAction gSetDestination , %AllActions%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , 
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...
@@ -238,7 +238,7 @@ EditRule:
 	Gui, 2: Add, Text, x32 y222 w260 h20 vConsequence , Do the following:
 	StringReplace, RuleAction, AllActionsNoDefault, %Action%, %Action%|
 
-	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r9 vGUIAction gSetDestination , %RuleAction%
+	Gui, 2: Add, DropDownList, x32 y242 w160 h20 r10 vGUIAction gSetDestination , %RuleAction%
 	Gui, 2: Add, Text, x202 y242 h20 w45 vActionTo , to folder:
 	Gui, 2: Add, Edit, x248 y242 w190 h20 w200 vGUIDestination , %Destination%
 	Gui, 2: Add, Button, x450 y242 gChooseFolder vGUIChooseFolder h20, ...

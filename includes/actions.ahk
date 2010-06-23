@@ -212,3 +212,22 @@ compressFile(file)
 	ifExist, %directory%\%zipname%
 		FileDelete, %directory%\%fullname%
 }
+
+addtoitunes(file)
+{
+	COM_Init() ;Initalize the COM module
+	iTunes := COM_CreateObject("iTunes.Application") ;Connect to iTunes. This will Also open iTunes automatically if its not already open
+	if (iTunes = 0)
+		return -1 ;iTunes is not installed
+		
+	iTunesLibrary := COM_Invoke(iTunes, "LibraryPlaylist")
+	if (iTunesLibrary = 0)
+		return -2 ;unable to retrieve library
+	
+	iTunesFile := COM_Invoke(iTunesLibrary, "AddFile", file)
+	if (iTunesFile = 0)
+		return -3 ;unable to add file
+		
+	COM_Release(iTunes)
+	COM_Term()
+}

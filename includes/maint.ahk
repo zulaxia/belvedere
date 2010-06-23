@@ -16,6 +16,8 @@ VerifyConfig:
 	IniRead, SleeptimeLength, rules.ini, Preferences, SleeptimeLength
 	IniRead, EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, LogType, rules.ini, Preferences, LogType
+	IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled
+	IniRead, TrayTipEnabled, rules.ini, Preferences, TrayTipEnabled
 	IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit
 	IniRead, Default_Enabled, rules.ini, Preferences, Default_Enabled
 	IniRead, Default_ConfirmAction, rules.ini, Preferences, Default_ConfirmAction
@@ -95,6 +97,18 @@ VerifyConfig:
 		else
 			IniWrite, %A_Space%, rules.ini, Preferences, LogType
 		
+		ChangeCount++
+	}
+	
+	if GrowlEnabled = ERROR
+	{
+		IniWrite, 0, rules.ini, Preferences, GrowlEnabled
+		ChangeCount++
+	}
+	
+	if TrayTipEnabled = ERROR
+	{
+		IniWrite, 0, rules.ini, Preferences, TrayTipEnabled
 		ChangeCount++
 	}
 	
