@@ -91,22 +91,24 @@ MANAGE:
 	IniRead, Default_Recursive, rules.ini, Preferences, Default_Recursive, 0
 	
 	Gui, 1: Tab, 3
-	Gui, 1: Add, Text, x62 y62 w60 h20 , Sleeptime:
-	Gui, 1: Add, Edit, x120 y60 w70 h20 Number vSleep, %Sleep%
-	Gui, 1: Add, DropDownList, x190 y60 w65 vSleeptimeLength, %thisSleeptimeLength%
-	Gui, 1: Add, Checkbox, x62 y102 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
-	Gui, 1: Add, DropDownList, x232 y102 w60 vLogType, %thisLogTypes%
-	Gui, 1: Add, Checkbox, x62 y132 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
-	Gui, 1: Add, Checkbox, x62 y162 vTrayTipEnabled Checked%TrayTipEnabled%, Enable support for Windows Tray Tips (yellow pop-up bubble)
-	Gui, 1: Add, Checkbox, x62 y192 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
+	Gui, 1: Add, Groupbox, x63 y40 w620 h70, System Options
+	Gui, 1: Add, Text, x70 y60 w60 h20 , Sleeptime:
+	Gui, 1: Add, Edit, x130 y58 w70 h20 Number vSleep, %Sleep%
+	Gui, 1: Add, DropDownList, x200 y58 w65 vSleeptimeLength, %thisSleeptimeLength%
+	Gui, 1: Add, Checkbox, x70 y90 vConfirmExit Checked%ConfirmExit%, Show confirmation dialog on exit
+	Gui, 1: Add, Groupbox, x63 y120 w620 h95, Logging/Alert Options
+	Gui, 1: Add, Checkbox, x70 y140 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
+	Gui, 1: Add, DropDownList, x240 y138 w60 vLogType, %thisLogTypes%
+	Gui, 1: Add, Checkbox, x70 y165 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
+	Gui, 1: Add, Checkbox, x70 y190 vTrayTipEnabled Checked%TrayTipEnabled%, Enable support for Windows Tray Tips (yellow pop-up bubble)
 	Gui, 1: Add, Groupbox, x63 y222 w620 h70, Default Rule Options
 	Gui, 1: Add, Text, x70 y242, The checked state of the following parameters will be the default for newly created rules:
 	Gui, 1: Add, Checkbox, x70 y262 w70 h20 vDefault_Enabled Checked%Default_Enabled%, Enabled
 	Gui, 1: Add, Checkbox, x140 y262 w95 h20 vDefault_ConfirmAction Checked%Default_ConfirmAction%, Confirm Action
 	Gui, 1: Add, Checkbox, x235 y262 w100 h20 vDefault_Recursive Checked%Default_Recursive%, Recursive
+	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
 	Gui, 1: Add, Text, x70 y320, %APPNAME% will accept the following command line parameters and corresponding values at runtime:
 	Gui, 1: Add, Text, x70 y340, %A_Space%%A_Space%%A_Space%-r <integer>%A_Tab%Specifies the number of times you would like %APPNAME% to run then exit quietly.
-	Gui, 1: Add, Groupbox, x63 y300 w620 h70, Command Line Parameters
 	Gui, 1: Add, Button, x62 y382 h30 vSavePrefs gSavePrefs, Save Preferences
 	Gui, 1: Add, Button, x580 y382 h30 vVerifyConfig gVerifyConfig, Verify Configuration
 	

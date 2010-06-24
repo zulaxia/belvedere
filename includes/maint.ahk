@@ -141,5 +141,5 @@ VerifyConfig:
 	}
 	
 	Log("Completed configuration file verification; making " . ChangeCount . " corrections", "System")
-	MsgBox, , Verification Complete, Your configuration file has been verified successfully!
+	MsgBox, , Verification Complete, Your configuration file has been verified successfully!`n %ChangeCount% changes were made
 Return
