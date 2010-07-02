@@ -228,15 +228,20 @@ MoveUpFolder:
 	if (SelectedRow = 1) ;if first folder we can't move up any more
 		return
 	
-	LV_GetText(SelectedFolder, SelectedRow, 1)
-	LV_GetText(PreviousFolder, SelectedRow-1, 1)
+	LV_GetText(SelectedFolder, SelectedRow, 2)
+	LV_GetText(PreviousFolder, SelectedRow-1, 2)
 	
 	;Taking the previous folder, replacing with a temp value and then 
 	; replacing with the new folder then writing to the file
 	IniRead, Folders, rules.ini, Folders, Folders
-	StringReplace Folders, Folders, %SelectedFolder%, --
-	StringReplace Folders, Folders, %PreviousFolder%, %SelectedFolder%
-	StringReplace Folders, Folders, --, %PreviousFolder%
+	StringReplace Folders, Folders, |%SelectedFolder%|, |--|
+	
+	if (SelectedRow = 2)
+		Folders := RegExReplace(Folders, "^\Q" . PreviousFolder . "\E\|", SelectedFolder . "|")
+	else
+		StringReplace Folders, Folders, |%PreviousFolder%|, |%SelectedFolder%|
+		
+	StringReplace Folders, Folders, |--|, |%PreviousFolder%|
 	IniWrite, %Folders%, rules.ini, Folders, Folders
 
 	;Refresh the list then restore focus and select so that you can
@@ -268,10 +273,17 @@ MoveDownFolder:
 	LV_GetText(SelectedFolder, SelectedRow, 2)
 	LV_GetText(NextFolder, SelectedRow+1, 2)
 	
+	;Taking the next folder, replacing with a temp value and then 
+	; replacing with the new folder then writing to the file
 	IniRead, Folders, rules.ini, Folders, Folders
-	StringReplace Folders, Folders, %SelectedFolder%|, --|
-	StringReplace Folders, Folders, %NextFolder%|, %SelectedFolder%|
-	StringReplace Folders, Folders, --|, %NextFolder%|
+	
+	if (SelectedRow = 1)
+		Folders := RegExReplace(Folders, "^\Q" . SelectedFolder . "\E\|", "--|")
+	else
+		StringReplace Folders, Folders, |%SelectedFolder%|, |--|
+	
+	StringReplace Folders, Folders, |%NextFolder%|, |%SelectedFolder%|
+	StringReplace Folders, Folders, --, %NextFolder%
 	IniWrite, %Folders%, rules.ini, Folders, Folders
 
 	;Refresh the list then restore focus and select so that you can
@@ -305,9 +317,14 @@ MoveUpRule:
 	;Taking the previous rule, replacing with a temp value and then 
 	; replacing with the new rule then writing to the file
 	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
-	StringReplace RuleNames, RuleNames, %SelectedRule%|, --|
-	StringReplace RuleNames, RuleNames, %PreviousRule%|, %SelectedRule%|
-	StringReplace RuleNames, RuleNames, --|, %PreviousRule%|
+	StringReplace RuleNames, RuleNames, |%SelectedRule%|, |--|
+	
+	if (SelectedRow = 2)
+		RuleNames := RegExReplace(RuleNames, "^\Q" . PreviousRule . "\E\|", SelectedRule . "|")
+	else
+		StringReplace RuleNames, RuleNames, |%PreviousRule%|, |%SelectedRule%|
+	
+	StringReplace RuleNames, RuleNames, |--|, |%PreviousRule%|
 	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
 
 	;Refresh the list then restore focus and select so that you can
@@ -340,9 +357,14 @@ MoveDownRule:
 	LV_GetText(NextRule, SelectedRow+1, 2)
 	
 	IniRead, RuleNames, rules.ini, %ActiveFolder%, RuleNames
-	StringReplace RuleNames, RuleNames, %SelectedRule%|, --|
-	StringReplace RuleNames, RuleNames, %NextRule%|, %SelectedRule%|
-	StringReplace RuleNames, RuleNames, --|, %NextRule%|
+	
+	if (SelectedRow = 1)
+		RuleNames := RegExReplace(RuleNames, "^\Q" . SelectedRule . "\E\|", "--|")
+	else
+		StringReplace RuleNames, RuleNames, |%SelectedRule%|, |--|
+	
+	StringReplace RuleNames, RuleNames, |%NextRule%|, |%SelectedRule%|
+	StringReplace RuleNames, RuleNames, --, %NextRule%
 	IniWrite, %RuleNames%, rules.ini, %ActiveFolder%, RuleNames
 
 	;Refresh the list then restore focus and select so that you can
