@@ -10,7 +10,7 @@
 <p>Belvedere is an automated file management application that performs actions on files based on user-defined criteria. For example, if a file in your downloads folder hasn't been opened in 4 weeks and it's larger than 10MB, you can tell Belvedere to automatically send it to the Recycle Bin.  Belvedere is written by Adam Pash and distributed by Lifehacker under the GNU Public License. For details on how to use Belvedere, check out the <a href="http://lifehacker.com/341950/">Belvedere homepage</a>.</p>
 <p>Icon provided by <a href="http://what-cheer.com/">What Cheer</a></p>
 <p>Compression functionality provided by <a href="http://www.7-zip.com">7-zip</a> under the GNU LGPL license</p>
-<p>Version: 0.5<br />
+<p>Version: 0.6<br />
 Creator: Adam Pash<br />
 Contributors: Matt Shorts<br />
 QA & Testing: Dustin Luck</p>
@@ -18,6 +18,21 @@ QA & Testing: Dustin Luck</p>
 <hr />
 <h1>Changelog</h1>
 <pre>
+Version 0.6
+	added regex support
+	added rule copy/move support
+	added new actions
+	  print action
+	  move & leave shortcut action
+	  custom actions
+	  add to iTunes action
+	added folder/rule prioritization
+	added is >= and is <= verbs
+	added growl for windows support
+	changed sleeptime to be more user friendly
+	changed handling of duplicate rule names;  mirrored windows approach (i.e. <rule name> (1), (2), etc.)
+	fixed bug that did not allow duplicate folder names, but different paths
+
 Version 0.5
 	added system and action logging and viewer
 	added new verb 'contains one of'

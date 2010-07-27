@@ -12,6 +12,7 @@
 <p>The screen is divided into 4 sections:</p>
 <a href="#settings">Rule Settings Area</a><br />
 <a href="#subjects">Rule Subjects Area</a><br />
+<a href="#exclusions">Rule Exclusion Area</a><br />
 <a href="#verbs">Rule Verbs Area</a><br />
 <a href="#buttons">Rule Buttons</a><br />
 <hr />
@@ -39,8 +40,9 @@
 	  <li><strong>contains</strong> - acts upon a file if the filename contains the specified text exactly.</li>
 	  <li><strong>does not contain</strong> - acts upon a file if it does not contain the specified text exactly.</li>
 	  <li><strong>contains one of</strong> - acts upon a file if the filename contains any one of the elements in a comma separated list.  NOTE:  The list must not contain spaces between the elements and the comma, otherwise you may miss a match.</li>
+	  <li><strong>RegEx</strong> - acts upon a file if the filename matches the Regular Expression inserted.  For basic Regular Expression syntax, please used the following reference page:  <a href="http://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm">http://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm</a></li> 
 	</ul>
-<li><strong>extension</strong> - This subject acts upon the file extension of the file in question, excluding the filename and '.'.</li>
+<li><strong>Extension</strong> - This subject acts upon the file extension of the file in question, excluding the filename and '.'.</li>
 	<ul>
 	  <li><strong>is</strong> - acts upon a file if the file extension matches exactly.</li>
 	  <li><strong>is not</strong> - acts upon all files that do not match the file extension exactly.</li>
@@ -48,7 +50,8 @@
 	  <li><strong>does not match one of</strong> - acts upon a file if the file extension does not match any one of the elements in a comma separated list.  NOTE:  The list must not contain spaces between the elements and the comma, otherwise you may miss a match.</li>
 	  <li><strong>contains</strong> - acts upon a file if the file extension contains the specified text exactly.</li>
 	  <li><strong>does not contain</strong> - acts upon a file if the file extension does not contained the specified text exactly.</li>
-	  <li><strong>contains one of</strong> - acts upon a file if the filename contains any one of the elements in a comma separated list.  NOTE:  The list must not contain spaces between the elements and the comma, otherwise you may miss a match.</li>
+	  <li><strong>contains one of</strong> - acts upon a file if the file extension contains any one of the elements in a comma separated list.  NOTE:  The list must not contain spaces between the elements and the comma, otherwise you may miss a match.</li>
+	  <li><strong>RegEx</strong> - acts upon a file if the file extension matches the Regular Expression inserted.  For basic Regular Expression syntax, please used the following reference page:  <a href="http://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm">http://www.autohotkey.com/docs/misc/RegEx-QuickRef.htm</a></li>
 	</ul>
 </ul>
 
@@ -59,7 +62,9 @@
 	  <li><strong>is</strong> - acts upon a file if the file size matches the file size specified.</li>
 	  <li><strong>is not</strong> - acts upon all files that do not match the file size specified .</li>
 	  <li><strong>is greater than</strong> - acts upon a file if the file size is greater than the file size specified.</li>
+	  <li><strong>is greater than or equal</strong> - acts upon a file if the file size is greater than or equal to the file size specified.</li>
 	  <li><strong>is less than</strong> - acts upon a file if the file size is less than the file size specified.</li>
+	  <li><strong>is less than or equal</strong> - acts upon a file if the file size is less than or equal to the file size specified.</li>
 	</ul>
 </ul>
 <p>Sizes are currently in units of Megabytes (MB) and Kilobytes (KB).</p>
@@ -85,25 +90,88 @@
 <p>Time periods are from the current system provided time and are specified in units of minutes, hours, days, and weeks.</p>
 <a href="#top">Top</a><br />
 <hr />
+<a name="exclusions"><h2>Rule Exclusions</h2></a>
+<p>The Rule Exclusion area is where the user can exclude files that match in the subject area, but with any of the selected file attributes.</p>
+<img src="images/rule-create-2a.JPG"><br />
+<p>The following options are available to users:</p>
+<ul>
+<li><strong>Read Only</strong> - Can be read, but not changed or deleted</li>
+<li><strong>Hidden</strong> - Are not shown in a directory listing by default</li>
+<li><strong>System</strong> - System files of the operating system, also not shown in a directory listing by default</li>
+</ul>
+<a href="#top">Top</a><br />
+<hr />
 <a name="verbs"><h2>Rule Verbs</h2></a>
-<p>The Rule Verbs area is where the actions of the rule are defined when ANY or ALL of the conditions set within the Rule Subjects area are met.</p>
-<img src="images/rule-create-3.JPG"><br />
-<p>The following options are available to be executed on files that meet ANY or ALL of the conditions set above:</p>
+<p>The Rule Verbs area is where the actions of the rule are defined when ANY or ALL of the conditions set within the Rule Subjects area are met.  The following options are available:</p>
+<img src="images/rule-create-3.JPG"><br /><br />
+<img src="images/rule-create-3i.JPG"><br />
 <ul>
 <li><strong>Move File</strong> - This action will relocate the file from the current location to the location set in the box to the immediate right.  This location is chosen by clicking the '...' button and selecting a valid location.</li>
 	<ul>
 		<li>The user may choose whether or not to Overwrite a file of a similar name in the location directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
 		<li>The user may choose whether or not to Compress a file by selecting the check box to the far right.  Compression is in the form a single file zip, and takes the name of the file (minus extension) and is in the form of <filename>.zip.  If the box is left unchecked, the file will be moved over as normal.</li>
 	</ul>
-<li><strong>Rename File</strong> - This action will rename the file in the current location as identified by the conditions set above.</li>
+<li><strong>Move File & leave shortcut</strong> - Exactly like the option above, this action will relocate the file from the current location to the location set in the box to the immediate right.  This option leaves a shortcut in the original location pointing to the new location.</li>
+	<ul>
+		<li>The user may choose whether or not to Overwrite a file of a similar name in the location directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
+		<li>The user may choose whether or not to Compress a file by selecting the check box to the far right.  Compression is in the form a single file zip, and takes the name of the file (minus extension) and is in the form of <filename>.zip.  If the box is left unchecked, the file will be moved over as normal.</li>
+	</ul>
+</ul>
+<img src="images/rule-create-3a.JPG"><br />
+<ul>
+<li><strong>Rename File</strong> - This action will rename the file in the current location as identified by the conditions set above.  The following naming templates (input exactly as shown below) are available for use:</li>
+	<ul>
+		<li><strong>[filename]</strong> - The full filename, minus the period and extension.</li>
+		<li><strong>[fullname]</strong> - The full filename, including the period and extension.</li>
+		<li><strong>[ext]</strong> - The file extension, minus the period.</li>
+		<li><strong>[drive]</strong> - The file drive letter.</li>
+		<li><strong>[YYYY]</strong> - Current 4-digit year (e.g. 2004).</li>
+		<li><strong>[MM]</strong> - Current 2-digit month (01-12).</li>
+		<li><strong>[DD]</strong> - Current 2-digit day of the month (01-31).</li>
+		<li><strong>[MMMM]</strong> - Current month's full name in the current user's language, e.g. July. </li>
+		<li><strong>[MMM]</strong> - Current month's abbreviation in the current user's language, e.g. Jul.</li>
+		<li><strong>[DDDD]</strong> - Current day of the week's full name in the current user's language, e.g. Sunday.</li>
+		<li><strong>[DDD]</strong> - Current day of the week's 3-letter abbreviation in the current user's language, e.g. Sun.</li>
+		<li><strong>[WDay]</strong> - Current 1-digit day of the week (1-7). 1 is Sunday in all locales.</li>
+		<li><strong>[YDay]</strong> - Current day of the year (1-366). The value is not zero-padded, e.g. 9 is retrieved, not 009.</li>
+		<li><strong>[YWeek]</strong> - Current year and week number (e.g. 200453) according to ISO 8601.</li>
+		<li><strong>[hh]</strong> - Current 2-digit hour (00-23) in 24-hour time (for example, 17 is 5pm).</li>
+		<li><strong>[mm]</strong> - Current 2-digit minute (00-59).</li>
+		<li><strong>[ss]</strong> - Current 2-digit second (00-59).</li>
+		<li><strong>[ms]</strong> - Current 3-digit millisecond (000-999).</li>
+		<li><strong>[DT]</strong> - The current local time in YYYYMMDDHH24MISS format.</li>
+		<li><strong>[DT-UTC]</strong> - The current Coordinated Universal Time (UTC) in YYYYMMDDHH24MISS format. UTC is essentially the same as Greenwich Mean Time (GMT).</li>
+	</ul>
+	<p>Please note that while characters other than the templates listed above can be used, Belvedere will strip out all illegal filename characters (\, /, :, ?, <, >, *, |, ") if they are present.<br />
+	    Some descriptions above were taken from the Autohotkey on line help text at <a href="http://www.autohotkey.com/docs/Variables.htm#BuiltIn">http://www.autohotkey.com/docs/Variables.htm#BuiltIn</a> . Further clarifications can be found at the aforementioned link.</p>
+</ul>
+<img src="images/rule-create-3b.JPG"><br /><br />
+<img src="images/rule-create-3c.JPG"><br />
+<ul>		
 <li><strong>Send file to Recycle Bin</strong> - This action will move the file from the current location to the Windows Recycle Bin.</li>
 <li><strong>Delete file</strong> - This action will irreversibly delete the file from the current location.</li>
+</ul>
+<img src="images/rule-create-3d.JPG"><br />
+<ul>
 <li><strong>Copy File</strong> - This action will make a copy of the file in question in the location chosen by clicking the '...' button and selecting a valid location.</li>
 	<ul>
 		<li>The user may choose whether or not to Overwrite a file of a similar name in the location directory if it exists, by selecting the check box to the far right.  If this box is left unchecked, and a file of the same name already exists in the destination directory, the action of this rule will be skipped, without alerting the user.</li>
 		<li>The user may choose whether or not to Compress a file by selecting the check box to the far right.  Compression is in the form a single file zip, and takes the name of the file (minus extension) and is in the form of <filename>.zip.  If the box is left unchecked, the file will be moved over as normal.</li>
 	</ul>
+</ul>
+<img src="images/rule-create-3e.JPG"><br /><br />
+<img src="images/rule-create-3f.JPG"><br />
+<ul>	
 <li><strong>Open File</strong> - This action will open the file in question as handled by file extension associations within your operating system.  For example, if .txt files are associated with Notepad by default, the file in question will be opened by said program.</li>
+<li><strong>Print File</strong> - This action will send the file in question to the default print spooler for printing.</li>
+</ul>
+<img src="images/rule-create-3g.JPG"><br />
+<ul>
+<li><strong>Custom</strong> - This action will execute a user defined command or executable with the matched file as first parameter of the executable.</li>
+</ul>
+<img src="images/rule-create-3h.JPG"><br />
+<ul>
+<li><strong>Add to iTunes</strong> - This action will use the iTunes COM interface to add the matched file to the default iTunes Library.</li>
 </ul>
 <a href="#top">Top</a><br />
 <hr />

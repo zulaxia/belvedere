@@ -9,30 +9,30 @@
 <h1>Preferences Tab</h1>
 <p>With the preferences tab, users can configure the various aspects of Belvedere to their liking</p>
 <img src="images/tab-prefs-full.JPG"><br /><br />
-<a href="#sleep">Sleeptime</a><br />
-<a href="#log">System Logging</a><br />
+<a href="#system">System Options</a><br />
+<a href="#log">Logging/Alert Options</a><br />
+<a href="#options">Default Rule Options</a><br />
 <a href="#cmd">Command Line Parameters</a><br />
 <a href="#verify">Verify Configuration</a><br />
 <hr />
-<a name="sleep"><h2>Sleeptime</h2></a>
-<p>The sleeptime setting is used to configure how often Belvedere will rotate through the folder and rules.  After each process time, Belvedere will go to sleep for the specified period of time.  Once this time period has passed, Belvedere will 'wake-up' and work through all the active rules for each folder.  All times inserted are in milliseconds.</p>
-<h3>Examples:</h3>
-<ul>
-<li><strong>3000000 </strong>- 3 hours</li>
-<li><strong>300000 </strong>- 3 minutes</li>
-<li><strong>30000 </strong>- 30 seconds</li>
-<li><strong>3000 </strong>- 3 seconds</li>
-</ul>
+<a name="system"><h2>System Options</h2></a>
+<img src="images/tab-prefs-1.JPG"><br />
+<h3>Sleeptime</h3>
+<p>The sleeptime setting is used to configure how often Belvedere will rotate through the folder and rules. After each process time, Belvedere will go to sleep for the specified period of time. Once this time period has passed, Belvedere will 'wake-up' and work through all the active rules for each folder.  Time periods are from the last program execution time and are specified in units of seconds, minutes, hours, days, and weeks.</p>
+<h3>Exit Confirmation</h3>
+<p>Belvedere will display a confirmation message by default when the user tries to exit the application.  This can be turned off, eliminating the need for confirmation, by removing the checkmark from this particular box.</p>
 <a href="#top">Top</a><br />
 <hr />
-<a name="log"><h2>System Logging</h2></a>
+<a name="log"><h2>Logging/Alert Options</h2></a>
+<img src="images/tab-prefs-2.JPG"><br />
+<h3>System Logging</h3>
 <p>Belvedere is capable of logging all the actions within the system in 3 different forms:</p>
 <ol>
 <li><strong>System Events (System) </strong>- This option allows the user to log all activity within Belvedere with respect to option changes, rule creation/deletion/activation.</li>
 <li><strong>System Actions (Actions) </strong>- this option allows the user to log all actions that Belvedere takes based upon the rules that are set up and active within the system.</li>
 <li><strong>All System Occurrences (Both) </strong>- This option is a combination of both of the options listed above.</li>
 </ol>
-<h3>Examples:</h3>
+<h4>Examples:</h4>
 <ul>
 <dl>
 <dt>System Events</dt><br />
@@ -46,9 +46,29 @@
 <dd style="font-family: monospace">2009-04-28 10:38:14 ======================================</dd>
 </dl>
 </ul>
+<h3>Growl for Windows</h3>
+<p>Belvedere has the ability to send alerts to Growl for Windows (if installed) to alert users of actions as they occur.  If checked, Belvedere will register itself with Growl for Windows upon startup, and send alerts.  A restart is required if this setting is changed.  The following types of alerts are currently supported:</p>
+<ul>
+<li><strong> Action </strong>- This type of alert is triggered when an acition is taken by Belvedere based on any enabled rules.</li>
+<li><strong> System </strong>- This type of alert is triggered when the user changes a system setting or configuration option.</li>
+<li><strong> Error </strong>- This type of alert is triggered when an action is taken by Belvedere by was unable to complete successfully.</li>
+</ul>
+<h3>Windows Tray Tips</h3>
+<p>Belvedere has the ability to send alerts to the Windows Tray to alert users of actions as they occur.  If checked, Belvedere will begin sending alerts to the Windows Tray.  A restart is required if this setting is changed.  The following types of alerts are currently supported:</p>
+<ul>
+<li><strong> Action </strong>- This type of alert is triggered when an acition is taken by Belvedere based on any enabled rules.</li>
+<li><strong> System </strong>- This type of alert is triggered when the user changes a system setting or configuration option.</li>
+<li><strong> Error </strong>- This type of alert is triggered when an action is taken by Belvedere by was unable to complete successfully.</li>
+</ul>
+<a href="#top">Top</a><br />
+<hr />
+<a name="options"><h2>Default Rule Options</h2></a>
+<img src="images/tab-prefs-3.JPG"><br />
+<p>When creating a new rule, the Rule Options in the top right hand corner of the <a href="rule-create.htm">Create rule</a> dialog can be defaulted to checked/unchecked, depending on the options chosen in this section.  This setting will then apply to all newly created rules.</p>
 <a href="#top">Top</a><br />
 <hr />
 <a name="cmd"><h2>Command Line Parameters</h2></a>
+<img src="images/tab-prefs-4.JPG"><br />
 <p>Belvedere has the ability accept command line parameters to alter various settings of the application at runtime.  The following parameters and their values are currently accepted by Belvedere:</p>
 <ul>
 <dl>
@@ -62,6 +82,7 @@
 <a href="#top">Top</a><br />
 <hr />
 <a name="verify"><h2>Verify Configuration</h2></a>
+<img src="images/tab-prefs-5.JPG"><br />
 <p>By clicking this button, Belvedere will both verify and correct basic errors within the rules.ini file.  This functionality is specifically used when the rules file is found to be corrupted or incomplete.  This verification should also be executed immediately following an application upgrade to ensure that the rules.ini file it upgraded to the most current release.</p>
 <a href="#top">Top</a><br />
 </BODY>
