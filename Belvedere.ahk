@@ -32,7 +32,7 @@ IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
 
 ;Register Belvedere with the Growl for Windows Application
 if GrowlEnabled = 1
-	RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /r:"Action"`,"System"`,"Error" "Belvedere has been registered"
+	RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /r:"Action"`,"System"`,"Error" /ai:"%A_ScriptDir%\resources\both.png" "Belvedere has been registered"
 	
 Log("Starting " . APPNAME . " " . Version, "System")
 Notify("Starting " . APPNAME . " " . Version, "System")
@@ -547,7 +547,7 @@ return
 ;Here we are creating all the variables for usage as well as the resource files
 SetVars:
 	APPNAME = Belvedere
-	Version = 0.5
+	Version = 0.6
 	AllSubjects = Name||Extension|Size|Date last modified|Date last opened|Date created|
 	NoDefaultSubject = Name|Extension|Size|Date last modified|Date last opened|Date created|
 	NameVerbs = is||is not|matches one of|does not match one of|contains|does not contain|contains one of|RegEx|
@@ -581,14 +581,23 @@ return
 BuildINI:
 	IfNotExist, rules.ini
 	{
-		IniWrite,%A_Space%,rules.ini, Folders, Folders
-		IniWrite,%A_Space%,rules.ini, Rules, AllRuleNames
-		IniWrite,3,rules.ini, Preferences, Sleeptime
-		IniWrite,minutes,rules.ini, Preferences, SleeptimeLength
-		IniWrite,0,rules.ini, Preferences, RBEnable
-		IniWrite,0,rules.ini, Preferences, EnableLogging
-		IniWrite,%A_Space%,rules.ini, Preferences, LogType
-		IniWrite,%A_Desktop%,rules.ini, Preferences, LastFolder
+		IniWrite, %A_Space%, rules.ini, Folders, Folders
+		IniWrite, %A_Space%, rules.ini, Rules, AllRuleNames
+		IniWrite, 3, rules.ini, Preferences, Sleeptime
+		IniWrite, minutes, rules.ini, Preferences, SleeptimeLength
+		IniWrite, 0, rules.ini, Preferences, RBEnable
+		IniWrite, 0, rules.ini, Preferences, EnableLogging
+		IniWrite, %A_Space%, rules.ini, Preferences, LogType
+		IniWrite, %A_Desktop%, rules.ini, Preferences, LastFolder
+		IniWrite, 0, rules.ini, Preferences, GrowlEnabled
+		IniWrite, 0, rules.ini, Preferences, TrayTipEnabled
+		IniWrite, 1, rules.ini, Preferences, ConfirmExit
+		IniWrite, 0, rules.ini, Preferences, Default_Enabled
+		IniWrite, 0, rules.ini, Preferences, Default_ConfirmAction
+		IniWrite, 0, rules.ini, Preferences, Default_Recursive
+		IniWrite, 0, rules.ini, RecycleBin, RBEmpty
+		IniWrite, %A_Space%, rules.ini, RecycleBin, RBEmptyTimeValue
+		IniWrite, %A_Space%, rules.ini, RecycleBin, RBEmptyTimeLength
 	}
 return
 

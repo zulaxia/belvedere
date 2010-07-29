@@ -7,7 +7,7 @@
 
 ;General Application defines
 !define PRODUCT_NAME "Belvedere"
-!define PRODUCT_VERSION "0.5"
+!define PRODUCT_VERSION "0.6"
 !define PRODUCT_PUBLISHER "Lifehacker"
 !define PRODUCT_WEB_SITE "http://lifehacker.com/341950/belvedere-automates-your-self+cleaning-pc"
 !define PRODUCT_HELP_TEXT "Belvedere Help.chm"
@@ -24,7 +24,7 @@
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PRODUCT_STARTMENU_REGVAL}"
 
 ;Finish Page Defines
-!define MUI_FINISHPAGE_TEXT "Thank you for installing ${PRODUCT_NAME}, we hope you enjoy using this application. Please run 'Verify Configuration' on the Preferences if you have just completed an upgrade."
+!define MUI_FINISHPAGE_TEXT "Thank you for installing ${PRODUCT_NAME}.\r\n\r\nPlease run 'Verify Configuration' on the Preferences tab if you have just completed an upgrade."
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${PRODUCT_NAME}.exe"
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show Help Text"
@@ -84,6 +84,7 @@ Section "Installation" secApp
   SetOutPath "$INSTDIR\resources"
   File "${PRODUCT_HELP_TEXT}"
   File 7za.exe
+  File growlnotify.exe
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
@@ -173,6 +174,7 @@ Section Uninstall
   Delete "$INSTDIR\resources\belvedere-paused.ico"
   Delete "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
   Delete "$INSTDIR\resources\7za.exe"
+  Delete "$INSTDIR\resources\growlnotify.exe"
 
   SetShellVarContext all
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"

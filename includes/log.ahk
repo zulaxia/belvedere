@@ -28,7 +28,7 @@ Notify(String, Type)
 	if (GrowlEnabled = 1)
 	{
 		Title = Belvedere %Type% Message
-		RunWait, %A_ScriptDir%\resources\growlnotify.exe /a:"Belvedere" /n:%Type% /t:"%Title%" "%String%"
+		RunWait, %A_ScriptDir%\resources\growlnotify.exe /i:"%A_ScriptDir%\resources\both.png" /a:"Belvedere" /n:%Type% /t:"%Title%" "%String%"
 	}
 }
 

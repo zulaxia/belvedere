@@ -498,6 +498,7 @@ SavePrefs:
 	SleeptimeLength := SleeptimeLength
 	
 	;Getting old values for enhanced logging prior to writing new ones
+	IniRead, Old_EnableLogging, rules.ini, Preferences, EnableLogging
 	IniRead, Old_Sleeptime, rules.ini, Preferences, Sleeptime
 	IniRead, Old_SleeptimeLength, rules.ini, Preferences, SleeptimeLength
 	IniRead, Old_GrowlEnabled, rules.ini, Preferences, GrowlEnabled
@@ -515,23 +516,26 @@ SavePrefs:
 	IniWrite, %Default_ConfirmAction%, rules.ini, Preferences, Default_ConfirmAction
 	IniWrite, %Default_Recursive%, rules.ini, Preferences, Default_Recursive
 	
-	if (EnableLogging = 1)
+	if (EnableLogging <> Old_EnableLogging)
 	{
-		if(LogType = "")
+		if (EnableLogging = 1)
 		{
-			MsgBox,,Missing Logging Type, Please select a logging type
-			return
+			if(LogType = "")
+			{
+				MsgBox,,Missing Logging Type, Please select a logging type
+				return
+			}
+			
+			Log("Logging has been enabled with type: " . LogType, "System")
+			Notify("Logging has been enabled with type: " . LogType, "System")
+			WinNotify("Logging has been enabled with type: " . LogType, "System")
 		}
-		
-		Log("Logging has been enabled with type: " . LogType, "System")
-		Notify("Logging has been enabled with type: " . LogType, "System")
-		WinNotify("Logging has been enabled with type: " . LogType, "System")
-	}
-	else if (EnableLogging = 0)
-	{
-		Log("Logging has been disabled", "System")
-		Notify("Logging has been disabled", "System")
-		WinNotify("Logging has been disabled", "System")
+		else if (EnableLogging = 0)
+		{
+			Log("Logging has been disabled", "System")
+			Notify("Logging has been disabled", "System")
+			WinNotify("Logging has been disabled", "System")
+		}
 	}
 	
 	Log("Preferences have been saved", "System")
