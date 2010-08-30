@@ -732,6 +732,20 @@ CopyRule:
 	IniRead, Enabled, rules.ini, %RuleName%, Enabled, 0
 	IniRead, ConfirmAction, rules.ini, %RuleName%, ConfirmAction, 0
 	IniRead, Recursive, rules.ini, %RuleName%, Recursive, 0
+	IniRead, AttribReadOnly, rules.ini, %ActiveRule%, AttribReadOnly, 0
+	IniRead, AttribHidden, rules.ini, %ActiveRule%, AttribHidden, 0
+	IniRead, AttribSystem, rules.ini, %ActiveRule%, AttribSystem, 0
+	
+	;Loops to determine number of subjects within a rule
+	NumOfRules := 1
+	Loop
+	{
+		IniRead, MultiRule, rules.ini, %RuleName%, Subject%A_Index%
+		if (MultiRule != "ERROR")
+			NumOfRules++ 
+		else
+			break
+	}
 	
 	LineNum =
 	Loop
@@ -777,20 +791,27 @@ CopyRule:
 			break
 		}
 	}
-	
-	IniWrite, %RuleName%|, rules.ini, %A_ThisMenuItem%, RuleNames
+
+	;write rulename into list for the chosen folder and all rules lists
+	IniRead, FolderRuleNames, rules.ini, %A_ThisMenuItem%, RuleNames, %A_Space%
+	IniWrite, %FolderRuleNames%%RuleName%|, rules.ini, %A_ThisMenuItem%, RuleNames
 	IniWrite, %AllRuleNames%%RuleName%|, rules.ini, Rules, AllRuleNames
+
+	;write rule options
 	IniWrite, %A_ThisMenuItem%\*, rules.ini, %RuleName%, Folder
 	IniWrite, %Enabled%, rules.ini, %RuleName%, Enabled
 	IniWrite, %ConfirmAction%, rules.ini, %RuleName%, ConfirmAction
 	IniWrite, %Recursive%, rules.ini, %RuleName%, Recursive
 	IniWrite, %Matches%, rules.ini, %RuleName%, Matches
-	IniWrite, %GUIAction%, rules.ini, %RuleName%, Action
+	IniWrite, %Action%, rules.ini, %RuleName%, Action
+	IniWrite, %AttribReadOnly%, rules.ini, %RuleName%, AttribReadOnly
+	IniWrite, %AttribHidden%, rules.ini, %RuleName%, AttribHidden
+	IniWrite, %AttribSystem%, rules.ini, %RuleName%, AttribSystem
 	
 	;only need to write these tags if they need a destination
 	if  (GUIAction != "Send file to Recycle Bin") and (GUIAction != "Delete file")
 	{
-		IniWrite, %GUIDestination%, rules.ini, %RuleName%, Destination
+		IniWrite, %Destination%, rules.ini, %RuleName%, Destination
 		IniWrite, %Overwrite%, rules.ini, %RuleName%, Overwrite
 		IniWrite, %Compress%, rules.ini, %RuleName%, Compress
 	}
