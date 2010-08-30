@@ -502,12 +502,30 @@ SaveRule:
 				return
 			}
 		}
-		else if (GUIAction != "Rename file")
+		else if (GUIAction = "Custom")
 		{
 			IfNotExist, %GUIDestination%
 			{
-				Msgbox,,Invalid Folder/Action, %GUIDestination% is not a real folder or action.
+				MsgBox,, Invalid Action, The custom action %GUIDestination% does not exist.  Please choose an existing program or file.
 				return
+			}
+		}
+		else if (GUIAction != "Rename file")
+		{				
+			IfNotExist, %GUIDestination%
+			{
+				Msgbox, 3, Invalid Folder, %GUIDestination% does not currently exist.  Would you like to create it?
+				IfMsgBox, No
+				{
+					MsgBox,, Invalid Folder, Unable to create rule
+					return
+				}
+				
+				IfMsgBox, Cancel
+					return
+				
+				IfMsgBox, Yes
+					FileCreateDir, %GUIDestination% 
 			}
 		}
 	}
