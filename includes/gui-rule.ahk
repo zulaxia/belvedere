@@ -294,13 +294,13 @@ SetVerbList:
 		GuiControl, 2: ,GUIVerb%GUILineNum%,|%NameVerbs%
 		GuiControl, 2: Hide, GUIUnits%GUILineNum%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w140
-		GuiControl, 2: -Number, GUIObject%RuleNum%
+		GuiControl, 2: -Number, GUIObject%GUILineNum%
 	}
 	else if (GUISubject%GUILineNum% = "Size")
 	{
 		GuiControl, 2: ,GUIVerb%GUILineNum%,|%NumVerbs%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
-		GuiControl, 2: +Number, GUIObject%RuleNum%
+		GuiControl, 2: +Number, GUIObject%GUILineNum%
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%SizeUnits%
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
 	}
@@ -308,7 +308,7 @@ SetVerbList:
 	{
 		GuiControl,,GUIVerb%GUILineNum%,|%DateVerbs%
 		GuiControl, 2: Move , GUIObject%GUILineNum% , w70
-		GuiControl, 2: +Number, GUIObject%RuleNum%
+		GuiControl, 2: +Number, GUIObject%GUILineNum%
 		GuiControl, 2: ,GUIUnits%GUILineNum%,|%DateUnits%
 		GuiControl, 2: Show, GUIUnits%GUILineNum%
 	}
