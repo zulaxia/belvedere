@@ -100,7 +100,7 @@ MANAGE:
 	Gui, 1: Add, Checkbox, x70 y140 vEnableLogging Checked%EnableLogging%, Enable logging for this log type:
 	Gui, 1: Add, DropDownList, x240 y138 w60 vLogType, %thisLogTypes%
 	Gui, 1: Add, Checkbox, x70 y165 vGrowlEnabled Checked%GrowlEnabled%, Enable support for Growl for Windows (you must restart %APPNAME% for this setting to be applied)
-	Gui, 1: Add, Checkbox, x70 y190 vTrayTipEnabled Checked%TrayTipEnabled%, Enable support for Windows Tray Tips (yellow pop-up bubble)
+	Gui, 1: Add, Checkbox, x70 y190 vTrayTipEnabled Checked%TrayTipEnabled%, Enable support for Notification Area Balloon Tips
 	Gui, 1: Add, Groupbox, x63 y222 w620 h70, Default Rule Options
 	Gui, 1: Add, Text, x70 y242, The checked state of the following parameters will be the default for newly created rules:
 	Gui, 1: Add, Checkbox, x70 y262 w70 h20 vDefault_Enabled Checked%Default_Enabled%, Enabled

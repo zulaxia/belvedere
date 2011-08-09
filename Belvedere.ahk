@@ -1,3 +1,30 @@
+/*
+ * * * Compile_AHK SETTINGS BEGIN * * *
+
+[AHK2EXE]
+Exe_File=%In_Dir%\Belvedere.exe
+No_UPX=1
+NoDecompile=1
+Created_Date=1
+Execution_Level=2
+[VERSION]
+Set_Version_Info=1
+Inc_File_Version=0
+Product_Name=Belvedere
+Product_Version=1.0.48.5
+Set_AHK_Version=1
+[ICONS]
+Icon_1=%In_Dir%\resources\belvedere.ico
+Icon_2=%In_Dir%\resources\belvedere.ico
+Icon_3=%In_Dir%\resources\belvedere-paused.ico
+Icon_4=%In_Dir%\resources\belvedere-paused.ico
+Icon_5=%In_Dir%\resources\belvedere-paused.ico
+Icon_6=%In_Dir%\resources\belvedere.ico
+Icon_7=%In_Dir%\resources\belvedere-paused.ico
+
+* * * Compile_AHK SETTINGS END * * *
+*/
+
 ;
 ; AutoHotkey Version: 1.x
 ; Language:       English
@@ -399,36 +426,6 @@ Loop
 							WinNotify(Message, "Action")
 						}
 					}
-					else if (Action = "Add to iTunes")
-					{
-						errcode := addtoitunes(file)
-						if errcode
-						{
-							if (errcode = -1)
-							{
-								Log("ERROR: Unable to add file to iTunes; iTunes not found", "Action")
-								Message = %Message%Unable to add file to iTunes; iTunes not found
-							}
-							else if (errcode = -2)
-							{
-								Log("ERROR: Unable to add file to iTunes; Unable to acccess iTunes", "Action")
-								Message = %Message%Unable to add file to iTunes; Unable to acccess iTunes
-							}
-							else if (errcode = -3)
-							{
-								Log("ERROR: Unable to add file to iTunes; Add file process failed", "Action")
-								Message = %Message%Unable to add file to iTunes; Add file process failed
-							}
-							
-							Notify(Message, "Error")
-							WinNotify(Message, "Error")
-						}
-						else
-						{
-							Notify(Message, "Action")
-							WinNotify(Message, "Action")
-						}
-					}
 					else
 					{
 						Msgbox,,No Action, You've detemerined no action to take.
@@ -556,8 +553,8 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is greater than or equal|is less than|is less than or equal|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
-	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
+	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
 	DateUnits = seconds|minutes||hours|days|weeks
@@ -842,7 +839,6 @@ return
 ;Run when the 'About Belvedere' menu item is clicked on the Main Menu
 ABOUT:
 	Gui,4: Destroy
-	Gui,4: +owner1 
 	Gui,4: +toolwindow
 	Gui,4: Add,Picture,x45 y0,%BelvederePNG%
 	Gui,4: font, s8, Courier New
@@ -870,7 +866,6 @@ Return
 #Include includes\test.ahk
 #Include includes\maint.ahk
 #Include includes\gui-rule.ahk
-#Include includes\COM.ahk
 
 ;Closing the app; w/ confirmation
 EXIT:
