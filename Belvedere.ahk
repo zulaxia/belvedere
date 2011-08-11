@@ -56,6 +56,11 @@ IniRead, LogType, rules.ini, Preferences, LogType, %A_Space%
 IniRead, GrowlEnabled, rules.ini, Preferences, GrowlEnabled, 0
 IniRead, TrayTipEnabled, rules.ini, Preferences, TrayTipEnabled, 0
 IniRead, ConfirmExit, rules.ini, Preferences, ConfirmExit, 1
+IniRead, ExistingVersion, rules.ini, About, Version, 0
+
+;Check to see what version was running before we were initiated (used for upgrades)
+if (ExistingVersion < Version)
+	GoSub, UpgradeINI
 
 ;Register Belvedere with the Growl for Windows Application
 if GrowlEnabled = 1
@@ -814,6 +819,47 @@ SaveLog:
 		MsgBox,,Save Error, Log Save was not completed!
 	else
 		MsgBox,,Save Success, Log Save has completed successfully!
+Return
+
+UpgradeINI:
+	IniWrite, %Version%, rules.ini, About, Version ;go ahead and write the new version
+
+	if ExistingVersion = 0 ;This is our catchall (anythign less than 0.6) for now, moving forward we'll have this populated
+	{
+		IniRead, SleepTime, rules.ini, Preferences, SleepTime
+
+		if (SleepTime >= 604800000)
+		{
+			SleepTime /=604800000
+			IniWrite, %SleepTime%, rules.ini, Preferences, Sleeptime
+			IniWrite, weeks, rules.ini, Preferences, SleeptimeLength		
+		}
+		else if (SleepTime >= 86400000)
+		{
+			SleepTime /=86400000
+			IniWrite, %SleepTime%, rules.ini, Preferences, Sleeptime
+			IniWrite, days, rules.ini, Preferences, SleeptimeLength
+		}
+		else if (SleepTime >= 3600000)
+		{
+			SleepTime /=3600000
+			IniWrite, %SleepTime%, rules.ini, Preferences, Sleeptime
+			IniWrite, hours, rules.ini, Preferences, SleeptimeLength		
+		}
+		else if (SleepTime >= 60000)
+		{
+			SleepTime /=60000
+			IniWrite, %SleepTime%, rules.ini, Preferences, Sleeptime
+			IniWrite, minutes, rules.ini, Preferences, SleeptimeLength
+		}
+		else
+		{
+			IniWrite, %SleepTime%, rules.ini, Preferences, Sleeptime
+			IniWrite, seconds, rules.ini, Preferences, SleeptimeLength
+		}
+	}
+	MsgBox, 1, Upgrade, Welcome to %APPNAME% %Version% we noticed that you just upgraded a previous version.`nPlease give us a few seconds to verify your configuration...
+	Gosub, VerifyConfig
 Return
 
 ;Run when the 'Help' menu item is clicked on the Main Menu
