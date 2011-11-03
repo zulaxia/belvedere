@@ -58,7 +58,7 @@ TESTMatches:
 	}
 	
 	; Now loop through the folder to test for matches
-	Loop %Folder%, 0, %Recursive%
+	Loop %Folder%, 1, %Recursive%
 	{
 		Loop
 		{

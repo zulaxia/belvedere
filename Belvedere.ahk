@@ -9,7 +9,10 @@ Created_Date=1
 Execution_Level=2
 [VERSION]
 Set_Version_Info=1
+Company_Name=Lifehacker
+File_Description=Belvedere
 Inc_File_Version=0
+Internal_Name=Belvedere
 Product_Name=Belvedere
 Product_Version=1.0.48.5
 Set_AHK_Version=1
@@ -150,7 +153,7 @@ Loop
 			}
 
 			;Loop through all of the folder contents
-			Loop %Folder%, 0, %Recursive%
+			Loop %Folder%, 1, %Recursive%
 			{
 				Loop
 				{
@@ -281,9 +284,9 @@ Loop
 						Message = %Message%Destination: %Destination%`r`n
 						
 						if (Action = "Move file & leave shortcut")
-							errcode := move(file, Destination, Overwrite, Compress, 1)
+							errcode := move(file, Destination, Overwrite, Compress, 1, Attributes)
 						else
-							errcode := move(file, Destination, Overwrite, Compress, 0)
+							errcode := move(file, Destination, Overwrite, Compress, 0, Attributes)
 							
 						if (errcode = -1)
 						{
@@ -312,7 +315,7 @@ Loop
 						Log("Destination: " . Destination, "Action")
 						Message = %Message%Destination: %Destination%`r`n
 						
-						errcode := rename(file, Destination)
+						errcode := rename(file, Destination, Attributes)
 						if errcode
 						{
 							Log("ERROR: Unable to rename file", "Action")
@@ -344,7 +347,7 @@ Loop
 					}
 					else if (Action = "Delete file")
 					{
-						errcode := delete(file)
+						errcode := delete(file, Attributes)
 						if errcode
 						{
 							Log("ERROR: Unable to delete file", "Action")
@@ -361,7 +364,7 @@ Loop
 					else if (Action = "Copy file")
 					{
 						Log("Destination: " . Destination, "Action")
-						errcode := copy(file, Destination, Overwrite, Compress)
+						errcode := copy(file, Destination, Overwrite, Compress, Attributes)
 						if (errcode = -1)
 						{
 							Msgbox,,Missing Folder,A folder you're attempting to copy files to does not exist.`n Check your "%thisRule%" rule and verify that %Destination% exists.

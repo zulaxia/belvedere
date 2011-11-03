@@ -1,13 +1,17 @@
-delete(file)
+delete(file, attributes)
 {
-	FileDelete, %file%
+	IfInString, Attributes, D
+		FileRemoveDir, %file%, 1
+	else
+		FileDelete, %file%
+		
 	if ErrorLevel
 		return ErrorLevel
 	else
 		return 0
 }
 
-move(file, destination, overwrite, compress, shortcut)
+move(file, destination, overwrite, compress, shortcut, attributes)
 {
 	global thisRule
 	global errorCheck
@@ -27,7 +31,11 @@ move(file, destination, overwrite, compress, shortcut)
 	{		
 		if (overwrite = 1)
 		{
-			FileMove, %file%, %destination%, %overwrite%
+			IfInString, Attributes, D
+				FileMoveDir, %file%, %destination%\%name%, %overwrite%+1
+			else
+				FileMove, %file%, %destination%, %overwrite%
+			
 			if ErrorLevel
 			{
 				return ErrorLevel
@@ -42,7 +50,11 @@ move(file, destination, overwrite, compress, shortcut)
 		{
 			IfNotExist, %destination%\%zipname%
 			{
-				FileMove, %file%, %destination%, %overwrite%
+				IfInString, Attributes, D
+					FileMoveDir, %file%, %destination%\%name%, %overwrite%
+				else
+					FileMove, %file%, %destination%, %overwrite%
+				
 				if ErrorLevel
 				{
 					return ErrorLevel
@@ -57,7 +69,11 @@ move(file, destination, overwrite, compress, shortcut)
 	}
 	else
 	{
-		FileMove, %file%, %destination%, %overwrite%
+		IfInString, Attributes, D
+			FileMoveDir, %file%, %destination%\%name%, 2
+		else
+			FileMove, %file%, %destination%, %overwrite%
+		
 		if ErrorLevel
 			return ErrorLevel
 		else
@@ -65,7 +81,7 @@ move(file, destination, overwrite, compress, shortcut)
 	}
 }
 
-copy(file, destination, overwrite, compress)
+copy(file, destination, overwrite, compress, attributes)
 {
 	global thisRule
 	global errorCheck
@@ -81,7 +97,10 @@ copy(file, destination, overwrite, compress)
 	{		
 		if (overwrite = 1)
 		{
-			FileCopy, %file%, %destination%, %overwrite%
+			IfInString, Attributes, D
+				FileCopyDir, %file%, %destination%\%name%, %overwrite%
+			else
+				FileCopy, %file%, %destination%, %overwrite%
 			if ErrorLevel
 			{
 				return ErrorLevel
@@ -96,7 +115,10 @@ copy(file, destination, overwrite, compress)
 		{
 			IfNotExist, %destination%\%zipname%
 			{
-				FileCopy, %file%, %destination%, %overwrite%
+				IfInString, Attributes, D
+					FileCopyDir, %file%, %destination%\%name%, %overwrite%
+				else
+					FileCopy, %file%, %destination%, %overwrite%
 				if ErrorLevel
 				{
 					return ErrorLevel
@@ -111,7 +133,11 @@ copy(file, destination, overwrite, compress)
 	}
 	else
 	{
-		FileCopy, %file%, %destination%, %overwrite%
+		IfInString, Attributes, D
+			FileCopyDir, %file%, %destination%\%name%, %overwrite%
+		else
+			FileCopy, %file%, %destination%, %overwrite%
+			
 		if ErrorLevel
 			return ErrorLevel
 		else
@@ -122,7 +148,7 @@ copy(file, destination, overwrite, compress)
 ;approach and code inspired by Lightning Renamer
 ; written by no1readsthese
 ; http://www.autohotkey.com/forum/topic29448.html
-rename(file, template)
+rename(file, template, attributes)
 {
 	SplitPath, file, fullname, directory, extension, name_no_ext, drive
 	extension := "." extension
@@ -160,7 +186,11 @@ rename(file, template)
 	StringReplace, template, template, |,, All
 	StringReplace, template, template, ",, All ;"
 
-	FileMove, %file%, %directory%\%template%
+	IfInString, Attributes, D
+		FileMoveDir, %file%, %directory%\%template%
+	else	
+		FileMove, %file%, %directory%\%template%
+	
 	if ErrorLevel
 		return ErrorLevel
 	else
@@ -206,9 +236,16 @@ custom(file, destination)
 compressFile(file)
 {
 	SplitPath, file,fullname,directory,, name
+	FileGetAttrib, Attributes, %file%
 	zipname := name . ".zip"
 	RunWait, %A_ScriptDir%\resources\7za.exe a "%directory%\%zipname%" "%directory%\%fullname%",,hide
 	
 	ifExist, %directory%\%zipname%
-		FileDelete, %directory%\%fullname%
+	{
+		IfInString, Attributes, D
+			FileRemoveDir, %directory%\%fullname%, 1
+		else
+			FileDelete, %directory%\%fullname%
+		
+	}
 }
