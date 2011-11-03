@@ -401,7 +401,8 @@ SetDestination:
 		GuiControl, 2: Hide, Overwrite
 		GuiControl, 2: Hide, Compress
 	}
-	else if (GUIAction = "Open file") or (GUIAction = "Delete file") or (GUIAction = "Send file to Recycle Bin") or (GUIAction = "Print file")
+	else if (GUIAction = "Open file") or (GUIAction = "Delete file") or (GUIAction = "Send file to Recycle Bin") 
+	     or (GUIAction = "Print file") or (GUIAction = "Add to iTunes")
 	{
 		GuiControl, 2: Hide, ActionTo
 		GuiControl, 2: Hide, GUIChooseFolder

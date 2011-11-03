@@ -434,6 +434,17 @@ Loop
 							WinNotify(Message, "Action")
 						}
 					}
+					else if (Action = "Add to iTunes")
+					{
+						errcode := addtoitunes(file)
+						if errcode
+						{
+							Log("ERROR: Unable to add file to iTunes", "Action")
+							Message = %Message%Unable to add file to iTunes
+							Notify(Message, "Error")
+							WinNotify(Message, "Error")
+						}
+					}
 					else
 					{
 						Msgbox,,No Action, You've detemerined no action to take.
@@ -561,8 +572,8 @@ SetVars:
 	NoDefaultNumVerbs = is|is not|is greater than|is greater than or equal|is less than|is less than or equal|
 	DateVerbs = is in the last||is not in the last| ; removed is||is not| for now... needs more work implementing
 	NoDefaultDateVerbs = is in the last|is not in the last|
-	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
-	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|
+	AllActions = Move file||Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
+	AllActionsNoDefault = Move file|Move file & leave shortcut|Rename file|Send file to Recycle Bin|Delete file|Copy file|Open file|Print file|Custom|Add to iTunes|
 	SizeUnits = MB||KB
 	NoDefaultSizeUnits = MB|KB|
 	DateUnits = seconds|minutes||hours|days|weeks

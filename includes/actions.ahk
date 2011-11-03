@@ -249,3 +249,16 @@ compressFile(file)
 		
 	}
 }
+
+addtoitunes(file)
+{
+	RegRead, MusicLoc, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders, My Music
+	itunesfolder := MusicLoc . "\iTunes\iTunes Music\Automatically Add to iTunes"
+	ifExist, %itunesfolder%
+		FileMove, %file%, %itunesfolder%
+
+	if ErrorLevel
+		return ErrorLevel
+	else
+		return 0
+}
