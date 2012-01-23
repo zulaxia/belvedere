@@ -80,8 +80,8 @@ isLessThanEqual(Subject, Object)
 
 isInTheLast(Subject, Object)
 {
-	global thisRule
-	IniRead, Units, rules.ini, %thisRule%, Units
+	global thisRule, RuleNum
+	IniRead, Units, rules.ini, %thisRule%, Units%RuleNum%
 	if (Units = "ERROR")
 	{
 		global testUnits

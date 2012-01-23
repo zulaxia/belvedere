@@ -563,7 +563,7 @@ return
 ;Here we are creating all the variables for usage as well as the resource files
 SetVars:
 	APPNAME = Belvedere
-	Version = 0.6
+	Version = 0.7
 	AllSubjects = Name||Extension|Size|Date last modified|Date last opened|Date created|
 	NoDefaultSubject = Name|Extension|Size|Date last modified|Date last opened|Date created|
 	NameVerbs = is||is not|matches one of|does not match one of|contains|does not contain|contains one of|RegEx|
