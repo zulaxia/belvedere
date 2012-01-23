@@ -7,7 +7,7 @@
 
 ;General Application defines
 !define PRODUCT_NAME "Belvedere"
-!define PRODUCT_VERSION "0.6"
+!define PRODUCT_VERSION "0.7"
 !define PRODUCT_PUBLISHER "Lifehacker"
 !define PRODUCT_WEB_SITE "http://lifehacker.com/341950/belvedere-automates-your-self+cleaning-pc"
 !define PRODUCT_HELP_TEXT "Belvedere Help.chm"
