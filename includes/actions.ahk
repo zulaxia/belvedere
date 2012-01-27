@@ -253,10 +253,37 @@ compressFile(file)
 addtoitunes(file)
 {
 	RegRead, MusicLoc, HKEY_CURRENT_USER, Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders, My Music
-	itunesfolder := MusicLoc . "\iTunes\iTunes Music\Automatically Add to iTunes"
+	itunesfolder := MusicLoc . "\iTunes\iTunes Media\Automatically Add to iTunes"
 	ifExist, %itunesfolder%
 		FileMove, %file%, %itunesfolder%
+	else
+		Log("Unable to find iTunes folder to move file", "Action")
+	
+	;we tried to move the file, if that wasn't successful, it's worth trying to copy it
+	ifExist, %file%
+	{
+		Log("File was not moved with this operation, trying to copy file instead...", "Action")
+		FileCopy, %file%, %itunesfolder%
+		SplitPath, file, name
+		copiedFile := itunesfolder . "\" . name
 
+		ifExist, %copiedFile%
+		{
+			Log("File copy was successful", "Action")
+			FileDelete, %file%
+			
+			if ErrorLevel
+				Log("Unable to delete original file after copy", "Action")
+			else
+				Log("Deletion of original file was successful", "Action")
+		}
+		else
+		{
+			Log("File copy failed as well", "Action")
+			ErrorLevel := 1
+		}
+	}
+		
 	if ErrorLevel
 		return ErrorLevel
 	else
