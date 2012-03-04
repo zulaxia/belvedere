@@ -89,7 +89,15 @@ isInTheLast(Subject, Object)
 	}
 
 	EnvSub, Time, %Subject%, s
-	if (Units = "minutes")
+	
+	if (Units = "seconds")
+	{
+		if (Time < Object)
+			result := true
+		else
+			result := false
+	}	
+	else if (Units = "minutes")
 	{
 		if ((Time/60) < Object)
 			result := true
