@@ -1,5 +1,4 @@
 Belvedere
-![Belvedere icon](/includes/belvedere.ico)
 =========
 
 An automated file manager for Windows
