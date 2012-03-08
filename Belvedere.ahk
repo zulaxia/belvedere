@@ -915,7 +915,7 @@ ABOUT:
 	Gui,4: Add,Text,cBlue g7zipHomepage Center x30 y415, 7-Zip used for compression under GNU LGPL license
 	Gui,4: Color,F8FAF0
 	Gui,1: +Disabled
-	Gui,4: Show,auto,About Belvedere
+	Gui,4: Show, AutoSize,About Belvedere
 Return
 
 #Include includes\verbs.ahk
