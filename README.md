@@ -8,7 +8,7 @@ An automated file manager for Windows
 * Language(s): AutoHotkey, NSIS (for the installer)
 * License: GPL v3 
 
-See [LICENSE.txt](https://github.com/imaginationac/belvedere/blob/master/LICENSE.txt for licensing details.
+See [LICENSE.txt](https://github.com/imaginationac/belvedere/blob/master/LICENSE.txt) for licensing details.
 
 #How to build the installer.
 
