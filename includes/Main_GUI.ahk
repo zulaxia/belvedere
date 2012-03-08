@@ -544,9 +544,9 @@ SavePrefs:
 	
 	if (Old_Sleeptime <> SleepTime or Old_SleeptimeLength <> SleeptimeLength)
 	{
-		Log("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
-		Notify("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
-		WinNotify("Preferences - Sleeptime changed from ". Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+		Log("Preferences - Sleeptime changed from " . Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+		Notify("Preferences - Sleeptime changed from " . Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
+		WinNotify("Preferences - Sleeptime changed from " . Old_Sleeptime . " " . Old_SleeptimeLength . " to " . SleepTime . " " . SleeptimeLength , "System")
 	}
 	
 	if (Old_GrowlEnabled <> GrowlEnabled or Old_TrayTipEnabled <> TrayTipEnabled)
@@ -602,9 +602,9 @@ RBSavePrefs:
 	
 	if (Old_RBEmptyTimeValue <> RBEmptyTimeValue or Old_RBEmptyTimeLength <> RBEmptyTimeLength)
 	{
-		Log("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
-		Notify("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
-		WinNotify("Recycle Bin - Sleeptime changed from ". Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+		Log("Recycle Bin - Sleeptime changed from " . Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+		Notify("Recycle Bin - Sleeptime changed from " . Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
+		WinNotify("Recycle Bin - Sleeptime changed from " . Old_RBEmptyTimeValue . " " . Old_RBEmptyTimeLength . " to " . RBEmptyTimeValue . " " . RBEmptyTimeLength , "System")
 	}
 	MsgBox,,Saved Settings, Your settings have been saved.
 return
