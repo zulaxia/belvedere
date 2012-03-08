@@ -1,2 +1,4 @@
 rules.ini
 TASKS
+*.exe
+*.chm
