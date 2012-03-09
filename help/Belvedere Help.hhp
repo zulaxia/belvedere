@@ -1,6 +1,6 @@
 [OPTIONS]
 Compatibility=1.1 or later
-Compiled file=Belvedere Help.chm
+Compiled file=..\build\Belvedere Help.chm
 Contents file=Table of Contents.hhc
 Default topic=index.htm
 Display compile progress=No

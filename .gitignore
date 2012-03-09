@@ -1,0 +1,5 @@
+*.chm
+*.exe
+build/
+dist/
+rules.ini
