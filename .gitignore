@@ -1,4 +1,4 @@
-*.exe
 *.chm
+*.exe
 build/
 rules.ini

@@ -21,17 +21,24 @@
 ; Set up build environment
 #NoEnv
 #SingleInstance ignore
+SetWorkingDir %A_ScriptDir%
+buildDir = %A_WorkingDir%\build\
+executableName= Belvedere.exe
+
 ; NSIS
 ; Microsoft HTML Help Workshop 1.3
 ; ahk2exe
-$ahk2exe= I:\Program Files (x86)\AutoHotKey\Compiler\Ahk2Exe.exe
+ahk2exe = I:\Program Files (x86)\AutoHotKey\Compiler\Ahk2Exe.exe
 ; Check dependencies
 
 ; Clean old build files
+;FileRemoveDir, 
 
 ; Compile Belvedere.ahk
-RunWait %$ahk2exe% /in Belvedere.ahk /out build/Belvedere.exe
+RunWait, %ahk2exe% /in Belvedere.ahk
 
+; Copy to build folder
+FileMove, %executableName%, %buildDir%
 
 ; Compile help.
 
