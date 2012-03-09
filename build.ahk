@@ -1,5 +1,5 @@
 ; Build script for Belvedere
-; Version 0.0.1
+; Version 0.0.2
 ; Author: Dorian Alexander Patterson <imaginationc@gmail.com>
 ; Requires: AutoHotkey_L 1.1.07.01+
 ;
@@ -25,11 +25,13 @@ SetWorkingDir %A_ScriptDir%
 buildDir = build
 executableName= Belvedere.exe
 
-; NSIS
-; Microsoft HTML Help Workshop 1.3
-; ahk2exe
-ahk2exe = I:\Program Files (x86)\AutoHotKey\Compiler\Ahk2Exe.exe
 ; Check dependencies
+RegRead, ahk2exe, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Ahk2Exe.exe ;ahk2exe
+if ErrorLevel{
+	MsgBox, "You do not have AutoHotkey_L installed. Please download it."
+	ExitApp, 1
+}
+; NSIS
 
 ; Clean old build files
 IfExist, %buildDir%
@@ -39,11 +41,11 @@ FileCreateDir, %buildDir%
 ; Compile Belvedere.ahk
 RunWait, %ahk2exe% /in Belvedere.ahk
 
-; Copy to build folder
+; Move to build folder
 FileMove, %executableName%, %buildDir%
 
 ; Compile help.
 
-; Move the executable and help file to the the build folder.
+; Move the help file to the the build folder.
 
 ; Copy installer files to build
