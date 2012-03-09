@@ -22,7 +22,7 @@
 #NoEnv
 #SingleInstance ignore
 SetWorkingDir %A_ScriptDir%
-buildDir = %A_WorkingDir%\build\
+buildDir = build
 executableName= Belvedere.exe
 
 ; NSIS
@@ -32,7 +32,9 @@ ahk2exe = I:\Program Files (x86)\AutoHotKey\Compiler\Ahk2Exe.exe
 ; Check dependencies
 
 ; Clean old build files
-;FileRemoveDir, 
+IfExist, %buildDir%
+	FileRemoveDir, %buildDir%, 1
+FileCreateDir, %buildDir%
 
 ; Compile Belvedere.ahk
 RunWait, %ahk2exe% /in Belvedere.ahk
