@@ -22,9 +22,12 @@
 #NoEnv
 #SingleInstance ignore
 SetWorkingDir A_ScriptDir
-buildDir = build
+buildDir = %A_WorkingDir%\build
+installerDir = %A_WorkingDir%\installer
 helpProject = %A_WorkingDir%\help\Belvedere Help.hhp
-executableName= Belvedere.exe
+distDir = %A_WorkingDir%\dist
+executableName = Belvedere.exe
+installerScript = %installerDir%\installer.nsi
 
 ; Check dependencies
 ; AutoHotkey script compiler.
@@ -55,18 +58,22 @@ RunWait, %ahk2exe% /in Belvedere.ahk
 FileMove, %executableName%, %buildDir%
 
 ; Compile help.
-while(!helpCompiled){
+; FIXME: Not able to exit loop on fail.
+While(!helpCompiled){
 	RunWait %hhw% %helpProject%
-	MsgBox, 4, , Did you compile the help manual sucessfully?
+	MsgBox, 4, , Did you compile the help manual successfully?
 	IfMsgBox Yes
 		helpCompiled = 1
-	Else
+	Else{
 		MsgBox, 0, , "Fix the errors in the help manual project and try again."
 		If MsgBox OK{
 			ExitApp, 1
 		}
+	}
 }
 
-; Move the help file to the the build folder.
-
 ; Copy installer files to build
+FileCopy, %installerDir%\*.*, %buildDir%\*.*
+
+; Build the installer
+;RunWait, %makensis% 
