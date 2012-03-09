@@ -21,17 +21,27 @@
 ; Set up build environment
 #NoEnv
 #SingleInstance ignore
-SetWorkingDir %A_ScriptDir%
+SetWorkingDir A_ScriptDir
 buildDir = build
+helpProject = %A_WorkingDir%\help\Belvedere Help.hhp
 executableName= Belvedere.exe
 
 ; Check dependencies
-RegRead, ahk2exe, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Ahk2Exe.exe ;ahk2exe
+; AutoHotkey script compiler.
+RegRead, ahk2exe, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Ahk2Exe.exe 
 if ErrorLevel{
 	MsgBox, "You do not have AutoHotkey_L installed. Please download it."
 	ExitApp, 1
 }
-; NSIS
+; Help manual compiler.
+RegRead, hhw, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\hhw.exe 
+if ErrorLevel{
+	MsgBox, "You do not have Microsoft HTML Help Workshop installed. Please download it."
+	ExitApp, 1
+}
+; Commandline compiler for NSIS (makensis.exe)
+RegRead, makensis, HKEY_LOCAL_MACHINE, SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\NSIS, InstallLocation
+makensis .= "\makensis.exe"
 
 ; Clean old build files
 IfExist, %buildDir%
@@ -45,6 +55,17 @@ RunWait, %ahk2exe% /in Belvedere.ahk
 FileMove, %executableName%, %buildDir%
 
 ; Compile help.
+while(!helpCompiled){
+	RunWait %hhw% %helpProject%
+	MsgBox, 4, , Did you compile the help manual sucessfully?
+	IfMsgBox Yes
+		helpCompiled = 1
+	Else
+		MsgBox, 0, , "Fix the errors in the help manual project and try again."
+		If MsgBox OK{
+			ExitApp, 1
+		}
+}
 
 ; Move the help file to the the build folder.
 
