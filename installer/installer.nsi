@@ -1,8 +1,9 @@
 ;
 ; Belvedere Installer Script
 ;
-;	Author:		Matthew Shorts <mshorts@gmail.com> 
-;	Version: 	0.2
+;	Author(s):		Matthew Shorts <mshorts@gmail.com>,
+;					Dorian Alexander Patterson <imaginationac@gmail.com>
+;	Version: 	0.2.1
 ;	
 
 ;General Application defines
@@ -71,7 +72,7 @@ BrandingText "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 
 ;Installation Information
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "install-${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
+OutFile "../dist/install-${PRODUCT_NAME}-${PRODUCT_VERSION}.exe"
 InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show

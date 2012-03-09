@@ -1,5 +1,5 @@
 ; Build script for Belvedere
-; Version 0.0.2
+; Version 0.0.4
 ; Author: Dorian Alexander Patterson <imaginationc@gmail.com>
 ; Requires: AutoHotkey_L 1.1.07.01+
 ;
@@ -27,7 +27,7 @@ installerDir = %A_WorkingDir%\installer
 helpProject = %A_WorkingDir%\help\Belvedere Help.hhp
 distDir = %A_WorkingDir%\dist
 executableName = Belvedere.exe
-installerScript = %installerDir%\installer.nsi
+installerScript = %buildDir%\installer.nsi
 
 ; Check dependencies
 ; AutoHotkey script compiler.
@@ -76,4 +76,6 @@ While(!helpCompiled){
 FileCopy, %installerDir%\*.*, %buildDir%\*.*
 
 ; Build the installer
-;RunWait, %makensis% 
+CompileCommand = %makensis% /V1 %installerScript%
+FileCreateDir, %A_WorkingDir%\dist
+RunWait, %CompileCommand%
