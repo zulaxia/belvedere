@@ -1,5 +1,5 @@
 ; Build script for Belvedere
-; Version 0.0.4
+; Version 0.1.0
 ; Author: Dorian Alexander Patterson <imaginationc@gmail.com>
 ; Requires: AutoHotkey_L 1.1.07.01+
 ;
