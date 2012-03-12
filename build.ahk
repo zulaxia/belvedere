@@ -31,19 +31,30 @@ installerScript = %buildDir%\installer.nsi
 
 ; Check dependencies
 ; AutoHotkey script compiler.
-RegRead, ahk2exe, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\Ahk2Exe.exe 
+RegRead, ahk2exe, HKEY_LOCAL_MACHINE, SOFTWARE\AutoHotkey, InstallDir
 if ErrorLevel{
 	MsgBox, "You do not have AutoHotkey_L installed. Please download it."
 	ExitApp, 1
 }
+
+ahk2exe .= "\Compiler\Compile_AHK.exe" 
+
 ; Help manual compiler.
-RegRead, hhw, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\hhw.exe 
+RegRead, hhc, HKEY_LOCAL_MACHINE, SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\hhw.exe, Path
 if ErrorLevel{
 	MsgBox, "You do not have Microsoft HTML Help Workshop installed. Please download it."
 	ExitApp, 1
 }
+
+hhc .= "\hhc.exe"
+
 ; Commandline compiler for NSIS (makensis.exe)
-RegRead, makensis, HKEY_LOCAL_MACHINE, SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\NSIS, InstallLocation
+RegRead, makensis, HKEY_LOCAL_MACHINE, SOFTWARE\NSIS
+if ErrorLevel{
+	MsgBox, "You do not have NSIS Installed, the installer will not be compiled."
+	skipInstaller := 1
+}
+
 makensis .= "\makensis.exe"
 
 ; Clean old build files
@@ -52,30 +63,33 @@ IfExist, %buildDir%
 FileCreateDir, %buildDir%
 
 ; Compile Belvedere.ahk
-RunWait, %ahk2exe% /in Belvedere.ahk
+RunWait, %ahk2exe% /nogui %A_ScriptDir%\Belvedere.ahk
 
 ; Move to build folder
-FileMove, %executableName%, %buildDir%
+IfExist, %executableName% 
+{
+	FileMove, %executableName%, %buildDir%
+}Else{
+	MsgBox, "Application Compile Failed, exiting..."
+	ExitApp, 1
+}
 
 ; Compile help.
-; FIXME: Not able to exit loop on fail.
-While(!helpCompiled){
-	RunWait %hhw% %helpProject%
-	MsgBox, 4, , Did you compile the help manual successfully?
-	IfMsgBox Yes
-		helpCompiled = 1
-	Else{
-		MsgBox, 0, , "Fix the errors in the help manual project and try again."
-		If MsgBox OK{
-			ExitApp, 1
-		}
-	}
+RunWait, %hhc% "%helpProject%"
+
+IfNotExist, %A_ScriptDir%\build\Belvedere Help.chm
+{
+	MsgBox, "Help Compile Failed, the installer will not be compiled."
+	skipInstaller := 1
 }
 
 ; Copy installer files to build
 FileCopy, %installerDir%\*.*, %buildDir%\*.*
 
 ; Build the installer
-CompileCommand = %makensis% /V1 %installerScript%
-FileCreateDir, %A_WorkingDir%\dist
-RunWait, %CompileCommand%
+if(!skipInstaller)
+{
+	CompileCommand = %makensis% /V1 %installerScript%
+	FileCreateDir, %A_WorkingDir%\dist
+	RunWait, %CompileCommand%
+}
