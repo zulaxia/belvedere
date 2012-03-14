@@ -85,6 +85,7 @@ IfNotExist, %A_ScriptDir%\build\Belvedere Help.chm
 
 ; Copy installer files to build
 FileCopy, %installerDir%\*.*, %buildDir%\*.*
+FileCopy, LICENSE.txt, %buildDir%
 
 ; Build the installer
 if(!skipInstaller)

@@ -3,7 +3,7 @@
 ;
 ;	Author(s):		Matthew Shorts <mshorts@gmail.com>,
 ;					Dorian Alexander Patterson <imaginationac@gmail.com>
-;	Version: 	0.2.1
+;	Version: 	0.3
 ;	
 
 ;General Application defines
@@ -85,7 +85,9 @@ Section "Installation" secApp
   SetOutPath "$INSTDIR\resources"
   File "${PRODUCT_HELP_TEXT}"
   File 7za.exe
+  File 7za-license.txt
   File growlnotify.exe
+  File growlnotify-license.txt
   SetShellVarContext all
   CreateDirectory "$SMPROGRAMS\${PRODUCT_NAME}"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\Belvedere.exe"
@@ -175,7 +177,9 @@ Section Uninstall
   Delete "$INSTDIR\resources\belvedere-paused.ico"
   Delete "$INSTDIR\resources\${PRODUCT_HELP_TEXT}"
   Delete "$INSTDIR\resources\7za.exe"
+  Delete "$INSTDIR\resources\7za-license.txt"
   Delete "$INSTDIR\resources\growlnotify.exe"
+  Delete "$INSTDIR\resources\growlnotify-license.txt"
 
   SetShellVarContext all
   Delete "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk"
