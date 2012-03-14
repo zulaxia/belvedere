@@ -226,7 +226,8 @@ print(file)
 
 custom(file, destination)
 {
-	Run, %destination% %file%,,hide
+	SplitPath, destination,, directory
+	Run, "%destination%" "%file%", %directory%, Hide UserErrorLevel
 	if ErrorLevel
 		return ErrorLevel
 	else
