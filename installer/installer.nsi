@@ -82,6 +82,7 @@ Section "Installation" secApp
   SetOutPath "$INSTDIR"
   SetOverwrite ifnewer
   File Belvedere.exe
+  File LICENSE.txt
   SetOutPath "$INSTDIR\resources"
   File "${PRODUCT_HELP_TEXT}"
   File 7za.exe
@@ -170,6 +171,7 @@ Section Uninstall
   Delete "$INSTDIR\${PRODUCT_NAME}.url"
   Delete "$INSTDIR\uninst.exe"
   Delete "$INSTDIR\Belvedere.exe"
+  Delete "$INSTDIR\LICENSE.txt"
   Delete "$INSTDIR\rules.ini"
   Delete "$INSTDIR\resources\both.png"
   Delete "$INSTDIR\resources\belvederename.png"
