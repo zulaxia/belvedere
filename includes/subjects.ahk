@@ -27,6 +27,20 @@ getSize(file)
 	return fileSize
 }
 
+getTestSize(file, Units)
+{
+	FileGetSize, fileSize, %file%
+	if (Units = "KB")
+	{
+		fileSize := fileSize/1024 
+	}
+	if (Units = "MB")
+	{
+		fileSize := fileSize/1048576
+	}
+	return fileSize
+}
+
 getDateLastOpened(file)
 {
 	FileGetTime, lastAccess, %file%, A

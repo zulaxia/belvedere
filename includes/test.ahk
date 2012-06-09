@@ -72,6 +72,7 @@ TESTMatches:
 
 			file = %A_LoopFileLongPath%
 			fileName = %A_LoopFileName%
+			testUnits = % Units%RuleNum%
 
 			; Below determines the subject of the comparison
 			if (Subject%RuleNum% = "Name")
@@ -79,7 +80,7 @@ TESTMatches:
 			else if (Subject%RuleNum% = "Extension")
 				thisSubject := getExtension(file)
 			else if (Subject%RuleNum% = "Size")
-				thisSubject := getSize(file)
+				thisSubject := getTestSize(file,testUnits)
 			else if (Subject%RuleNum% = "Date last modified")
 				thisSubject := getDateLastModified(file)
 			else if (Subject%RuleNum% = "Date last opened")
@@ -89,7 +90,7 @@ TESTMatches:
 			else
 				MsgBox,,No Match, Subject does not have a match
 			
-			testUnits = % Units%RuleNum%
+			
 			; Below determines the comparison verb
 			if (Verb%RuleNum% = "contains")
 				result%RuleNum% := contains(thisSubject, Object%RuleNum%)
