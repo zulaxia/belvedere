@@ -14,7 +14,8 @@ getExtension(file)
 getSize(file)
 {
 	global thisRule
-	IniRead, Units, rules.ini, %thisRule%, Units
+	global RuleNum
+	IniRead, Units, rules.ini, %thisRule%, Units%RuleNum%
 	FileGetSize, fileSize, %file%
 	if (Units = "KB")
 	{
